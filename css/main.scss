@@ -7,8 +7,9 @@
 
 // Our variables
 // $base-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-$code-font-family: 'Source Code Pro', monospace;
 $base-font-family: 'Neuton', serif;
+$code-font-family: 'Source Code Pro', monospace;
+$title-font-family: $code-font-family;
 $base-font-size:   16px;
 $base-font-weight: 400;
 $small-font-size:  $base-font-size * 0.875;
