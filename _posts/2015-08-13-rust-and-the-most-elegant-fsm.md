@@ -42,9 +42,9 @@ compare labels in a case-insensitive manner (i.e., A=a), assuming ASCII
 with zero parity. Non-alphabetic codes must match exactly.
 ```
 
-There are some more sections that provide details on things like pointers, you can read the spec if you want. Here are the states (I used http://madebyevan.com/fsm/ to build this, which doesn't have edge avoidance so I added some extra states to keep the lines in order):
+There are some more sections that provide details on things like pointers, you can read the spec if you want. Here are the states (I used [http://madebyevan.com/fsm/](http://madebyevan.com/fsm/) to build this, which doesn't have edge avoidance so I added some extra states to keep the lines in order):
 
-![Domain Name Parser  States](/assets/DomainNameParserStates.png)
+![Domain Name Parser  States]({{ site.url }}{{ site.baseurl }}/assets/DomainNameParserStates.png)
 
 This state diagram basically represents the above, so I decided to translate this (minus the 'offset' and 'store' states) to Rust enums.
 
