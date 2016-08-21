@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "A year of Rust and DNS"
-date:   2016-08-19 00:00:00 -0700
+date:   2016-08-21 00:00:00 -0700
 categories: Rust DNS
 ---
 
