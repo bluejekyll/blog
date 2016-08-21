@@ -264,7 +264,7 @@ This brings me to a lull point; DNSSec, how hard could it be? Remember I
 Did you catch that? No one implemented the spec properly, so now the spec is
  the implementation. I think that's a tail wagging the dog, right?
 
-Anyway, back to the deceivingly easy bit perhaps a picture will help:
+Anyway, back to the deceivingly easy bit; perhaps a picture will help:
 
 ![Trust-DNS work history]({{ site.url }}{{ site.baseurl }}/assets/trust-dns-work.png)
 
