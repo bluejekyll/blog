@@ -17,7 +17,7 @@ Approximately a year and a half ago I discovered possibly the greatest
  default memory settings, no changing the default garbage collector. It was a
  nice language, but I had some problems. I missed generics, I missed typed and
  checked exceptions, and I couldn't help but feel like I was writing C but with
- a Garbage Collector (ok, easier than C and it has memory safety, bit bonuses).
+ a Garbage Collector (ok, easier than C and it has memory safety, big bonuses).
 
 Then I started seeing Hacker News talking about this new language called
  [Rust](https://www.rust-lang.org). It was marching toward a 1.0 release, I think
@@ -223,10 +223,10 @@ In the above example, we only need to deal with the `DecodeError` returned from
  is just a union of a bunch of different types:
 
 ```rust
-    links {
-      super::decode_error::Error, super::decode_error::ErrorKind, Decode;
-      super::encode_error::Error, super::encode_error::ErrorKind, Encode;
-    }
+links {
+  super::decode_error::Error, super::decode_error::ErrorKind, Decode;
+  super::encode_error::Error, super::encode_error::ErrorKind, Encode;
+}
 ```
 
 While the type itself isn't growing because enums in Rust are more equivalent to
@@ -321,23 +321,23 @@ My favorite though is the ability to write threaded tests for server code, in Ru
  made even easier than similar practices I've used in Java:
 
 ```rust
-  #[test]
-  fn test_server_www_udp() {
-    let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127,0,0,1), 0));
-    let udp_socket = UdpSocket::bound(&addr).unwrap();
+#[test]
+fn test_server_www_udp() {
+  let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127,0,0,1), 0));
+  let udp_socket = UdpSocket::bound(&addr).unwrap();
 
-    let ipaddr = udp_socket.local_addr().unwrap();
-    println!("udp_socket on port: {}", ipaddr);
+  let ipaddr = udp_socket.local_addr().unwrap();
+  println!("udp_socket on port: {}", ipaddr);
 
-    thread::Builder::new().name("test_server:udp:server".to_string()).spawn(move || server_thread_udp(udp_socket)).unwrap();
+  thread::Builder::new().name("test_server:udp:server".to_string()).spawn(move || server_thread_udp(udp_socket)).unwrap();
 
-    let client_conn = UdpClientConnection::new(ipaddr).unwrap();
-    let client_thread = thread::Builder::new().name("test_server:udp:client".to_string()).spawn(move || client_thread_www(client_conn)).unwrap();
+  let client_conn = UdpClientConnection::new(ipaddr).unwrap();
+  let client_thread = thread::Builder::new().name("test_server:udp:client".to_string()).spawn(move || client_thread_www(client_conn)).unwrap();
 
-    let client_result = client_thread.join();
+  let client_result = client_thread.join();
 
-    assert!(client_result.is_ok(), "client failed: {:?}", client_result);
-  }
+  assert!(client_result.is_ok(), "client failed: {:?}", client_result);
+}
 ```
 
 Teasing this apart, it creates two threads, one for the client, and one for the server.
@@ -362,35 +362,35 @@ I started writing tests like this in Java years ago for distributed systems, but
  thread is where the meat of the test is:
 
 ```rust
-  fn client_thread_www<C: ClientConnection>(conn: C) {
-    let name = Name::with_labels(vec!["www".to_string(), "example".to_string(), "com".to_string()]);
-    println!("about to query server: {:?}", conn);
-    let client = Client::new(conn);
+fn client_thread_www<C: ClientConnection>(conn: C) {
+  let name = Name::with_labels(vec!["www".to_string(), "example".to_string(), "com".to_string()]);
+  println!("about to query server: {:?}", conn);
+  let client = Client::new(conn);
 
-    let response = client.query(&name, DNSClass::IN, RecordType::A).expect("error querying");
+  let response = client.query(&name, DNSClass::IN, RecordType::A).expect("error querying");
 
-    assert!(response.get_response_code() == ResponseCode::NoError, "got an error: {:?}", response.get_response_code());
+  assert!(response.get_response_code() == ResponseCode::NoError, "got an error: {:?}", response.get_response_code());
 
-    let record = &response.get_answers()[0];
-    assert_eq!(record.get_name(), &name);
-    assert_eq!(record.get_rr_type(), RecordType::A);
-    assert_eq!(record.get_dns_class(), DNSClass::IN);
+  let record = &response.get_answers()[0];
+  assert_eq!(record.get_name(), &name);
+  assert_eq!(record.get_rr_type(), RecordType::A);
+  assert_eq!(record.get_dns_class(), DNSClass::IN);
 
-    if let &RData::A(ref address) = record.get_rdata() {
-      assert_eq!(address, &Ipv4Addr::new(93,184,216,34))
-    } else {
-      assert!(false);
-    }
-
-    let mut ns: Vec<_> = response.get_name_servers().to_vec();
-    ns.sort();
-
-    assert_eq!(ns.len(), 2);
-    assert_eq!(ns.first().unwrap().get_rr_type(), RecordType::NS);
-    assert_eq!(ns.first().unwrap().get_rdata(), &RData::NS(Name::parse("a.iana-servers.net.", None).unwrap()) );
-    assert_eq!(ns.last().unwrap().get_rr_type(), RecordType::NS);
-    assert_eq!(ns.last().unwrap().get_rdata(), &RData::NS(Name::parse("b.iana-servers.net.", None).unwrap()) );
+  if let &RData::A(ref address) = record.get_rdata() {
+    assert_eq!(address, &Ipv4Addr::new(93,184,216,34))
+  } else {
+    assert!(false);
   }
+
+  let mut ns: Vec<_> = response.get_name_servers().to_vec();
+  ns.sort();
+
+  assert_eq!(ns.len(), 2);
+  assert_eq!(ns.first().unwrap().get_rr_type(), RecordType::NS);
+  assert_eq!(ns.first().unwrap().get_rdata(), &RData::NS(Name::parse("a.iana-servers.net.", None).unwrap()) );
+  assert_eq!(ns.last().unwrap().get_rr_type(), RecordType::NS);
+  assert_eq!(ns.last().unwrap().get_rdata(), &RData::NS(Name::parse("b.iana-servers.net.", None).unwrap()) );
+}
 ```
 
 If you notice, the function is declared as generic over the `ClientConnection` type,
@@ -426,3 +426,5 @@ I'm currently in the middle of working on DNSCrypt, and then I'll be moving on
  my joy of programming.
 
 (I'll try to post more regularly on progress)
+
+[discuss on hacker news](https://news.ycombinator.com/item?id=12332876)
