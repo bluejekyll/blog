@@ -179,9 +179,9 @@ The above code shows a basic usage of match on integer and conversion to the
 
 # Rust does not prevent *logic* bugs
 
-Rust prevents memory leaks, a subset of concurrency bugs, and others. It's not
+Rust prevents memory leaks[[1]](?#1), a subset of concurrency bugs, and others. It's not
  some magic bullet, but to not have to deal with memory access issues? Null
- pointer dereferences? Memory leaks? Yeah, there was a reason I went to Java all
+ pointer dereferences? Memory leaks[[1]](?#1)? Yeah, there was a reason I went to Java all
  those years ago. But now, I can go back to systems level programming with even
  better safety guarantees than Java!
 
@@ -409,16 +409,16 @@ I know that looking at the `Name::with_labels()` call looks a little clumsy, I w
 
 It's currently not used in production (as far as I know). I've put a lot of work
  into validating correctness of what is going on, and have had
- [help](https://github.com/bluejekyll/trust-dns/graphs/contributors), and more
+ [help](https://github.com/bluejekyll/trust-dns/graphs/contributors), more
  is always welcome. I want to get a DNS fuzzer running against it to really pound
  on it, and then get some benchmark and comparison tests against other servers.
 
 Things I'm proud of: DNSSec support, with client side validation, and zone
  signing with local keys. Server and Client both have support for dynamic DNS
  with SIG0 validation and auth. Journaling support on the Server with sqlite. EDNS is
- supported for greater than 512 byte UDP.
+ supported for greater than 512 byte UDP packets (defaults to 1500).
 
-I'm currently in the middle of working on DNSCrypt, and then I'll be moving on
+I'm currently in the middle of working on DNSCrypt[[2]](?#2), and then I'll be moving on
  to some more fun ideas. I never imagined it would be this long of a journey,
  but it's only just beginning, and along with learning such a spectacular language
  it's totally worth it. Thank you to everyone who
@@ -427,4 +427,25 @@ I'm currently in the middle of working on DNSCrypt, and then I'll be moving on
 
 (I'll try to post more regularly on progress)
 
+- <a name="1">1</a>) I got a lot of feedback on Rust not preventing memory leaks.
+ For me, in my experience it's at least as good as Java, meaning you have to go
+ out of your way to cause a situation where a variable will not be dropped. This
+ can happen in safe code. Examples would be ever growing Vectors, or poor usage
+ of `std::mem::forget` which tells Rust not to call drop and cleanup the memory.
+ When would you want to do this? I've used this when passing objects back to C
+ through FFI methods, there are other cases. If you want to read a ton, checkout
+ this post: [https://github.com/rust-lang/rfcs/pull/1066](https://github.com/rust-lang/rfcs/pull/1066).
+ I left what I wrote mostly so that people could come to it, and then read this,
+ think about it, and then realize no language actually prevents memory leaks, but
+ Rust is memory safe...
+- <a name="2">2</a>) After some offline discussion and this issue:
+ Feature request: "RFC 7858, DNS over TLS [#38](https://github.com/bluejekyll/trust-dns/issues/38)",
+ I'm very much thinking of shelving my work on DNSCrypt and focusing instead on
+ DNS over TLS
+
 [discuss on hacker news](https://news.ycombinator.com/item?id=12332876)
+
+<script type="text/javascript" src="//www.redditstatic.com/button/button1.js">
+  reddit_target='r/rust';
+  reddit_url='/r/rust/comments/4yxz98/a_year_of_rust_and_dns/';
+</script>
