@@ -41,3 +41,6 @@ What these allow me to do is follow fast iterative design. Create a quick top le
 What I've left to the reader, proper test design (checkout [TestNG](http://testng.org/doc/index.html) for Java and [Mockito](http://mockito.org/)) and methodology, good Agile development methodologies (pick one). Do your own research.
 
 *I decided to make this a three part piece. The next one deals with testing if you're interested in reading it. The final is about DevOPs*
+
+
+<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"/>

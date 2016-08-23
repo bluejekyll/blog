@@ -41,3 +41,6 @@ I know I called software engineers lazy bastards, and that probably stopped half
 - Design your software to be easily deployed and managed (pt. 3, this one)
 
 If you make good decisions in each of those categories, most likely you'll get to go back to being lazy and working on what you really want, and isn't that ultimately everyone's goal?
+
+
+<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"/>
