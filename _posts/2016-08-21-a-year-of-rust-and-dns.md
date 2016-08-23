@@ -446,6 +446,4 @@ I'm currently in the middle of working on DNSCrypt[[2]](?#2), and then I'll be m
 [discuss on hacker news](https://news.ycombinator.com/item?id=12332876)
 
 <script type="text/javascript" src="//www.redditstatic.com/button/button1.js">
-  reddit_target='r/rust';
-  reddit_url='/r/rust/comments/4yxz98/a_year_of_rust_and_dns/';
 </script>
