@@ -19,7 +19,7 @@ Imagine this, your riding along on your bike into work, a dude rolls up next you
 If he could have kept up with me, and we had more time, I would have told him what is more important than dropouts.
  Here is a picture of my bike:
 
-![Full bike]({{ site.url }}{{ site.baseurl }}/assets/full-bike.png)
+![Full bike]({{ site.url }}{{ site.baseurl }}/assets/full-bike.jpg)
 
 The first thing you will notice is that it's a Falcon, based on some
  [photos I found](http://www.classicrendezvous.com/British_isles/Falcon/Falcon_Jerry_Moos.htm)
@@ -82,7 +82,7 @@ While on pedals, I like the confidence I get with straps and clips. On my road b
 
 Here is a closer picture of that area:
 
-![Rear hub]({{ site.url }}{{ site.baseurl }}/assets/bike-hub.png)
+![Rear hub]({{ site.url }}{{ site.baseurl }}/assets/bike-hub.jpg)
 
 I initially had a cheap flip-flop hub. In theory flip-flops allow you to choose between the free-wheel and the fixed-wheel
  sides. I learned two things with this: first, don't buy weak stuff for your bike; second,
@@ -118,10 +118,10 @@ Recently I've been noticing a little creaking sound coming from my chain. I thin
  replace the chainring, sprocket and chain. Then one day, maybe get a pair of these [in red](http://phil-wood-co.myshopify.com/collections/track-hub-parts/products/rear-high-flange-double-fixed-track-hubs-classic-model),
  not purple.
 
-- <a name=r"1">1</a>) There are people who don't ride with breaks at all on fixies. If you were actually on a track, this
+- <a name="1">1</a>) There are people who don't ride with breaks at all on fixies. If you were actually on a track, this
  makes sense. But when you're riding in the city, you should always have a front break. Without it you're just putting
  yourself, and possibly others at risk.
-- <a name=r"2">2</a>) It turns out that if you stop skidding on that back tire you don't have to change it every couple of
+- <a name="2">2</a>) It turns out that if you stop skidding on that back tire you don't have to change it every couple of
  months. It looks cool, but do you really want to be buying tires all the time? And those Gatorskins that survive glass
  (no joke, no flats in six years) are not cheap.
 
