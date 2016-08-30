@@ -11,8 +11,8 @@ Imagine this, your riding along on your bike into work, a dude rolls up next you
  "you've got the wrong dropouts, that's not safe". To which I laugh and then say, "it's not a problem". To
  which he says, "well, it's harder to adjust the wheel". I conceded this point, "yes, it is, but my frame
  was way less expensive". Mind you, we were having this conversation over the course of a block, between
- lights. After the next light, I left him and his pretty black fixing with matching purple hubs in the dust
- (after doing an obligatory track stop while waiting for the light to turn).
+ lights. After the next light, I rode off leaving his pretty black fixie with matching purple hubs behind
+ (after doing an obligatory track stop while waiting for the light to turn), but it did get me thinking...
 
 # What *is* important on a bike?
 
