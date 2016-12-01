@@ -138,5 +138,3 @@ Basically, the sweet sauce here is that the 'state' can carry context implicitly
 Rust continues to impress me while learning it. There are definitely some oddities like enum's being called enum's when they really are something else. Also, I continue to fight the compiler on mutability around ownership, etc. It's not that I don't get the ownership model, I do... it's that after working with a GC in Java for so long, I have to train myself to think about it each time I pass a reference to something, and as far as I can tell 90% of the time I'm getting it wrong the first time.
 
 Anyway, getting back to hacking DNS now.
-
-<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"/>

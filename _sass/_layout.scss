@@ -242,3 +242,32 @@
         }
     }
 }
+
+.share-post {
+  width: 100%;
+  align-items: center;
+  padding: 5px;
+  border-radius: 5px;
+  border-style: hidden;
+  display: flex;
+}
+
+.share-item {
+  vertical-align: top;
+  margin: .5em;
+/**  border-radius: 3px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: $grey-color-light; */
+}
+
+.share-icon {
+  vertical-align: top;
+  background-color: $grey-color-light;
+  height: 40px;
+  width: 40px;
+  padding: 2px;
+  margin: .5em;
+  border-radius: 3px;
+  border-style: hidden;
+}

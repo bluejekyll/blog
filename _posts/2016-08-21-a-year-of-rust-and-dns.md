@@ -442,7 +442,3 @@ I'm currently in the middle of working on DNSCrypt[[2]](?#2), and then I'll be m
  Feature request: "RFC 7858, DNS over TLS [#38](https://github.com/bluejekyll/trust-dns/issues/38)",
  I'm very much thinking of shelving my work on DNSCrypt and focusing instead on
  DNS over TLS
-
-[discuss on hacker news](https://news.ycombinator.com/item?id=12332876)
-
-<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"/>

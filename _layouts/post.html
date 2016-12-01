@@ -12,4 +12,14 @@ layout: default
     {{ content }}
   </div>
 
+  <div class="share-post">
+    <div class="share-item"><script type="text/javascript" src="//www.redditstatic.com/button/button3.js"></script></div>
+    <!--  <div class="share-item"><script type="text/javascript" src="//www.redditstatic.com/button/button1.js"></script></div> -->
+    <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ site.url }}{{ page.url }}&via={{ site.twitter_username }}&related={{ site.twitter_username }}" rel="nofollow" target="_blank" title="Share on Twitter">
+      <div class="share-icon">
+        {% include icon-twitter.svg %}
+      </div>
+    </a>
+  </div>
+
 </article>

@@ -98,6 +98,3 @@ As an example, asm.js is a new JavaScript spec that defines a subset of JS which
 # When should you start using Rust?
 
 Now, depending on what you need it for. For me, having a predictable runtime (no GC) is important to a project I'm working on. Having that also run at native C like speed is also desirable. If you have a project that also needs this, Rust seems like the perfect fit. If on the other hand you have a high application to build and time critical deadlines to get it into production I'd still stick with Java or Scala to deliver that. Rust doesn't have the same amount of libraries and hasn't been beaten around in production to discover all it's bugs yet. It's also possible that the language will change a bit over time, but this will probably all calm down after the 1.0 release.
-
-
-<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"/>

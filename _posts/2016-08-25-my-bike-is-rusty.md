@@ -118,11 +118,11 @@ Recently I've been noticing a little creaking sound coming from my chain. I thin
  replace the chainring, sprocket and chain. Then one day, maybe get a pair of these [in red](http://phil-wood-co.myshopify.com/collections/track-hub-parts/products/rear-high-flange-double-fixed-track-hubs-classic-model),
  not purple.
 
+*UPDATE*: I finally put some work into the bike, new cog, chainring and bolts, chain, everything is running beautifully.
+
 - <a name="1">1</a>) There are people who don't ride with breaks at all on fixies. If you were actually on a track, this
  makes sense. But when you're riding in the city, you should always have a front break. Without it you're just putting
  yourself, and possibly others at risk.
 - <a name="2">2</a>) It turns out that if you stop skidding on that back tire you don't have to change it every couple of
  months. It looks cool, but do you really want to be buying tires all the time? And those Gatorskins that survive glass
  (no joke, no flats in six years) are not cheap.
-
-<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"/>
