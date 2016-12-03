@@ -16,7 +16,7 @@ If you read my last post on TRust-DNS, [A year of Rust and DNS](http://bluejekyl
  actually pays me for any of this work, I get to choose what to work on when,
  and what I think is the most important thing to deliver. This is such a huge leap for Rust that it was completely worth adding a couple of months to the delivery of new features.
 
-This is the story of the journey into the future; including the pain, the joy and some thoughts on the future. I will forewarn you that should you attempt to follow this path, things will probably have changed quite a bit during the time that this was written and when you attempt the journey. I should also mention, that I built most of this somewhat isolated from the on-going development around tokio-rs, so it's completely likely that I have made decisions that are not idiomatic according to people more deeply involved in that effort.
+This[[1]](?#1) is the story of the journey into the future; including the pain, the joy and some thoughts on the future. I will forewarn you that should you attempt to follow this path, things will probably have changed quite a bit during the time that this was written and when you attempt the journey. I should also mention, that I built most of this somewhat isolated from the on-going development around tokio-rs, so it's completely likely that I have made decisions that are not idiomatic according to people more deeply involved in that effort.
 
 # What is Async I/O? (briefly)
 
@@ -183,7 +183,7 @@ self.client
 
 In this snippet from the function, it is using a [ClientFuture](https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/client/src/client/client_future.rs), the TRust-DNS tokio-rs based DNS client, to send a query. Subsequent to a successful response  after sending the future query, it then validates all the resource record sets returned from the server. If the processing is also successful, it then checks to see if the responses were actually `NSEC` records, which then triggers additional logic to validate a negative cache response. Each of those operations `send(..)`, `and_then(..)`, `and_then(..)` captures the logic to be performed at each state transition, i.e. 'external state'. This is pretty cool, and I'm sure all you functional programmers are thinking "duh", but for me, learning to use this has been a very eye-opening experience.
 
-Now Coming back to `poll(..)`, this is our internal state function. Sadly, most of my code here is fairly complex, you can take a look at [UdpStream](https://github.com/bluejekyll/trust-dns/blob/master/client/src/udp/udp_stream.rs#L113) and [TcpStream](https://github.com/bluejekyll/trust-dns/blob/master/client/src/tcp/tcp_stream.rs#L88)[[1]](?#1) for the actual inner I/O examples, but I don't want this post to be excessively long, so let's look at a simpler one, [TimeoutStream](https://github.com/bluejekyll/trust-dns/blob/master/server/src/server/timeout_stream.rs#L43):
+Now Coming back to `poll(..)`, this is our internal state function. Sadly, most of my code here is fairly complex, you can take a look at [UdpStream](https://github.com/bluejekyll/trust-dns/blob/master/client/src/udp/udp_stream.rs#L113) and [TcpStream](https://github.com/bluejekyll/trust-dns/blob/master/client/src/tcp/tcp_stream.rs#L88)[[2]](?#2) for the actual inner I/O examples, but I don't want this post to be excessively long, so let's look at a simpler one, [TimeoutStream](https://github.com/bluejekyll/trust-dns/blob/master/server/src/server/timeout_stream.rs#L43):
 
 ```rust
 pub struct TimeoutStream<S> {
@@ -330,4 +330,6 @@ If you want to play with the TRust-DNS futures, ClientFuture was [published](htt
 
 Thank you to [@alexcrichton](https://github.com/alexcrichton) for helping guide me through some initial issues I had when implementing the UDP and TCP streams. Also, thank you to all of the contributors of [furures-rs](https://github.com/alexcrichton/futures-rs/graphs/contributors) and [tokio-rs](https://github.com/tokio-rs/tokio-core/graphs/contributors) who made all of this possible. A huge thank you to the [contributors](https://github.com/bluejekyll/trust-dns/graphs/contributors) of TRust-DNS; I deeply appreciate your efforts in helping drive this project forward.
 
-- <a name="1">1</a>) I implemented these streams prior to [tokio_core::io::Framed](https://docs.rs/tokio-core/0.1.1/tokio_core/io/struct.Framed.html) being stabilized. I'd highly recommend looking at that for request/response type protocols.
+- <a name="1">1</a>) Taking TRust-DNS IntoFuture is a pun, not a typo on the type [IntoFuture](https://docs.rs/futures/0.1.6/futures/future/trait.IntoFuture.html) in the futures-rs library.
+
+- <a name="2">2</a>) I implemented these streams prior to [tokio_core::io::Framed](https://docs.rs/tokio-core/0.1.1/tokio_core/io/struct.Framed.html) being stabilized. I'd highly recommend looking at that for request/response type protocols.
