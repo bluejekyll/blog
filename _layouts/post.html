@@ -13,12 +13,12 @@ layout: default
   </div>
 
   <div class="share-post">
-    <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ site.url }}{{ page.url }}&via={{ site.twitter_username }}&related={{ site.twitter_username }}" rel="nofollow" target="_blank" title="Share on Twitter">
+    <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ site.url }}{{ site.baseurl }}{{ page.url }}&via={{ site.twitter_username }}&related={{ site.twitter_username }}" rel="nofollow" target="_blank" title="Share on Twitter">
       <div class="share-icon">
         {% include icon-twitter.svg %}
       </div>
     </a>
-    <a href="http://www.reddit.com/submit?url={{ site.url }}{{ page.url }}&title={{ page.title }}" rel="nofollow" target="_blank" title="Discuss on Reddit">
+    <a href="http://www.reddit.com/submit?url={{ site.url }}{{ site.baseurl }}{{ page.url }}&title={{ page.title }}" rel="nofollow" target="_blank" title="Discuss on Reddit">
       <div class="share-icon">
         {% include icon-reddit.svg %}
       </div>
