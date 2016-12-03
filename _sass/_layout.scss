@@ -269,5 +269,17 @@
   padding: 2px;
   margin: .20em;
   border-radius: 3px;
-  border-style: hidden;
+  border-style: solid;
+  border-width: thin;
+  border-color: $grey-color-light;
+}
+
+.share-icon-dark {
+  background-color: $grey-color;
+  border-color: $grey-color;
+}
+
+.share-icon:hover {
+  border-style: solid;
+  border-color: $grey-color-dark;
 }
