@@ -137,7 +137,7 @@ Which of course tracks the failure. The `NameServerStats` object is a StateMachi
 
 I did double check implementation of `PeekMut` to actually verify this functionality (and there is also a test case for it in `trust-dns-resolver`), I want to submit some improvements to the docs here in the stdlib. What's great about this implementation is that two async requests can be submitted back to back, and the highest priority connection will always be chosen, never actually removed from the pool! This is different from a database connection pool, for example, as everything is async; there is no need to remove and return connections to the pool, as you would with a syncronous connection to a database.
 
-*A sid note on `pub(crate)`*:
+*A side note on `pub(crate)`*:
 
 This is a really nice new feature in Rust for library maintenance. We've just reviewed some code above from two internal objects In the TRust-DNS library, there are a lot of interfaces public that really don't need to be. The issue with this is that it increases the surface area that has been published from the TRust-DNS cient library to include things that I really only want to be usable within the project. In the Resolver I get to use the new `pub(crate)` feature (introduces in [Rust 1.18](https://blog.rust-lang.org/2017/06/08/Rust-1.18.html)) which restricts the public interfaces to be only available within the crate. In affect this means that most internals (like `NameServer` and `NameServerPool`) of the Resolver library will not be public. This also helps because it will direct users to the interfaces I want them to use, namely: `Resolver`, and `LookupIp`. e.g.: 
 
