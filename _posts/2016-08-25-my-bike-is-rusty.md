@@ -7,7 +7,7 @@ categories: bikes
 
 *This post is written for an individual who tried to school me about my fixie today*
 
-Imagine this, your riding along on your bike into work, a dude rolls up next you on his fixie, and says,
+Imagine this, you're riding along on your bike into work, a dude rolls up next you on his fixie, and says,
  "you've got the wrong dropouts, that's not safe". To which I laugh and then say, "it's not a problem". To
  which he says, "well, it's harder to adjust the wheel". I conceded this point, "yes, it is, but my frame
  was way less expensive". Mind you, we were having this conversation over the course of a block, between

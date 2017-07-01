@@ -1,5 +1,4 @@
 #!/bin/bash -e
 
-cd _site
-bundle exec jekyll serve
+bundle exec jekyll serve --config _config.yml,_dev_config.yml --watch
 
