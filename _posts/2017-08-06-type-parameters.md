@@ -56,14 +56,14 @@ And then I started learning Rust...
 
 # You thought you knew Generics? Welcome to Rust
 
-Rust definitely raises the conceptual bar with it's Generics and type system. To understand why, it's important to understand the difference between monomorphism and polymorphism. Object Oriented languages all support polymorphic functions. In C++ this is opt-in with the `virtual` keyword, and in Java it's opt-out with the `final` keyword. Rust also supports polymorphism with [Trait Objects](https://doc.rust-lang.org/book/first-edition/trait-objects.html), to use it you must cast a reference to a to a trait object, for example:
+Rust definitely raises the conceptual bar with it's Generics and type system. To understand why, it's important to understand the difference between monomorphism and *runtime*[[1]](?#1)) polymorphism (to clarify, my usage of polymophism is specifically in regards to dynamic runtime polymorphism, see comment below). Object Oriented languages all support polymorphic functions. In C++ this (runtime polymorphism) is opt-in with the `virtual` keyword, and in Java it's opt-out with the `final` keyword. Rust also supports *runtime* polymorphism with [Trait Objects](https://doc.rust-lang.org/book/first-edition/trait-objects.html), to use it you must cast a reference to a to a trait object, for example:
 
 ```rust
 let obj = Object::new();
 let trait_obj = &obj as &Trait;
 ```
 
-This makes Rust similar to C++ in the sense that polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's quickly review polymorphism in Rust:
+This makes Rust similar to C++ in the sense that *runtime* polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's quickly review polymorphism in Rust:
 
 ```rust
 trait Animal {
@@ -98,9 +98,9 @@ fn main() {
 
 ```
 
-The above `print_num_legs` function is polymorphic, because it operates on the concept of Animal. This is a bit of a contrived example, obviously. An interesting difference between Rust and C++/Java at this point is where the opt-in/opt-out of polymorphism occurs. In Rust it's from the reference to the Animal object, but in C++/Java, it's actually in the definition of the class itself. Initially this struck me as odd, but only because I wasn't used to it. Now of course I find it funny that C++ and Java did it the other way (C++ also requires references to objects for polymorphism, if the variable is stack based, then polymophism will not come into play in the way that it always does in Java). Polymorphism comes at a cost, and that's the fact that when you cast a reference to a Trait Object the compiler must capture additional information behind the pointer to that memory, mainly the virtual function table. This is the table of functions which the object, Dog for example, implement with references to the function actually provided by that instance of the object.
+The above `print_num_legs` function is polymorphic, because it operates on the concept of Animal. This is a bit of a contrived example, obviously. An interesting difference between Rust and C++/Java at this point is where the opt-in/opt-out of polymorphism occurs. In Rust it's from the reference to the Animal object, but in C++/Java, it's actually in the definition of the class itself. Initially this struck me as odd, but only because I wasn't used to it. Now of course I find it funny that C++ and Java did it the other way (C++ also requires references to objects for polymorphism, if the variable is stack based, then polymorphism will not come into play in the way that it always does in Java). *Runtime* polymorphism comes at a cost, and that's the fact that when you cast a reference to a Trait Object the compiler must capture additional information behind the pointer to that memory, mainly the virtual function table. This is the table of functions which the object, Dog for example, implement with references to the function actually provided by that instance of the object.
 
-This cost can be removed by using monomorphism, and if you're following along (and I'm doing a decent job explaining), Generics. It should be mentioned that polymorphism comes at the cost of runtime memory, where as monomorphism comes at the cost of additional binary size. There is no free beer here. The logic from above isn't all that different, it all comes in the `print_num_legs` function definition:
+This cost can be removed by using monomorphism, and if you're following along (and I'm doing a decent job explaining), Generics. It should be mentioned that *runtime* polymorphism comes at the cost of runtime memory, where as monomorphism comes at the cost of additional binary size. There is no free beer here. The logic from above isn't all that different, it all comes in the `print_num_legs` function definition:
 
 ```rust
 fn print_num_legs<A: Animal>(animal: &A) {
@@ -174,7 +174,7 @@ trait Add<RHS = Self> {
 }
 ```
 
-This allows the return type, `Output` to be declared separately from the `Add` trait. The trait bound for `add` basically says this, `add` can be defined for any type, but it can only be added to itself. This means that `2 /*usize*/ + "3" /*&str*/;` is not legal. It does allow us to change the output though. Let's make up some types, say `BitField8` and `BitField16` types. We'll define `add` on `BitField8` which will append one to another and return a `BitField16`:
+This allows the return type, `Output` to be declared separately from the `Add` trait. The trait bound for `add` basically says this, `add` can be defined for any type, but it can only be added to itself (turns out I learned something new today, the RHS is just defaulted to the same type, see examples below [[2]](?#2)). This means that `2 /*usize*/ + "3" /*&str*/;` is not legal. It does allow us to change the output though. Let's make up some types, say `BitField8` and `BitField16` types. We'll define `add` on `BitField8` which will append one to another and return a `BitField16`:
 
 ```rust
 struct BitField8(u8);
@@ -229,3 +229,29 @@ Before taking TRust-DNS to 1.0, I want to go back and review these interfaces an
 # Grokked
 
 The reason I wrote this post is because these concepts were something which confused me when initially working with Rust. By literally starting to think in terms of TypeParameters, it has helped clarify some of what is going on when writing generic code. The type system in Rust is so much more advanced than any other language that *I've* used; I'm still getting used to thinking about it in terms that make sense to me. I hope you found this post useful, apologies if you found it meandering.
+
+p.s. Posting to your blog is a great learning potential, some corrections:
+
+- <a name="1">1</a>) Above the way in which I refer to the difference between polymorphism and monomorphism is incorrect. [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) is the general term for multiple types implementing the same common interface. This does not necessarily imply that the functions must be dynamically called at runtime, in fact generics are generally a subset of polymorphism. The term monomorphism is the specific feature of the compiler to replace function calls to polymorphic functions with a separately compiled code path. Thanks for the [correction](https://www.reddit.com/r/rust/comments/6rzbnd/i_just_wrote_a_thing_about_grokking_generics_in/dl8z4pj/)!
+
+- <a name="2">2</a>) In the Add example I wrote above, it actually *is* possible to define add on two different types. I've expanded the example from above:
+
+```rust
+struct BitField8(u8);
+struct BitField16(u16);
+// added this additional third type
+struct BitField32(u32);
+
+impl Add<BitField16> for BitField8 {
+  // when you add 8 bits to 16, you need enough space, i.e. 32 bits
+  type Output = BitField32;
+  
+  fn add(self, rhs: BitField16) -> Self::Output {
+     let high: u32 = (self.0 as u32) << 16;
+     BitField32(high + rhs.0 as u32)
+  }
+}
+```
+
+It turns out that in `Add<RHS = Self>`, the RHS only defaults to `Self`. This makes more sense after being [corrected](https://www.reddit.com/r/rust/comments/6rzbnd/i_just_wrote_a_thing_about_grokking_generics_in/dl8wa97/).
+
