@@ -161,8 +161,8 @@ I want TRust-DNS to always be validating DNSSec records, and reject unsigned rec
 
 There are still a few things that need to be implemented in the Resolver:
 
-* `AAAA` (IPv6) in addition to the `A` (IPv4) lookup performed today: [#159](https://github.com/bluejekyll/trust-dns/issues/159)
-* Using the system `resolv.conf` for configuration: [#109](https://github.com/bluejekyll/trust-dns/issues/109)
+* `AAAA` (IPv6) in addition to the `A` (IPv4) lookup performed today: *FIXED* [#159](https://github.com/bluejekyll/trust-dns/issues/159)
+* Using the system `resolv.conf` for configuration: *FIXED* [#109](https://github.com/bluejekyll/trust-dns/issues/109)
 * Connection latency measurements: [#158](https://github.com/bluejekyll/trust-dns/issues/158)
 * Better fairness in the NameServerPool: [#157](https://github.com/bluejekyll/trust-dns/issues/157)
 * Integrate TLS support: [#156](https://github.com/bluejekyll/trust-dns/issues/156)
