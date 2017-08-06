@@ -63,7 +63,7 @@ let obj = Object::new();
 let trait_obj = &obj as &Trait;
 ```
 
-This makes Rust similar to C++ in the sense that polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's just review quickly polymorphism, shown in Rust:
+This makes Rust similar to C++ in the sense that polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's quickly review polymorphism, shown in Rust:
 
 ```rust
 trait Animal {
@@ -118,6 +118,8 @@ fn main() {
 ```
 
 This is now a monomorpic call. The compiler literally generates different code for each variation of the call to `print_num_legs`. This reduces our runtime cost, but we get to keep the nice fact that we still only needed to write a single function for all types of Animals.
+
+# Generic experts only
 
 Ok, now that we're all experts with polymorphism, monomorphism and Generics in Rust, let's dive deeper in to the depths of this type system. Take a look at the interface that tripped me up and took a while to understand, from [here](https://github.com/bluejekyll/trust-dns/blob/a46d1bbe996b69df9dcd964540de57df2d44681e/client/src/client/client.rs#L424):
 
