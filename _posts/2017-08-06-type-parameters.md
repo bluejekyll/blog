@@ -56,7 +56,7 @@ And then I started learning Rust...
 
 # You thought you knew Generics? Welcome to Rust
 
-Rust definitely raises the conceptual bar with it's Generics and type system. To understand why, it's important to understand the difference between monomorphism and *runtime*[[1]](?#1)) polymorphism (to clarify, my usage of polymophism is specifically in regards to dynamic runtime polymorphism, see comment below). Object Oriented languages all support polymorphic functions. In C++ this (runtime polymorphism) is opt-in with the `virtual` keyword, and in Java it's opt-out with the `final` keyword. Rust also supports *runtime* polymorphism with [Trait Objects](https://doc.rust-lang.org/book/first-edition/trait-objects.html), to use it you must cast a reference to a to a trait object, for example:
+Rust definitely raises the conceptual bar with it's Generics and type system. To understand why, it's important to understand the difference between monomorphism and *runtime*[[1]](?#1) polymorphism (to clarify, my usage of polymorphism is specifically in regards to dynamic runtime polymorphism, see comment below). Object Oriented languages all support polymorphic functions. In C++ this (runtime polymorphism) is opt-in with the `virtual` keyword, and in Java it's opt-out with the `final` keyword. Rust also supports *runtime* polymorphism with [Trait Objects](https://doc.rust-lang.org/book/first-edition/trait-objects.html), to use it you must cast a reference to a to a trait object, for example:
 
 ```rust
 let obj = Object::new();
@@ -232,7 +232,7 @@ The reason I wrote this post is because these concepts were something which conf
 
 p.s. Posting to your blog is a great learning potential, some corrections:
 
-- <a name="1">1</a>) Above the way in which I refer to the difference between polymorphism and monomorphism is incorrect. [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) is the general term for multiple types implementing the same common interface. This does not necessarily imply that the functions must be dynamically called at runtime, in fact generics are generally a subset of polymorphism. The term monomorphism is the specific feature of the compiler to replace function calls to polymorphic functions with a separately compiled code path. Thanks for the [correction](https://www.reddit.com/r/rust/comments/6rzbnd/i_just_wrote_a_thing_about_grokking_generics_in/dl8z4pj/)!
+- <a name="1">1</a>) Above the way in which I refer to the difference between polymorphism and monomorphism was incorrect, I attempted to correct most locations in the post. [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) is the general term for multiple types implementing the same common interface. This does not necessarily imply that the functions must be dynamically called at runtime, in fact generics are generally a subset of polymorphism. The term monomorphism is the specific feature of the compiler to replace function calls to polymorphic functions with a separately compiled code path. Thanks for the [correction](https://www.reddit.com/r/rust/comments/6rzbnd/i_just_wrote_a_thing_about_grokking_generics_in/dl8z4pj/)!
 
 - <a name="2">2</a>) In the Add example I wrote above, it actually *is* possible to define add on two different types. I've expanded the example from above:
 
