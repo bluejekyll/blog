@@ -11,13 +11,13 @@ A while back I was writing some Rust, and the compiler yelled at me, it's such a
 
 # My brief history with "Generics"
 
-My first introduction to the concept of Generics was with the `C++` Template system in a [Computer Science](https://computerscience.vassar.edu) class in [College](https://www.vassar.edu). It's been a while, but I still have this `typedef` name in my head, `interator`. I had typedeffed it to reduce my typing throughout the code, it was something like:
+My first introduction to the concept of Generics was with the `C++` Template system in a [Computer Science](https://computerscience.vassar.edu) class in [College](https://www.vassar.edu). It's been a while, but I still have this `typedef` name in my head, `interator` (notice the 'int-erator', an iterator of integers). I had typedeffed it to reduce my typing throughout the code, it was something like:
 
 ```c++
 typedef std::vector<int>::iterator interator;
 ```
 
-To this day I frequently mistype iterator as interator... crazy how that stuff can stick with you. Most of my time was spent with Java and it's Generics system, though. It was definitely something initially missing from Java after switching from C++ (they were finally added in 1.5). Some people don't like Generics, let me just say, I am firmly in the camp of Generics being awesome. An example of why Generics are necessary in Java is most obvious with collections like Map, before Generics:
+To this day I frequently mistype iterator as interator... crazy how that stuff can stick with you. Most of my time was actually spent with Java and it's Generics system, though. It was definitely something initially missing from Java after switching from C++ (they were finally added in 1.5). Some people don't like Generics, let me just say, I am firmly in the camp of Generics being awesome. An example of why Generics are necessary in Java is most obvious with collections like Map, before Generics:
 
 ```java
 String foo = "foo";
@@ -63,11 +63,11 @@ let obj = Object::new();
 let trait_obj = &obj as &Trait;
 ```
 
-This makes Rust similar to C++ in the sense that polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's quickly review polymorphism, shown in Rust:
+This makes Rust similar to C++ in the sense that polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's quickly review polymorphism in Rust:
 
 ```rust
 trait Animal {
-  // default impl, don't most animals have 4 legs?
+  // default impl, don't most animals have 4 legs? j/k
   fn num_legs(&self) -> usize { 4 }
 }
 
@@ -100,7 +100,7 @@ fn main() {
 
 The above `print_num_legs` function is polymorphic, because it operates on the concept of Animal. This is a bit of a contrived example, obviously. An interesting difference between Rust and C++/Java at this point is where the opt-in/opt-out of polymorphism occurs. In Rust it's from the reference to the Animal object, but in C++/Java, it's actually in the definition of the class itself. Initially this struck me as odd, but only because I wasn't used to it. Now of course I find it funny that C++ and Java did it the other way (C++ also requires references to objects for polymorphism, if the variable is stack based, then polymophism will not come into play in the way that it always does in Java). Polymorphism comes at a cost, and that's the fact that when you cast a reference to a Trait Object the compiler must capture additional information behind the pointer to that memory, mainly the virtual function table. This is the table of functions which the object, Dog for example, implement with references to the function actually provided by that instance of the object.
 
-This cost can be removed by using monomorphism, and if your following along, Generics. It should be mentioned that polymorphism comes at the cost of runtime memory, where as monomorphism comes at the cost of additional binary size. There is no free beer here. The logic from above isn't all that different, it all comes in the `print_num_legs` function definition:
+This cost can be removed by using monomorphism, and if you're following along (and I'm doing a decent job explaining), Generics. It should be mentioned that polymorphism comes at the cost of runtime memory, where as monomorphism comes at the cost of additional binary size. There is no free beer here. The logic from above isn't all that different, it all comes in the `print_num_legs` function definition:
 
 ```rust
 fn print_num_legs<A: Animal>(animal: &A) {
@@ -121,7 +121,7 @@ This is now a monomorpic call. The compiler literally generates different code f
 
 # Generic experts only
 
-Ok, now that we're all experts with polymorphism, monomorphism and Generics in Rust, let's dive deeper in to the depths of this type system. Take a look at the interface that tripped me up and took a while to understand, from [here](https://github.com/bluejekyll/trust-dns/blob/a46d1bbe996b69df9dcd964540de57df2d44681e/client/src/client/client.rs#L424):
+Ok, now that we're all experts with polymorphism and monomorphism in Rust, let's dive deeper in to the depths of this type system. Take a look at the interface that tripped me up and took a while to understand, from [here](https://github.com/bluejekyll/trust-dns/blob/a46d1bbe996b69df9dcd964540de57df2d44681e/client/src/client/client.rs#L424):
 
 ```rust
 pub fn new<CC>(client_connection: CC) -> SecureSyncClientBuilder<CC>
@@ -148,7 +148,7 @@ This doesn't compile because we didn't tell Rust that you can print the type T w
 fn generic<T: Debug>(a: T) { println!("{:?}", a) }
 ```
 
-That's nice and simple. But here's the thing, Generics are just other parameters to the function, TypeParameters. By using the term *parameter*, it helps with understanding more complex use cases. For example, if you want to cast one variable from one type to another you do this:
+That's nice and simple. But here's the thing, Generics are just other parameters to the function, TypeParameters. By using the term *parameter*, it helps with understanding more complex use cases. For example, if you want to cast one variable from one type to another you do this with traditional values:
 
 ```rust
 // Cast the 32 bit number, 128 to an 8 bit number
@@ -224,6 +224,8 @@ Notice something funky here, we are "casting" `CC` to `ClientConnection`, why? C
 
 To finish this off, the MessageStream is then bound to the type `Stream<Item=Vec<u8>, Error=io::Error> + 'static`. This is just saying that MessageStream is a Stream of future data of the type `Vec<u8>`; the raw, binary DNS packet. The additional `'static` bound just specifies that the Stream must either have a `'static` lifetime or be an owned type.
 
+Before taking TRust-DNS to 1.0, I want to go back and review these interfaces and see if they can be simplified. If anyone has ideas on that, please file an issue on the [repo](https://github.com/bluejekyll/trust-dns/issues).
+
 # Grokked
 
-The reason I put this post up is because these concepts were something which confused me for a little bit when getting used to working with Rust. Literally starting to think in terms of TypeParameters has helped clarify some of what is going on when writing generic code. The type system in Rust is so much more advanced than any other language that *I've* used; I'm still getting used to thinking about it in terms that make sense to me. I hope you found it useful.
+The reason I wrote this post is because these concepts were something which confused me when initially working with Rust. By literally starting to think in terms of TypeParameters, it has helped clarify some of what is going on when writing generic code. The type system in Rust is so much more advanced than any other language that *I've* used; I'm still getting used to thinking about it in terms that make sense to me. I hope you found this post useful, apologies if you found it meandering.
