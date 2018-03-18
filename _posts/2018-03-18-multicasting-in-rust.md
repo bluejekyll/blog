@@ -428,7 +428,7 @@ Create a new socket for the response, in the proper IP scope.
 
 Send our response to the source address. The response was a string passed in at the creation of the server, so the client already knows what is coming.
 
-From here we can move on to the client to get verify the server's response. A note, I realized that the `NotifyServer` was dropping early after getting to this point, so I changed that to capture the notify, and we're back in the `test_multicast` function:
+From here we can move on to the client to verify the server's response. A note, I realized that the `NotifyServer` was dropping early after getting to this point, so I changed that to capture the notify, and we're back in the `test_multicast` function:
 
 ```rust
 let notify = NotifyServer(Arc::clone(&client_done));
@@ -500,7 +500,7 @@ fn bind_multicast(socket: &Socket, addr: &SocketAddr) -> io::Result<()> {
     let addr = match *addr {
         SocketAddr::V4(addr) => SocketAddr::new(Ipv4Addr::new(0, 0, 0, 0).into(), addr.port()),
         SocketAddr::V6(addr) => {
-            SocketAddr::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1).into(), addr.port())
+            SocketAddr::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0).into(), addr.port())
         }
     };
     socket.bind(&socket2::SockAddr::from(addr))
