@@ -118,7 +118,7 @@ fn test_ipv6_multicast() {
 }
 ```
 
-Now if you run `cargo test` we'll see that at least our addresses are in scope. Now let's add some the listener. First we're going to start with our boiler plate for the thread:
+Now if you run `cargo test` we'll see that at least our addresses are in scope. Now let's add the listener. First we're going to start with our boiler plate for the thread:
 
 ```rust
 use std::sync::{Arc, Barrier};
