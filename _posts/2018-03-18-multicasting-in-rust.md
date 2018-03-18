@@ -188,7 +188,7 @@ fn test_ipv6_multicast() {
 }
 ```
 
-Ok that's a bit more code. What we're doing in that block in there is starting a thread that's going to run our server logic. We're making using of a `Barrier` to synchronize the server and the client such that the client does attempt to test before the server is running. We also have an `AtomicBool` for indicating when the server can safely stop running. I've also moved the client test section to a generic test case regardless of IPv4 or IPv6. Doing this makes testing client/server code easy.
+Ok that's a bit more code. What we're doing in that block in there is starting a thread that's going to run our server logic. We're making using of a `Barrier` to synchronize the server and the client such that the client does not attempt to run the tests before the server is running. We also have an `AtomicBool` for indicating when the server can safely stop running. I've also moved the client test section to a generic test case regardless of IPv4 or IPv6. Doing this makes testing client/server code easy.
 
 When you run the tests you should see some decent output:
 
