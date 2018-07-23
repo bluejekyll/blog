@@ -83,9 +83,7 @@ And now we're ready to write some code.
 Some of this stuff is documented well, other parts less so. To generate the docs, I needed to use the stable compiler, as there were some issues with nightly, but it's definitely worth generating those:
 
 ```console
-$> rustup default stable
-$> cargo doc --open
-$> rustup default nightly-2018-07-17
+$> cargo +stable doc --open
 ```
 
 I have spent a little time familiarizing myself with `Vue` and `React` (only so far as tutorials and play apps in the past). I found the `Yew` framework to be very reminiscent of `React`, it claims to be ["inspired by Elm and ReactJS"](https://github.com/DenisKolodin/yew) (I've never worked with `Elm`).
