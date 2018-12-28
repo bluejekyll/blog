@@ -220,7 +220,7 @@ pub fn register_panic_handler() {
 }
 ```
 
-The `Fatal` error type has a side-effect of failing any running transaction, and closing the connection to the DB. In my testing, if we panicked without a handler, it would cause Postgres to kill the entire DB process, and restart and recover. This would be undesirable to say the least, thus the panic handler. Let's look at `pg_error::log` function, because it was really annoying:
+The `Fatal` error type has a side-effect of failing any running transaction, and closing the connection to the DB. In my testing, if we panicked without a handler, it would cause Postgres to kill the entire DB process, restart and recover. This would be undesirable to say the least, thus the panic handler. Let's look at `pg_error::log` function, because it was really annoying:
 
 ### How to easily lose 3 days of development time
 
