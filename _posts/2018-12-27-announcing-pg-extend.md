@@ -323,7 +323,7 @@ postgres=# SELECT add_one(3);
 postgres=# \q
 ```
 
-Notice that the symbol to load is `pg_add_one` and not `add_one`, as the latter would have conflicted with the original function in Rust. As a future task, I want to build generators for the plsql scripts to load the function
+Notice that the symbol to load is `pg_add_one` and not `add_one`, as the latter would have conflicted with the original function in Rust. As a future task, I want to build generators for the psql scripts to load the function
 
 ## Just the beginning
 
