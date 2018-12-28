@@ -15,7 +15,7 @@ Initially I started playing around with wanting to build Postgres extensions in 
 
 ## Goal
 
-To build a library that makes it effortless to create Postgres extensions in Rust. This library needs to do a few things, which are currently implemented as C macros in Postgres header files, hey my ancient knowledge of C continues to be helpful! As an aside, I still think people should learn C, and this is mostly because it remains the lingua franca for all foreign function interfaces (FFI) between different programming languages (and there's lots of software written in it out there, like Postgres).
+To build a library that makes it effortless to create Postgres extensions in Rust. This library needs to do a few things, which are currently implemented as C macros in Postgres header files, hey, my ancient knowledge of C continues to be helpful! As an aside, I still think people should learn C, and this is mostly because it remains the lingua franca for all foreign function interfaces (FFI) between different programming languages (and there's lots of software written in it out there, like Postgres).
 
 First things first, we will need a macro to define the "module magic" that informs Postgres that a dynamic library is able to be loaded by it's loader. Next we need to create a way to call into Rust from Postgres such that we can write standard Rust code, without needing to know the inner workings of Postgres and it's conventions in C. This wrapper should also make sure that the FFI boundary is respected between the C and Rust. Finally, we will want to use Postgres' allocator `palloc` for allocating all memory in the extensions.
 
@@ -284,7 +284,7 @@ Now, one last thing, the allocators.
 
 ## Properly allocating memory in Postgres
 
-Postgres has it's own allocator, `palloc`, as well as an associated `pfree`. These all memory allocated with `palloc` is guaranteed to be deallocated when a transaction and/or connection are closed. This is a nice feature for not leaking memory. Somewhat recently, Rust stabilized overriding the global allocator. This was the line at in the `pg_magic` macro that was annotated with `#[global_allocator]`. The allocator implementation is straight forward, but I have some open questions about whether or not it's correct, here it is:
+Postgres has it's own allocator, `palloc`, as well as an associated `pfree`. All memory allocated with `palloc` is guaranteed to be deallocated when a transaction and/or connection are closed. This is a nice feature for not leaking memory. Somewhat recently, Rust stabilized overriding the global allocator. This was the line in the `pg_magic` macro that was annotated with `#[global_allocator]`. The allocator implementation is straight forward, but I have some open questions about whether or not it's correct, here it is:
 
 ```rust
 pub struct PgAllocator;
