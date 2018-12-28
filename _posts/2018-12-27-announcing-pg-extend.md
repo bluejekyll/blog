@@ -327,6 +327,6 @@ Notice that the symbol to load is `pg_add_one` and not `add_one`, as the latter 
 
 ## Just the beginning
 
-This is really just the beginning of this library. There is going to be a long road to complete it, as there are a lot of type conversions to implement for the `PgDatum` type. As I have time, I will get to it, but if you find this useful and want to contribute, please feel welcome. I've picked as open a set of licenses as possible to allow people from all walks to get in on the fun.
+This is really just the beginning of this library. There is going to be a long road to complete it, as there are a lot of type conversions to implement for the `PgDatum` type. As I have time, I will get to it, but if you find this useful and want to contribute, please feel welcome. I've picked as open a set of licenses as possible to allow people from all walks to get in on the fun, [bluejekyll/pg-extend-rs](https://github.com/bluejekyll/pg-extend-rs).
 
 As always, thank you to all the Rust contributors who continue to make the language an absolute pleasure.
