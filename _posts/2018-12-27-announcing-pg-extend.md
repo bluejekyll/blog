@@ -183,7 +183,7 @@ pub extern "C" fn pg_add_one(
 }
 ```
 
-The above code tries to do as little as possible inside the macro generated code. This is by design, as it's harder to write meta-code than it is to write *actual* code. Also, more shared library code should help with optimization and code size. I like that so little `unsafe` code was necessary, but I'm guessing there will be a lot more as we try to implement all the Datum type conversions. All the supported Datum conversions will be available in the `pg_extend::pg_datum` [module](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/src/pg_datum.rs#L53).
+The above code tries to do as little as possible inside the macro generated code. This is by design, as it's harder to write meta-code than it is to write *actual* code. Also, more shared library code should help with optimization and code size. I like that so little `unsafe` code was necessary, but I'm guessing there will be a lot more as we try to implement all the Datum type conversions. All the supported Datum conversions will be available in the `pg_extend::pg_datum` [module](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/src/pg_datum.rs#L53) (I should note, at the time of this writing there is only a conversion for `i32` to and from `Datum`, not very useful yet).
 
 There is also a function which declares the calling convention ABI this function supports:
 
@@ -198,7 +198,7 @@ pub extern "C" fn pg_finfo_pg_add_one() -> &'static pg_extend::pg_sys::Pg_finfo_
 
 Which is fairly straight forward.
 
-By-the-way, this is the first time I've worked with panic handling in Rust, so please reach out if you see anything that looks wrong with the way I've written this. Tonight, I even informed of a new library for trying to enforce no panics, named [no_panic](https://crates.io/crates/no-panic). As I mentioned above that we'd get to the panic handler, so let's look at that.
+By-the-way, this is the first time I've worked with panic handling in Rust, so please reach out if you see anything that looks wrong with the way I've written this. Tonight, I was even informed of a new library for trying to enforce no panics, named [no_panic](https://crates.io/crates/no-panic). As I mentioned above that we'd get to the panic handler, so let's look at that.
 
 ### Errors and Panic handling
 
