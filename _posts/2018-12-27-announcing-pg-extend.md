@@ -41,7 +41,7 @@ fn test_add_one() {
 }
 ```
 
-Follow the comments above which describe each important section to pay attention to, the full example is [available in the repo](https://github.com/bluejekyll/pg-extend-rs/blob/8f88631ffaf5e6d732cd1e0db0205aed51dfca2e/examples/add_one/src/lib.rs).
+Follow the comments above which describe each important section to pay attention to, the full example is [available in the repo](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/examples/add_one/src/lib.rs).
 
 This is the way in which the function will be executed in Postgres:
 
@@ -55,9 +55,9 @@ postgres=# SELECT add_one(3);
 
 ## Prerequisites, we need the C bindings
 
-Bindgen to the rescue! One of the greatest tools in the Rust ecosystem when building FFI code, is bindgen. We're going to use this to define bindings to the Postgres C types we need in Rust. To do this, in the `pg_extend` [crate](https://crates.io/crates/pg-extend), we're going to define a `pg_sys` [module](https://github.com/bluejekyll/pg-extend-rs/tree/8f88631ffaf5e6d732cd1e0db0205aed51dfca2e) and run bindgen in a `build.rs` [script](https://github.com/bluejekyll/pg-extend-rs/blob/8f88631ffaf5e6d732cd1e0db0205aed51dfca2e/pg-extend/build.rs).
+Bindgen to the rescue! One of the greatest tools in the Rust ecosystem when building FFI code, is bindgen. We're going to use this to define bindings to the Postgres C types we need in Rust. To do this, in the `pg_extend` [crate](https://crates.io/crates/pg-extend), we're going to define a `pg_sys` [module](https://github.com/bluejekyll/pg-extend-rs/tree/f3e5620a43d325b413a9d0c069bcc99b12505e1d) and run bindgen in a `build.rs` [script](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/build.rs).
 
-I won't go over this in detail, bindgen has a great set of [documentation](https://rust-lang.github.io/rust-bindgen/) around it for generating FFI bindings to C. The headers we're using are from the `postgres/include/server`, and are defined in the `wrapper.h` [file](https://github.com/bluejekyll/pg-extend-rs/blob/8f88631ffaf5e6d732cd1e0db0205aed51dfca2e/pg-extend/wrapper.h).
+I won't go over this in detail, bindgen has a great set of [documentation](https://rust-lang.github.io/rust-bindgen/) around it for generating FFI bindings to C. The headers we're using are from the `postgres/include/server`, and are defined in the `wrapper.h` [file](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/wrapper.h).
 
 ## Defining pg_magic
 
@@ -67,19 +67,6 @@ The postgres magic macro, `pg_magic!(version)`, does a few different things. The
 // We set the allocator to a custom allocator for Postgres, we'll cover this later...
 #[global_allocator]
 static GLOBAL: pg_extend::pg_alloc::PgAllocator = pg_extend::pg_alloc::PgAllocator;
-
-// This is the global static that Postgres looks for, the interface for the `Pg_magic_func`
-//    returns a reference to this static, to match that which postgres requires.
-#[allow(non_upper_case_globals)]
-static mut Pg_magic_data: pg_extend::pg_sys::Pg_magic_struct = pg_extend::pg_sys::Pg_magic_struct {
-    len: 0,
-    version: 0,
-    funcmaxargs: 0,
-    indexmaxkeys: 0,
-    namedatalen: 0,
-    float4byval: 0,
-    float8byval: 0,
-};
 
 // The magic function Postgres looks for on load of the module, without this Postgres will reject
 //    the library. `no_mangle` makes sure that the symbol name is not munged, `link_name` forces
@@ -93,36 +80,35 @@ pub extern "C" fn Pg_magic_func() -> &'static pg_extend::pg_sys::Pg_magic_struct
     use std::mem::size_of;
     use std::os::raw::c_int;
 
+    // This defines what configuration the extension was built with, the interface for the `Pg_magic_func`
+    //    returns a reference to this const, to match that which postgres requires.
+    const my_magic: pg_extend::pg_sys::Pg_magic_struct = pg_sys::Pg_magic_struct {
+        len: size_of::<pg_sys::Pg_magic_struct>() as c_int,
+        version: pg_sys::PG_VERSION_NUM as std::os::raw::c_int / 100,
+        // The rest of this options all come from compile time parameters in the Postgres build.
+        funcmaxargs: pg_sys::FUNC_MAX_ARGS as c_int,
+        indexmaxkeys: pg_sys::INDEX_MAX_KEYS as c_int,
+        namedatalen: pg_sys::NAMEDATALEN as c_int,
+        float4byval: pg_sys::USE_FLOAT4_BYVAL as c_int,
+        float8byval: pg_sys::USE_FLOAT8_BYVAL as c_int,
+    };
+
     // As this is the entry point for the library loading, we use this as an opportunity
     //    to register a panic handler, so that we can control errors being reported back
     //    from Rust to C (Postgres). More on this later.
     register_panic_handler();
 
-    // We need this unsafe, bc it's storing this in global static space (unsafe b/c of the mutability)
-    //    There might be better options here, like a Once and some atomics, etc.
-    unsafe {
-        Pg_magic_data = pg_sys::Pg_magic_struct {
-            len: size_of::<pg_sys::Pg_magic_struct>() as c_int,
-            // The rest of this options all come from compile time parameters in the Postgres build.
-            version: pg_sys::PG_VERSION_NUM as std::os::raw::c_int / 100,
-            funcmaxargs: pg_sys::FUNC_MAX_ARGS as c_int,
-            indexmaxkeys: pg_sys::INDEX_MAX_KEYS as c_int,
-            namedatalen: pg_sys::NAMEDATALEN as c_int,
-            float4byval: pg_sys::USE_FLOAT4_BYVAL as c_int,
-            float8byval: pg_sys::USE_FLOAT8_BYVAL as c_int,
-        };
-        &Pg_magic_data
-    }
+    &my_magic
 }
 ```
 
-The `pg_magic` macro can only be used once in a library. This should be clear with the unsafe assignment, but in addition to that, `register_panic_handler` should only be called once (though I don't think it should matter if it happens more than that), and `#[global_allocator]` can only exist once in a library. I believe this implementation is correct, but if people have opinions on a better way to do this, please reach out.
+The `pg_magic` macro can only be used once in a library. This will become clear with the `register_panic_handler` which should only be called once (though I don't think it should matter if it happens more than that), and `#[global_allocator]` can only exist once in a library. I believe this implementation is correct, but if people have opinions on a better way to do this, please reach out.
 
 Now that we have that, the library is marked as a Postgres extension that can be loaded dynamically.
 
 ## Unwrapping pg_extern
 
-The pg_extern attribute macro is where all the fun is. There are a number of things it does, and feel free to look at it's [implementation](https://github.com/bluejekyll/pg-extend-rs/blob/8f88631ffaf5e6d732cd1e0db0205aed51dfca2e/pg-extern-attr/src/lib.rs#L211). I built this after looking at a lot of documentation, some examples I found online, and the experience I had building this other procedural macro, [enum-as-inner](https://crates.io/crates/enum-as-inner). It's not the most straight forward process, but given Rust's type safety, it's generally clear *why* it's wrong, if not *how* to fix it (also `cargo +nightly expand` is a godsend here). I'm not going to walk through the macro implementation here, but rather what it produces (again, see the code comments inline):
+The pg_extern attribute macro is where all the fun is. There are a number of things it does, and feel free to look at it's [implementation](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extern-attr/src/lib.rs#L211). I built this after looking at a lot of documentation, some examples I found online, and the experience I had building this other procedural macro, [enum-as-inner](https://crates.io/crates/enum-as-inner). It's not the most straight forward process, but given Rust's type safety, it's generally clear *why* it's wrong, if not *how* to fix it (also `cargo +nightly expand` is a godsend here). I'm not going to walk through the macro implementation here, but rather what it produces (again, see the code comments inline):
 
 ```rust
 // Again, an unmangled name
@@ -197,7 +183,7 @@ pub extern "C" fn pg_add_one(
 }
 ```
 
-The above code tries to do as little as possible inside the macro generated code. This is by design, as it's harder to write meta-code than it is to write *actual* code. Also, more shared library code should help with optimization and code size. I like that so little `unsafe` code was necessary, but I'm guessing there will be a lot more as we try to implement all the Datum type conversions. All the supported Datum conversions will be available in the `pg_extend::pg_datum` [module](https://github.com/bluejekyll/pg-extend-rs/blob/8f88631ffaf5e6d732cd1e0db0205aed51dfca2e/pg-extend/src/pg_datum.rs#L53).
+The above code tries to do as little as possible inside the macro generated code. This is by design, as it's harder to write meta-code than it is to write *actual* code. Also, more shared library code should help with optimization and code size. I like that so little `unsafe` code was necessary, but I'm guessing there will be a lot more as we try to implement all the Datum type conversions. All the supported Datum conversions will be available in the `pg_extend::pg_datum` [module](https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/src/pg_datum.rs#L53).
 
 There is also a function which declares the calling convention ABI this function supports:
 
@@ -246,7 +232,7 @@ Everything in building this library was fairly straightforward up to this point,
 //    change in the future. Also, `file` and `func_name` will be `&'static str` in almost all
 //    cases, so we'll probably change this back to that.
 pub fn log<T1, T2, T3>(level: Level, file: T1, line: u32, func_name: T2, msg: T3)
-where 
+where
     T1: Into<Vec<u8>>,
     T2: Into<Vec<u8>>,
     T3: Into<Vec<u8>>,
