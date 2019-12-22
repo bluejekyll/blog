@@ -135,7 +135,7 @@ Trust-DNS has in many ways grown with the ecosystem around it. Initially it was 
 
 Oddly enough, a feature of the Trust-DNS Resolver to make testing easier will also potentially make it easy to port other executors (like async-std). To facilitate decent tests in the resolver a trait was defined, `ConnectionProvider`. This trait allowed for the creation of mocked connections to test all the Resolver's logic, allowing us to test many different scenarios without actually introducing any network IO. This has the interesting side-effect of being useful for abstracting the underlying executor and network drivers–something for us to explore in the future.
 
-Tokio itself has improved in a lot of other ways as well. The library has been polished significantly. There were some nuances to learn in adapting all of Trust-DNS to it, but all very much worth it. Please, explore the new API and I'd love any feedback you'd like to provide: [Trust-DNS Resolver](https://docs.rs/trust-dns-resolver).
+Tokio itself has improved in a lot of other ways as well. The library has been polished significantly. There were some nuances to learn in adapting all of Trust-DNS to it, but all very much worth it. Please, explore the new API and I'd love any feedback you'd like to provide: [Trust-DNS Resolver](https://docs.rs/trust-dns-resolver), discussion can be had on the release note on the [users.rust-lang.org discussion board](https://users.rust-lang.org/t/trust-dns-0-18-async-await-tokio-0-2-support/36053).
 
 ## A Massive thank you!
 
