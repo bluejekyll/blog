@@ -7,11 +7,11 @@ categories: rust
 
 *A review of preparing Trust-DNS for async/await in Rust*
 
-What started as a brief sojourn to learn the new `std::future::Future` in Rust 1.36, slowly became a journey to fully adopt the new async/await syntax in Rust. The plan had been to merely update to the new Future API, trying to keep the minimum Rust version as low as possible. This was ideally to keep the libraries compatible with more Rust users, but it became aparent that this wasn't really feasible. For a number of reasons, primarily, all of the underlying libraries Trust-DNS relies upon were moving in this direction, which made the task a fools errand. Additionally, adopting async/await simplified much of the code. This post is the announcement of the 0.18 release, representing a few months of work.
+What started as a brief sojourn to learn the new `std::future::Future` in Rust 1.36, slowly became a journey to fully adopt the new async/await syntax in Rust. The plan had been to merely update to the new Future API, trying to keep the minimum Rust version as low as possible. This was ideally to keep the libraries compatible with more Rust users, but it became apparent that this wasn't really feasible. For a number of reasons, primarily, all of the underlying libraries Trust-DNS relies upon were moving in this direction, which made the task a fools errand. Additionally, adopting async/await simplified much of the code. This post is the announcement of the 0.18 release, representing a few months of work.
 
 # Adopting async/await
 
-Async/await has been a long awaited feature in Rust. It's such a massive game changer for the language. Low level async programming has traditionally always meant building state machines and abstracting the worflow of the system around them. The original version of Futures in Rust were no different, though the Futures library did help substantially by giving us predefined state machines for common scenarios.
+Async/await has been a long awaited feature in Rust. It's such a massive game changer for the language. Low level async programming has traditionally always meant building state machines and abstracting the workflow of the system around them. The original version of Futures in Rust were no different, though the Futures library did help substantially by giving us predefined state machines for common scenarios.
 
 It can be most easily shown how much more ergonomic this is from some code, here's an example from the previous release of Trust-DNS, the HTTPS request handler:
 
@@ -62,7 +62,7 @@ where
 }
 ```
 
-This example shows how the older Future combinators could be used together, but it made for somewhat complex code to write. The `async fn` version is much more straightforward: 
+This example shows how the older Future combinators could be used together, but it made for somewhat complex code to write. The `async fn` version is much more straightforward:
 
 ```rust
 pub async fn h2_handler<T, I>(
