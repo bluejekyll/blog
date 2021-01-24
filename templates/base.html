@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ config.title }}</title>
+    <link rel="stylesheet" href="/css/paper.min.css">
+</head>
+
+<body>
+    <div id="top" class="row site">
+        <nav class="border split-nav">
+            <div class="nav-brand">
+                <h4>let blueJEKYLL = <a href="{{ config.base_url }}">benjaminFRY</a>;</h4>
+            </div>
+            <div class="collapsible">
+                <input id="collapsible1" type="checkbox" name="collapsible1">
+                <label for="collapsible1">
+                    <div class="bar1"></div>
+                    <div class="bar2"></div>
+                    <div class="bar3"></div>
+                </label>
+                <div class="collapsible-body">
+                    <ul class="inline">
+                        <li><a href="{{ config.base_url }}/posts">Posts</a></li>
+                        <li><a href="{{ config.extra.github }}">Github</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        {% block top %} {% endblock %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+{% extends "no-sidebar.html" %}
+
+{% block content %}
+{% set page = get_page(path="about.md") %}
+<h2>
+    {{ page.title }}
+</h2>
+<p>
+    {{ page.content | safe }}
+</p>
+
+<div class="row child-borders">
+    <a href="{{ config.base_url }}/posts/" class="paper-btn margin">Posts</a>
+    <a href="{{ config.extra.github }}" class="paper-btn margin">Github</a>
+</div>
+
+{% endblock content %}
