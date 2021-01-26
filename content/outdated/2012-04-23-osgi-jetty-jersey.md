@@ -1,6 +1,7 @@
 +++
 title = "OSGi, Jersey and Jetty"
 date = 2012-04-23
+aliases = ["/java/osgi/jersey/jetty/2012/04/23/osgi-jetty-jersey.html"]
 +++
 
 *Since writing this, I do not recommend OSGi any more, just use [DropWizard](http://www.dropwizard.io)*

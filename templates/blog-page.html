@@ -1,22 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<div class="card m-5 has-background-light">
-    <div class="card-header">
-        <div class="container has-background-dark p-2">
-            <p class="title is-2 has-text-light">{{ page.title }}</p>
-            <p class="subtitle is-italic is-4 has-text-grey-light">{{ page.description }}</p>
-            {% if page.date %}
-            <p class="is-family-monospace is-7 has-text-light">Written on {{ page.date }}</p>
-            {% endif %}
+<section class="hero is-dark">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                {{ page.title }}
+            </p>
+            <p class="subtitle is-4 is-italic">
+                {{ page.description }}
+            </p>
+            <p class="is-family-monospace is-7 has-text-light">{{ page.date }}</p>
         </div>
     </div>
-    <div class="card-content">
-        <article class="content">
-            <p>{{ page.content | safe }}</p>
-        </article>
-    </div>
+</section>
+
+<div class="container is-max-desktop has-background-light box">
+    <article class="content">
+        <p>{{ page.content | safe }}</p>
+    </article>
     <section class="section">
         <div>
             <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ page.permalink }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"

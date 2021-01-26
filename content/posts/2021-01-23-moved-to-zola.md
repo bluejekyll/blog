@@ -8,4 +8,6 @@ description = "Finally got around to migrating to Zola"
 
 Moved to Zola from Jekyll. Will be so much easier to maintain, the promise of Rust. Zola supports aliasing, so all old blog posts should have their alias with redirect to the new location.
 
-I followed these instructions from [Zola](https://www.getzola.org/documentation/getting-started/overview/).
+I followed these instructions from [Zola](https://www.getzola.org/documentation/getting-started/overview/). Zola supports aliases for URLs, which have been set for the previous sites layout. Please send me a note if an old article is noticed to be misconfigured.
+
+The site was built with the [Bulma CSS](https://bulma.io) library, I'm sure in other hands it could be made to look better, but for a backend dev, I'm happy with how it's turned out.

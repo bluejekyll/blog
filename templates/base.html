@@ -9,76 +9,96 @@
     <link rel="stylesheet" href="{{ config.base_url }}/blog.css" />
     <link rel="stylesheet" href="{{ config.base_url }}/fontawesome-free-5.15.2-web/css/all.min.css" />
     <link rel="stylesheet" href="{{ config.base_url }}/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="{{ get_url(path='js/navbar.js') }}"></script>
+    <!-- <script src="{{ get_url(path='js/navbar.js') }}"
+        integrity="sha384-{{ get_file_hash(path='js/navbar.js', sha_type=384) }}"></script> -->
 </head>
 
-<body>
-    <nav class="navbar box" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item has-text-weight-bold is-family-monospace" href="{{ config.base_url }}">
-                {{ config.extra.title }}
-            </a>
-
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-data">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-
-        <div id="navbar-data" class="navbar-menu">
-            <div class="navbar-end">
-                <a class="navbar-item" href="{{ config.base_url }}/posts">
-                    <span class="icon-text">
-                        <span class="icon">
-                            <i class="fas fa-th-list"></i>
-                        </span>
-                        <span>Posts</span>
-                    </span>
+<body class="">
+    <nav class="navbar is-spaced is-dark" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="{{ config.base_url }}">
+                    {{ config.extra.title }}
                 </a>
-                <a class="navbar-item" href="{{ config.extra.github }}">
-                    <span class="icon-text">
-                        <span class="icon">
-                            <i class="fab fa-github"></i>
-                        </span>
-                        <span>Github</span>
-                    </span>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
                 </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="{{ config.base_url }}/posts">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fas fa-th-list"></i>
+                            </span>
+                            <span>Posts</span>
+                        </span>
+                    </a>
+                    <a class="navbar-item" href="{{ config.extra.github }}">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fab fa-github"></i>
+                            </span>
+                            <span>Github</span>
+                        </span>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
-    <section class="section">
-        {% block content %} {% endblock %}
-    </section>
+    {% block content %} {% endblock %}
     <footer class="footer">
-        <div class="content has-text-centered">
-            <p>{{ config.extra.description }}</p>
-            <p>
-            <h4 class="sidebar-title text-center">Contact</h4>
-            <a class="" href="{{ config.extra.github }}">
-                <span class="icon-text">
-                    <span class="icon">
-                        <i class="fab fa-github"></i>
-                    </span>
-                    <span>Github</span>
-                </span>
-            </a>
-            <a class="" href="{{ config.extra.twitter }}">
-                <span class="icon-text">
-                    <span class="icon">
-                        <i class="fab fa-twitter"></i>
-                    </span>
-                    <span>Twitter</span>
-                </span>
-            </a>
-            <a class="" href="{{ config.extra.linkedin }}">
-                <span class="icon-text">
-                    <span class="icon">
-                        <i class="fab fa-linkedin"></i>
-                    </span>
-                    <span>LinkedIn</span>
-                </span>
-            </a>
-            </p>
+        <div class="container is-max-desktop">
+            <div class="content  has-text-centered">
+                <p class="is-size-7 has-text-dark">{{ config.extra.description }}</p>
+                <h4 class="3sidebar-title text-center">Contact</h4>
+                <div>
+                    <a class="" href="mailto:{{ config.extra.email }}">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fas fa-paper-plane"></i>
+                            </span>
+                            <span>benjaminfry@me.com</span>
+                        </span>
+                    </a>
+                </div>
+                <div>
+                    <a class="" href="{{ config.extra.github }}">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fab fa-github"></i>
+                            </span>
+                            <span>Github</span>
+                        </span>
+                    </a>
+                </div>
+                <div>
+                    <a class="" href="{{ config.extra.twitter }}">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fab fa-twitter"></i>
+                            </span>
+                            <span>Twitter</span>
+                        </span>
+                    </a>
+                </div>
+                <div>
+                    <a class="" href="{{ config.extra.linkedin }}">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fab fa-linkedin"></i>
+                            </span>
+                            <span>LinkedIn</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
         </div>
     </footer>
 </body>

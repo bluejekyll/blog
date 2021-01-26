@@ -2,10 +2,18 @@
 
 {% block content %}
 {% set page = get_page(path="about.md") %}
-<section class="content">
-    <h2>
-        {{ page.title }}
-    </h2>
+
+<section class="hero is-dark">
+    <div class="hero-body">
+        <div class="container">
+            <p class="title is-2">
+                {{ page.title }}
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="container content has-background-light box">
     <p>
         {{ page.content | safe }}
     </p>

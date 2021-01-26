@@ -1,6 +1,7 @@
 +++
 title = "Compiling libvirt and continuing use of polkit"
 date = 2012-04-18
+aliases = ["/java/osgi/jersey/2012/04/18/compiling-libvirt-and-continuing-use-of-polkit.html"]
 +++
 
 *edit: most people will just want to Docker or similar these days*

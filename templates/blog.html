@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="title">
-    {{ section.title }}
-</h1>
-<section class="section">
-    {% for page in section.pages %}
 
-    <div class="card mb-5 has-background-light">
-        <div class="card-content">
-            <div class="media">
-                <div class="media-content">
-                    <p class="title is-4"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></p>
-                    <p class="subtitle is-7 is-family-monospace">Written on {{ page.date }}</p>
-                </div>
-            </div>
-
-            <div class="content is-italic">{{ page.description }}</div>
+<section class="hero is-dark">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                {{ section.title }}
+            </p>
         </div>
     </div>
-    {% endfor %}
 </section>
+
+{% for page in section.pages %}
+<section class="container is-max-desktop">
+    <div class="has-background-light box mb-5">
+        <div class="subtitle is-7 is-family-monospace">{{ page.date }}</div>
+        <div class="title is-4"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></div>
+        <div class="content is-italic">{{ page.description }}</div>
+    </div>
+</section>
+{% endfor %}
 {% endblock content %}
