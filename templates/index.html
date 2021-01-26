@@ -5,7 +5,7 @@
 
 <section class="hero is-dark">
     <div class="hero-body">
-        <div class="container">
+        <div class="container is-max-desktop">
             <p class="title is-2">
                 {{ page.title }}
             </p>
@@ -13,9 +13,11 @@
     </div>
 </section>
 
-<section class="container content has-background-light box">
-    <p>
-        {{ page.content | safe }}
-    </p>
+<section class="container is-max-desktop">
+    <div class="content has-background-light box">
+        <p>
+            {{ page.content | safe }}
+        </p>
+    </div>
 </section>
 {% endblock content %}
