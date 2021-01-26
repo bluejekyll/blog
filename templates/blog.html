@@ -1,12 +1,24 @@
-{% extends "with-sidebar.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <h1 class="title">
     {{ section.title }}
 </h1>
-<ul>
+<section class="section">
     {% for page in section.pages %}
-    <li>{{ page.date }} <a href="{{ page.permalink | safe }}">{{ page.title }}</a></li>
+
+    <div class="card mb-5 has-background-light">
+        <div class="card-content">
+            <div class="media">
+                <div class="media-content">
+                    <p class="title is-4"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></p>
+                    <p class="subtitle is-7 is-family-monospace">Written on {{ page.date }}</p>
+                </div>
+            </div>
+
+            <div class="content is-italic">{{ page.description }}</div>
+        </div>
+    </div>
     {% endfor %}
-</ul>
+</section>
 {% endblock content %}

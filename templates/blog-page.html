@@ -1,38 +1,53 @@
-{% extends "with-sidebar.html" %}
+{% extends "base.html" %}
 
 {% block content %}
-<article class="article">
-    <h1 class="article-title text-center">{{ page.title }}</h1>
-    <p class="article-meta text-center">{{ page.description }}</p>
-    {% if page.date %}
-    <p class="article-meta text-center">Written on {{ page.date }}</p>
-    {% endif %}
-    <p>{{ page.content | safe }}</p>
-</article>
-<div class="row">
-    {#
-    <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ page.permalink }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"
-        rel="nofollow" target="_blank" title="Share on Twitter">
-        <div class="paper-btn">
-            {% include "icons/icon-twitter.svg" %}
-        </div>
-    </a>
-    <a href="http://www.reddit.com/submit?url={{ site.url }}{{ c.baseurl }}{{ page.url }}&title={{ page.title }}"
-        rel="nofollow" target="_blank" title="Discuss on Reddit">
-        <div class="share-icon">
-            {% include icon-reddit.svg %}
-        </div>
-    </a>
-    <a style="color: #777; font-size: 2em;"
-        href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&t=%22+encodeURIComponent(document.title)"
-        title="Discuss on Hacker News">
-        <div class="share-icon share-icon-dark">
-            {% include icon-hackernews.svg %}
-        </div>
-    </a>
-    #}
-    <!-- <div class="share-item"><script type="text/javascript" src="//www.redditstatic.com/button/button3.js"></script></div>
-         <div class="share-item"><script type="text/javascript" src="//www.redditstatic.com/button/button1.js"></script></div>
 
+<div class="card m-5 has-background-light">
+    <div class="card-header">
+        <div class="container has-background-dark p-2">
+            <p class="title is-2 has-text-light">{{ page.title }}</p>
+            <p class="subtitle is-italic is-4 has-text-grey-light">{{ page.description }}</p>
+            {% if page.date %}
+            <p class="is-family-monospace is-7 has-text-light">Written on {{ page.date }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-content">
+        <article class="content">
+            <p>{{ page.content | safe }}</p>
+        </article>
+    </div>
+    <section class="section">
+        <div>
+            <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ page.permalink }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                <span class="icon-text button">
+                    <span class="icon">
+                        <i class="fab fa-twitter-square"></i>
+                    </span>
+                    <span>Tweet this</span>
+                </span>
+            </a>
+            <a href="http://www.reddit.com/submit?url={{ page.permalink }}&title={{ page.title }}" rel="nofollow"
+                target="_blank" title="Discuss on Reddit">
+                <span class="icon-text button">
+                    <span class="icon">
+                        <i class="fab fa-reddit-square"></i>
+                    </span>
+                    <span>Talk on Reddit</span>
+                </span>
+            </a>
+            <a href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&t=%22+encodeURIComponent(document.title)"
+                title="Discuss on Hacker News">
+                <span class="icon-text button">
+                    <span class="icon">
+                        <i class="fab fa-hacker-news-square"></i>
+                    </span>
+                    <span>Discuss on Hacker News</span>
+                </span>
+            </a>
+        </div>
+    </section>
 </div>
+
 {% endblock content %}

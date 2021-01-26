@@ -1,9 +1,10 @@
 +++
 title = "Moved to Zola"
 date = 2021-01-23
+description = "Finally got around to migrating to Zola"
 +++
 
-# 301 Moved Permanently
+## 301 Moved Permanently
 
 Moved to Zola from Jekyll. Will be so much easier to maintain, the promise of Rust. Zola supports aliasing, so all old blog posts should have their alias with redirect to the new location.
 
