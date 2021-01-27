@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ config.title }}</title>
     <link rel="stylesheet" href="{{ config.base_url }}/css/font-comic-neue.css" />
-    <link rel="stylesheet" href="{{ config.base_url }}/blog.css" />
+    <link rel="stylesheet" href="{{ config.base_url }}/darkmode.css" />
+    <link rel="stylesheet" href="{{ config.base_url }}/lightmode.css" />
     <link rel="stylesheet" href="{{ config.base_url }}/fontawesome-free-5.15.2-web/css/all.min.css" />
     <link rel="stylesheet" href="{{ config.base_url }}/fontawesome-free-5.15.2-web/css/brands.min.css" />
     <script src="{{ get_url(path='js/navbar.js') }}"></script>
@@ -15,7 +16,7 @@
 </head>
 
 <body class="">
-    <nav class="navbar is-spaced is-dark" role="navigation" aria-label="main navigation">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
         <div class="container is-max-desktop">
             <div class="navbar-brand">
                 <a class="navbar-item has-text-weight-bold is-family-monospace" href="{{ config.base_url }}">
@@ -63,7 +64,7 @@
                             <span class="icon">
                                 <i class="fas fa-paper-plane"></i>
                             </span>
-                            <span>benjaminfry@me.com</span>
+                            <span>{{ config.extra.email }}</span>
                         </span>
                     </a>
                 </div>

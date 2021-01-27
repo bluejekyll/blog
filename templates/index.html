@@ -3,7 +3,7 @@
 {% block content %}
 {% set page = get_page(path="about.md") %}
 
-<section class="hero is-dark">
+<section class="hero mb-5">
     <div class="hero-body">
         <div class="container is-max-desktop">
             <p class="title is-2">
@@ -14,7 +14,8 @@
 </section>
 
 <section class="container is-max-desktop">
-    <div class="content has-background-light box">
+    <!-- <div class="content has-background-light box"> -->
+    <div class="content box mb-5">
         <p>
             {{ page.content | safe }}
         </p>

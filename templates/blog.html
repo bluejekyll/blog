@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<section class="hero is-dark">
+<section class="hero mb-5">
     <div class="hero-body">
         <div class="container is-max-desktop">
             <p class="title is-2">
@@ -12,13 +12,16 @@
     </div>
 </section>
 
-{% for page in section.pages %}
 <section class="container is-max-desktop">
-    <div class="has-background-light box mb-5">
-        <div class="subtitle is-7 is-family-monospace">{{ page.date }}</div>
-        <div class="title is-4"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></div>
-        <div class="content is-italic">{{ page.description }}</div>
+    <!-- <div class="has-background-light box mb-5"> -->
+    <div class="box mb-5">
+        {% for page in section.pages %}
+        <div class="section">
+            <div class="subtitle is-7 is-family-monospace">{{ page.date }}</div>
+            <div class="title is-4"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></div>
+            <div class="subtitle content is-italic">{{ page.description }}</div>
+        </div>
+        {% endfor %}
     </div>
 </section>
-{% endfor %}
 {% endblock content %}
