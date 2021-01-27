@@ -15,12 +15,14 @@ highlight_code = true
 # Themes available here: https://www.getzola.org/documentation/getting-started/configuration/#syntax-highlighting
 highlight_theme = "ayu-dark"
 
+render_emoji = true
+
 [extra]
 # Put all your custom variables here
 
 title = "let blueJEKYLL=benjaminFRY;"
 description = "A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C/C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans."
 email = "benjaminfry@me.com"
-twitter = "https://twitter.com/benj_fry"
-github = "https://github.com/bluejekyll"
-linkedin = "https://www.linkedin.com/in/benjamin-fry-8b83072/"
+twitter = "benj_fry"
+github = "bluejekyll"
+linkedin = "benjamin-fry-8b83072"

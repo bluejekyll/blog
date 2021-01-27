@@ -19,9 +19,9 @@
     <article class="content">
         <p>{{ page.content | safe }}</p>
     </article>
-    <section class="section">
+    <section class="section p-1">
         <div>
-            <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ page.permalink }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"
+            <a href="https://twitter.com/intent/tweet?text={{ page.title | safe }}&url={{ page.permalink | safe }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"
                 rel="nofollow" target="_blank" title="Share on Twitter">
                 <span class="icon-text button">
                     <span class="icon">
@@ -30,8 +30,8 @@
                     <span>Tweet this</span>
                 </span>
             </a>
-            <a href="http://www.reddit.com/submit?url={{ page.permalink }}&title={{ page.title }}" rel="nofollow"
-                target="_blank" title="Discuss on Reddit">
+            <a href="http://www.reddit.com/submit?url={{ page.permalink | safe }}&title={{ page.title | safe }}"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
                 <span class="icon-text button">
                     <span class="icon">
                         <i class="fab fa-reddit-square"></i>
@@ -39,7 +39,7 @@
                     <span>Talk on Reddit</span>
                 </span>
             </a>
-            <a href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&t=%22+encodeURIComponent(document.title)"
+            <a href="https://news.ycombinator.com/submitlink?u={{ page.permalink | safe }}&t={{ page.title | safe }}"
                 title="Discuss on Hacker News">
                 <span class="icon-text button">
                     <span class="icon">
