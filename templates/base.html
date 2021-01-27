@@ -20,7 +20,7 @@
         <div class="container is-max-desktop">
             <div class="navbar-brand">
                 <a class="navbar-item has-text-weight-bold is-family-monospace" href="{{ config.base_url }}">
-                    {{ config.extra.title }}
+                    {{ config.title }}
                 </a>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
                     data-target="navbar-data">
@@ -55,49 +55,52 @@
     {% block content %} {% endblock %}
     <footer class="footer">
         <div class="container is-max-desktop">
-            <div class="content  has-text-centered">
-                <p class="is-size-7 has-text-dark">{{ config.extra.description }}</p>
-                <h4 class="3sidebar-title text-center">Contact</h4>
-                <div>
-                    <a class="" href="mailto:{{ config.extra.email }}">
-                        <span class="icon-text">
-                            <span class="icon">
-                                <i class="fas fa-paper-plane"></i>
+            <div class="content has-text-centered">
+                <p class="is-size-7">{{ config.extra.description }}</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:{{ config.extra.email }}">
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                </span>
+                                <span>{{ config.extra.email }}</span>
                             </span>
-                            <span>{{ config.extra.email }}</span>
-                        </span>
-                    </a>
-                </div>
-                <div>
-                    <a class="" href="https://github.com/{{ config.extra.github }}">
-                        <span class="icon-text">
-                            <span class="icon">
-                                <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/{{ config.extra.github }}">
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <i class="fab fa-github"></i>
+                                </span>
+                                <span>Github</span>
                             </span>
-                            <span>Github</span>
-                        </span>
-                    </a>
-                </div>
-                <div>
-                    <a class="" href="https://twitter.com/{{ config.extra.twitter }}">
-                        <span class="icon-text">
-                            <span class="icon">
-                                <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/{{ config.extra.twitter }}">
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <i class="fab fa-twitter"></i>
+                                </span>
+                                <span>Twitter</span>
                             </span>
-                            <span>Twitter</span>
-                        </span>
-                    </a>
-                </div>
-                <div>
-                    <a class="" href="https://www.linkedin.com/in/{{ config.extra.linkedin }}">
-                        <span class="icon-text">
-                            <span class="icon">
-                                <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/{{ config.extra.linkedin }}">
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <i class="fab fa-linkedin"></i>
+                                </span>
+                                <span>LinkedIn</span>
                             </span>
-                            <span>LinkedIn</span>
-                        </span>
-                    </a>
-                </div>
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-{{ now() | date(format="%Y") }} {{ config.extra.copyright }}</p>
             </div>
         </div>
         </div>

@@ -1,5 +1,6 @@
 # The URL the site will be built for
 base_url = "https://bluejekyll.github.io/blog"
+title = "let blueJEKYLL=benjaminFRY;"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
@@ -20,7 +21,7 @@ render_emoji = true
 [extra]
 # Put all your custom variables here
 
-title = "let blueJEKYLL=benjaminFRY;"
+copyright = "Benjamin Fry a.k.a. bluejekyll"
 description = "A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C/C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans."
 email = "benjaminfry@me.com"
 twitter = "benj_fry"

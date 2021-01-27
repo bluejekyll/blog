@@ -1,8 +1,7 @@
 /* blog specific css */
 $family-sans-serif: "Comic Sans MS", sans-serif
 
-// $family-sans-serif: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI",
-//   "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+// $family-sans-serif: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 // $family-monospace: "Inconsolata", "Consolas", "Monaco", monospace
 
 ////////////////////////////////////////////////
@@ -54,7 +53,7 @@ $text-light: lighten($text, 10)
 $text-strong: darken($text, 5)
 
 $box-color: $text
-$box-background-color: $grey-dark
+$box-background-color: $grey-darker
 $box-shadow: none
 
 $link: $turquoise
@@ -119,11 +118,13 @@ $progress-bar-background-color: $grey-dark
 
 $panel-heading-background-color: $grey-dark
 
-/* imports of external sass libraries */
+$code: lighten($red, 15) !default
+$code-background: lighten($box-background-color, 5) !default
+
+////////////////////
+// BULMA
 @import "bulma-0.9.1/bulma/_bulma.sass"
 
-article pre
-    @extend .box
-
-article
-    @extend .is-size-5
+////////////////////
+// Blog overrides
+@import "_overrides.sass"

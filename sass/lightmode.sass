@@ -20,8 +20,11 @@
     $purple: #8e44ad
     $red: #e74c3c
     $white-ter: #ecf0f1
+    $white-bis: lighten($white-ter, 3)
     $primary: #34495e !default
     $yellow-invert: #fff
+
+    $background: $white-ter
 
     $radius-small: 3px
     $radius: 0.4em
@@ -42,7 +45,7 @@
     $text-strong: darken($primary, 5)
 
     $box-color: $text
-    $box-background-color: $white-ter
+    $box-background-color: $white-bis
     $box-shadow: none
 
     $link: $turquoise
@@ -74,14 +77,13 @@
 
     $control-height: 2.5em
 
+    $code: darken($red, 15%) !default
+    $code-background: lighten($box-background-color, 5) !default
+
     ////////////////////
     // BULMA
     @import "bulma-0.9.1/bulma/_bulma.sass"
 
     ////////////////////
-    // blog overrides
-    article pre
-        @extend .box
-
-    article
-        @extend .is-size-5
+    // Blog overrides
+    @import "_overrides.sass"
