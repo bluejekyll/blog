@@ -9,7 +9,7 @@ jobs:
   build:
     name: shalzz/zola-deploy-action
     environment:
-      name: gh_pages
+      name: gh-pages
     runs-on: ubuntu-latest
     steps:
     # Checkout
