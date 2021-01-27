@@ -6,5 +6,5 @@ I am a Software Engineer. I've enjoyed it for 20+ years, and plan to keep on hac
 
 I don't post often; I post whenever I think I have something interesting to share.
 
-- [Posts](/posts) - All interesting posts
-- [Outdated](/outdated) - Probably not useful anymore
+- [Posts](@/posts/_index.md) - All interesting posts
+- [Outdated](@/outdated/_index.md) - Probably not useful anymore

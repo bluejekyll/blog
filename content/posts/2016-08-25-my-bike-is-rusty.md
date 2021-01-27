@@ -17,7 +17,7 @@ Imagine this, you're riding along on your bike into work, a dude rolls up next y
 If he could have kept up with me, and we had more time, I would have told him what is more important than dropouts.
  Here is a picture of my bike:
 
-![Full bike]({{ site.url }}{{ site.baseurl }}/assets/full-bike.jpg)
+![Full bike](@/assets/full-bike.jpg)
 
 The first thing you will notice is that it's a Falcon, based on some
  [photos I found](http://www.classicrendezvous.com/British_isles/Falcon/Falcon_Jerry_Moos.htm)
@@ -80,7 +80,7 @@ While on pedals, I like the confidence I get with straps and clips. On my road b
 
 Here is a closer picture of that area:
 
-![Rear hub]({{ site.url }}{{ site.baseurl }}/assets/bike-hub.jpg)
+![Rear hub](@/assets/bike-hub.jpg)
 
 I initially had a cheap flip-flop hub. In theory flip-flops allow you to choose between the free-wheel and the fixed-wheel
  sides. I learned two things with this: first, don't buy weak stuff for your bike; second,
