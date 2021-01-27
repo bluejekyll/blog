@@ -80,7 +80,7 @@ While on pedals, I like the confidence I get with straps and clips. On my road b
 
 Here is a closer picture of that area:
 
-![Rear hub](@/assets/bike-hub.jpg)
+![Rear hub]({{ config.base_url }}/assets/bike-hub.jpg)
 
 I initially had a cheap flip-flop hub. In theory flip-flops allow you to choose between the free-wheel and the fixed-wheel
  sides. I learned two things with this: first, don't buy weak stuff for your bike; second,
