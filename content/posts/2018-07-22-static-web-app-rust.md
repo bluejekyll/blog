@@ -25,11 +25,11 @@ I had a few goals:
 
 Here's what the chart itself will end up generating (all names are fake):
 
-![Chore Chart](/blog/assets/web-app/chart.png)
+![Chore Chart](chart.png)
 
 Initially this was a static page. I implemented it with a statically generated list of people and jobs (the jobs and number of days are still static). I decided the first thing we'd make dynamic would be the list of people associated to the jobs, for that we'd need another form that will look like this:
 
-![Edit People](/blog/assets/web-app/edit-people.png)
+![Edit People](edit-people.png)
 
 As I'm no expert in the area, I decided not to fret too much if I couldn't get things to look right, again, if you're going to be bothered with fonts or look, you want to go elsewhere. Just for reference, the look/feel I was going for was a legal pad with a marker.
 

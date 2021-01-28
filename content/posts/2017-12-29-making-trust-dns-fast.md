@@ -57,7 +57,7 @@ That's significantly better, and brings us within 10µs of BIND9. That was a sad
 
 Now that we're viewing the correct binary, we can actually start looking at how to make it faster. Here's a screenshot of the `Instruments` capture, which has a lot of options. I've narrowed the view to only the time where the test was running.
 
-![Instruments]({{ site.url }}{{ site.baseurl }}/assets/profile-trust-dns.png)
+![Instruments](profile-trust-dns.png)
 
 I've underlined some things to draw your attention to them. You'll notice a few things. First on the left is the time spent in different calls. There are some that I avoided in this view. For example, the time spent in I/O. Most of the time is actually spent in `UdpSocket::recv_from` and `UdpSocket::send_to`, which we expect, this is mainly a network bound process after all. The other time I'm ignoring is the time spent in `env_logger`, as I see logging as important for monitoring the process.
 

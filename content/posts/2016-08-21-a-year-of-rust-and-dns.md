@@ -263,7 +263,7 @@ Did you catch that? No one implemented the spec properly, so now the spec is
 
 Anyway, back to the deceivingly easy bit; perhaps a picture will help:
 
-![Trust-DNS work history]({{ site.url }}{{ site.baseurl }}/assets/trust-dns-work.png)
+![Trust-DNS work history](trust-dns-work.png)
 
 At *blindmans peak*, I was riding high. Loving Rust, nothing could stop me. I
  had fun adding in support for things like the async io library `mio`
