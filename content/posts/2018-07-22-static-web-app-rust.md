@@ -3,6 +3,9 @@ title = "A static web app in Rust"
 date = 2018-07-22
 description = "A three day tour of Yew and WASM with Rust"
 aliases = ["/rust/2018/07/22/static-web-app-rust.html"]
+
+[taxonomies]
+topics=["programming", "rust"]
 +++
 
 I am not a frontend engineer. I don't generally have the patience for figuring out how to make something look the way I want; on top of that, all web work basically requires a knowledge of Javascript. I have no qualms in saying that I don't enjoy writing Javascript. This has basically kept me out of the web frontend space, even on hobby projects. But now I can target the web with my favorite language, Rust and deliver WASM. This post is about a minor little adventure in learning some of the tools for doing this.

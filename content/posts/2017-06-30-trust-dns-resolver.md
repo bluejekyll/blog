@@ -3,6 +3,9 @@ title = "The *new* TRust-DNS Resolver"
 date = 2017-06-30
 description = "Fun with the new TRust-DNS Resolver, and generally an update on the progress of the project"
 aliases = ["/rust/2017/06/30/trust-dns-resolver.html"]
+
+[taxonomies]
+topics=["programming", "rust", "dns"]
 +++
 
 I released the initial version of the TRust-DNS Resolver recently. Version 0.1.0, the version is offset from that of the TRust-DNS library, which is up to 0.10.4 at the time of this writing. When I started this project my main goal was to make a DNS server which was easy to manage, and a client which could be used to manage it in a secure way. As I've marched forward in implementing all of the features I've wanted, it started becoming clear that people are more interested in the Client than the Server. It really struck me when I got issue [#109](https://github.com/bluejekyll/trust-dns/issues/109), "use the system's dns conf, e.g. /etc/resolv.conf"; of course what everyone really wants to use is a simple query interface to get IP addresses. The rest of this post is about building this initial version.

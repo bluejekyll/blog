@@ -3,6 +3,8 @@ title = "My bike is rusty"
 date = 2016-08-25
 description = "This post is written for an individual who tried to school me about my fixie today"
 aliases = ["/bikes/2016/08/25/my-bike-is-rusty.html"]
+[taxonomies]
+topics = ["cycling"]
 +++
 
 Imagine this, you're riding along on your bike into work, a dude rolls up next you on his fixie, and says,

@@ -3,6 +3,9 @@ title = "Branchless #Rust2018"
 date = 2018-01-10
 description = "About an opportunity for Rust, as part of the #Rust2018 request"
 aliases = ["/rust/2018/01/10/branchless-rust.html"]
+
+[taxonomies]
+topics=["programming", "rust"]
 +++
 
 Recently there were two new issues discovered with CPUs, Meltdown (Intel) and Spectre (all "fast" CPUs?). Both of which basically exploit speculative branch prediction to gain access to memory via what's known as a side-channel attack. There was a Webkit [response](https://webkit.org/blog/8048/what-spectre-and-meltdown-mean-for-webkit/) to this in which they mention they will start utilizing "Branchless Security Checks". A [request](https://blog.rust-lang.org/2018/01/03/new-years-rust-a-call-for-community-blogposts.html) was put out for the Rust community's aspirations of the language in 2018, this post is in that spirit. For me, I would love to see the language continue its explosive growth. Branchless code is potentially an accelerant toward that end.

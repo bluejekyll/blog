@@ -3,6 +3,9 @@ title = "A year of Rust and DNS"
 date = 2016-08-21
 description = "This post is not meant to teach you Rust or DNS. It's more of a journal about some things I've found interesting while developing a DNS client and server in Rust"
 aliases = ["/rust/dns/2016/08/21/a-year-of-rust-and-dns.html"]
+
+[taxonomies]
+topics=["programming", "rust", "dns"]
 +++
 
 Approximately a year and a half ago I discovered possibly the greatest

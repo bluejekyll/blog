@@ -1,0 +1,33 @@
+{% macro topic(name) %}
+
+{% if name == "rust" %}
+{% set icon="fab fa-rust" %}
+
+{% elif name == "java" %}
+{% set icon="fab fa-java" %}
+
+{% elif name == "cycling" %}
+{% set icon="fas fa-bicycle" %}
+
+{% elif name == "programming" %}
+{% set icon="fas fa-laptop-code" %}
+
+{% elif name == "writing" %}
+{% set icon="fas fa-pencil-alt" %}
+
+{% elif name == "dns" %}
+{% set icon="fas fa-network-wired" %}
+
+{% elif name == "postgres" %}
+{% set icon="fas fa-database" %}
+
+{% else %}
+{{ throw(message="no icon for topic: " ~ name) }}
+
+{% endif %}
+
+<span class="icon tooltip">
+    <i class="{{ icon }}"></i>
+    <span class="tooltip-text">{{ name }}</span>
+</span>
+{% endmacro topic %}

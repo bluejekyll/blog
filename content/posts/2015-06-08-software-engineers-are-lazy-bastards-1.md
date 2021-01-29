@@ -3,6 +3,9 @@ title = "Software Engineers are lazy bastards, pt. 1"
 date = 2015-06-08
 description = "I decided to make this a three part piece. This one is about components and modularization, the next about testing, and then I will have a final one on development and operations."
 aliases = ["/dev/software/programming/testing/2015/06/08/software-engineers-are-lazy-bastards-1.html"]
+
+[taxonomies]
+topics=["programming"]
 +++
 
 Not too long ago, 2000 let's say, it was common for developers of software to be so lazy that they didn't even know if their software worked. They wouldn't write unit tests, they wouldn't even bother testing their code. They would throw it over the fence to quality assurance engineers and expect them to say, "Oh my god this is the greatest code ever, and it works perfectly". With the exception of the most simple program, this has never actually been the case, hell even [Grace Murray Hopper](http://en.wikipedia.org/wiki/Grace_Hopper) (go Brewers!) couldn't account for literal bugs in the system. This has often caused great angst among real engineers out there and even today people in the Software industry continue to say that Software engineering [is not "Real Engineering"](http://elegantcode.com/2011/06/22/why-software-development-will-never-be-engineering/). This is too easy of a copout and let's people off the hook for designing bad software, or using bad techniques.

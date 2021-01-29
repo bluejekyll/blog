@@ -3,6 +3,9 @@ title = "Await Trust-DNS no longer"
 date = 2019-12-21
 description = "A review of preparing Trust-DNS for async/await in Rust"
 aliases = ["/rust/2019/12/21/await-trust-dns.html"]
+
+[taxonomies]
+topics=["programming", "rust", "dns"]
 +++
 
 What started as a brief sojourn to learn the new `std::future::Future` in Rust 1.36, slowly became a journey to fully adopt the new async/await syntax in Rust. The plan had been to merely update to the new Future API, trying to keep the minimum Rust version as low as possible. This was ideally to keep the libraries compatible with more Rust users, but it became apparent that this wasn't really feasible. For a number of reasons, primarily, all of the underlying libraries Trust-DNS relies upon were moving in this direction, which made the task a fools errand. Additionally, adopting async/await simplified much of the code. This post is the announcement of the 0.18 release, representing a few months of work.

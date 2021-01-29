@@ -3,6 +3,9 @@ title = "Rust and the most elegant FSM"
 date = 2015-08-13
 description = "Finite state machines should be a foundation upon which Software Engineers build complex systems. In this post I want to show how Rust's enum type supports building FSM's in a very simple and elegant manner."
 aliases = ["/fsm/rust/2015/08/13/rust-and-the-most-elegant-fsm.html"]
+
+[taxonomies]
+topics=["programming", "rust"]
 +++
 
 # FSM, what?

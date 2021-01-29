@@ -3,6 +3,9 @@ title = "Taking TRust-DNS IntoFuture"
 date = 2016-12-03
 description = "Written to explain why I paused feature development of TRust-DNS to focus on implementing futures-rs and tokio-rs support"
 aliases = ["/rust/2016/12/03/trust-dns-into-future.html"]
+
+[taxonomies]
+topics=["programming", "rust", "dns"]
 +++
 
 If you read my last post on TRust-DNS, [A year of Rust and DNS](http://bluejekyll.github.io/blog/rust/dns/2016/08/21/a-year-of-rust-and-dns.html),

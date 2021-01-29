@@ -3,6 +3,9 @@ title = "Software Engineers are lazy bastards, pt. 2"
 date = 2015-06-12
 description = "I decided to make this a three part piece. The first one is here if you're interested in reading it. It concerns componentization and following good practices when building software as an argument for Software Engineering as a legitimate Engineering field. In this post I'm going to cover proper testing that all Software Engineers should be following. The final post is on DevOps"
 aliases = ["/dev/software/programming/testing/2015/06/12/software-engineers-are-lazy-bastards-2.html"]
+
+[taxonomies]
+topics=["programming"]
 +++
 
 Let me start off by explaining why I am calling Software Engineers lazy. This stems from the general principle that people are going to generally do the least amount of work possible to accomplish a given task. Software Engineers are no different; Computer Scientists on the other hand are perfectionists always looking for the most elegant solution to a problem. Perhaps even creating a new theorem or axiom, it's my job as a Software Engineer to understand and utilize these new advancements (and perhaps one day I will create some, I did get a [degree in Computer Science](http://computerscience.vassar.edu/) after all). Like the [CAP theorem](http://en.wikipedia.org/wiki/CAP_theorem) or [Raft](https://raftconsensus.github.io/) consensus protocol, it's definitely my responsibility to understand the theories behind these and be able to implement them if necessary, but I look at these as things like `I` beams in construction that can be bought off the shelf. My job as a Software Engineer is to take disparate pieces of technology and put them together to build a larger system. But why are we inherently lazy? Corners will be cut in order to ship software, systems will have components that aren't complete, because we have limited time and money which constrains our abilities to be perfect.

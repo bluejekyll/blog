@@ -1,12 +1,6 @@
-PAPER_CSS_VER := v1.8.2
 BULMA_CSS_VER := 0.9.1
 STATIC_CSS = static/css
 SASS = sass
-
-${STATIC_CSS}/paper.css:
-	mkdir -p ${STATIC_CSS}
-	curl -L -o ${STATIC_CSS}/paper.css https://github.com/rhyneav/papercss/releases/download/${PAPER_CSS_VER}/paper.css 
-	curl -L -o ${STATIC_CSS}/paper.min.css https://github.com/rhyneav/papercss/releases/download/${PAPER_CSS_VER}/paper.min.css
 
 ${SASS}/bulma-${BULMA_CSS_VER}:
 	mkdir -p ${SASS}
@@ -16,5 +10,13 @@ ${SASS}/bulma-${BULMA_CSS_VER}:
 	bash rename_bulma_sass.sh ${SASS}/bulma-${BULMA_CSS_VER}
 
 .PHONY: build
-build: ${STATIC_CSS}/paper.css ${SASS}/bulma-${BULMA_CSS_VER}
+build: ${SASS}/bulma-${BULMA_CSS_VER}
 	zola build
+
+.PHONY: clean
+clean:
+	rm -r public
+
+.PHONY: serve
+serve:
+	zola serve

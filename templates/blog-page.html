@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros/icons.html" as icons %}
 
 {% block content %}
 <section class="hero mb-5">
@@ -10,9 +11,16 @@
             <p class="subtitle is-4 is-italic">
                 {{ page.description }}
             </p>
-            <a href="{{ page.permalink }}">
-                <p class="is-family-monospace is-7">{{ page.date }}</p>
-            </a>
+            <div class="is-7">
+                <a href="{{ page.permalink }}">
+                    <span class="is-family-monospace">{{ page.date }}</span>
+                </a>
+                {% if page.taxonomies is containing("topics") %}
+                {% for name in page.taxonomies["topics"] %}
+                <span>{{ icons::topic(name=name) }}</span>
+                {% endfor %}
+                {% endif %}
+            </div>
         </div>
     </div>
 </section>

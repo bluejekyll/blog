@@ -2,6 +2,9 @@
 title = "Rust from a Java dev"
 date = 2015-05-14
 aliases = ["/java/rust/2015/05/14/rust-from-a-java-dev.html"]
+
+[taxonomies]
+topics=["java", "rust", "programming"]
 +++
 
 # A little background

@@ -1,0 +1,17 @@
+{% import "macros/icons.html" as icons %}
+{% macro preview(title, date, permalink, description, taxonomies) %}
+
+<div class="section">
+    <div class="subtitle is-7">
+        <span class="is-family-monospace">{{ date }}</span>
+        {% if taxonomies is containing("topics") %}
+        {% for name in taxonomies["topics"] %}
+        <span>{{ icons::topic(name=name) }}</span>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class="title is-4"><a href="{{ permalink | safe }}">{{ title }}</a></div>
+    <div class="subtitle content is-italic">{{ description }}</div>
+</div>
+
+{% endmacro preview %}

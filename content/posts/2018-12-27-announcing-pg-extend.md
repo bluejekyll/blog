@@ -3,6 +3,9 @@ title = "Easy Postgres extensions in Rust with pg-extend-rs"
 date = 2018-12-27
 description = "A project to make Postgres extensions in Rust easy, you might learn how to use macro_rules, attribute macros, allocators and some FFI in this post"
 aliases = ["/rust/2018/12/27/announcing-pg-extend.html"]
+
+[taxonomies]
+topics=["programming", "rust", "postgres"]
 +++
 
 There were a few things that happened this year that got me excited for the possibilities of *stable* Rust entering new spaces. They all come in the form of APIs that have become stabilized with a lot of effort from all of the developers contributing to the language. I wish I could say I helped with that effort, I do get to exploit all of that effort in this new project. I want to express my thanks and greatest esteem towards the people who continue to push the language forward, making it more useful and more pleasurable to use. For me to be able to write this, the stabilization of procedural macros, custom allocators, and panic handlers were all necessary. Each of these was stabilized over the last year, thank you!

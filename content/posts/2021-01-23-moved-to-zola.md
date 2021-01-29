@@ -2,6 +2,9 @@
 title = "Moved to Zola"
 date = 2021-01-23
 description = "Finally got around to migrating to Zola"
+
+[taxonomies]
+topics=["writing"]
 +++
 
 ## 301 Moved Permanently

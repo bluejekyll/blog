@@ -3,6 +3,9 @@ title = "Software Engineers are lazy bastards, pt. 3"
 date = 2015-06-23
 description = "I decided to make this a three part piece. The first one concerns componentization and following good practices when building software as an argument for Software Engineering as a legitimate Engineering field. The second covers proper testing that all Software Engineers should be following. In this post I'll talk about Development and Operations, i.e. DevOps."
 aliases = ["/dev/software/programming/testing/2015/06/23/software-engineers-are-lazy-bastards-20.html"]
+
+[taxonomies]
+topics=["programming"]
 +++
 
 Ok so DevOps became a thing. If I understand it properly, which I'm sure lots of people will say I do not, it's the idea that proper development practices are brought to bear on operations problems. This means things like using source code management systems (Git), having code reviews, following a process around work that needs to be done. These are all great things, and it's way better than way that people did this before. But here's the irony, and something I find kinda sad, computers and software were built to automate things. They were built to run factories, to make it easier to compute flight paths, to help with order fulfillment; I'm not going to list out all the places they help, I hope you get the point. So the irony is that DevOps is needed to help automate the systems that we (Software/Hardware/Computer People) built to help automate away other issues. I can't be the only one who sees this as ironically sad. To really make a point here, I'm going to start with an analogy, trains.

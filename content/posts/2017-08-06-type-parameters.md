@@ -3,6 +3,9 @@ title = "They're not Generics; they're TypeParameters"
 date = 2017-08-06
 description = "A story about grokking Generics in Rust"
 aliases = ["/rust/2017/08/06/type-parameters.html"]
+
+[taxonomies]
+topics=["programming", "rust"]
 +++
 
 A while back I was writing some Rust, and the compiler yelled at me, it's such a perfectionist. Luckily it also gave me a very helpful hint about how to fix the problem. I copy-and-pasted the hint into my code (yeah I know, you just lost some respect for me), and promised myself to go back and understand why later. I finally had to write some new code that used these interfaces and so I got to revisit the error message and why it was necessary. Before we get into that argument with the compiler, it might be helpful to walk down memory lane with Generics.

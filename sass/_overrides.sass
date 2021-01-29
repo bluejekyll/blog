@@ -11,3 +11,22 @@ code
 
 img
     border-radius: $radius-small
+
+.tooltip
+    position: relative
+    display: inline-block
+
+    & .tooltip-text
+        @extend .tag
+        visibility: hidden
+        background-color: $code-background
+        color: $code
+
+        /* Position the tooltip */
+        position: absolute
+        left: 10px
+        top: -20px
+        z-index: 1
+
+    &:hover .tooltip-text
+        visibility: visible

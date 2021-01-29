@@ -1,6 +1,9 @@
 +++
 title = "Moved to Github.io"
 date = 2016-08-17
+
+[taxonomies]
+topics=["writing"]
 +++
 
 # 301 Moved Permanently

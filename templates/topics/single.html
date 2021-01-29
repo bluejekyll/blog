@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros/icons.html" as icons %}
 {% import "macros/post.html" as post %}
 
 {% block content %}
@@ -7,16 +8,16 @@
     <div class="hero-body">
         <div class="container is-max-desktop">
             <p class="title is-2">
-                {{ section.title }}
+                <span>{{ taxonomy.name }}:{{ term.name }}</span><span class="m-1">{{ icons::topic(name=term.name)
+                    }}</span>
             </p>
         </div>
     </div>
 </section>
 
 <section class="container is-max-desktop">
-    <!-- <div class="has-background-light box mb-5"> -->
     <div class="box mb-5">
-        {% for page in section.pages %}
+        {% for page in term.pages %}
 
         {{ post::preview(title=page.title, date=page.date, permalink=page.permalink, description=page.description,
         taxonomies=page.taxonomies) }}

@@ -3,6 +3,9 @@ title = "Making TRust-DNS faster than BIND9"
 date = 2017-12-29
 description = "Written to explain what I've done to get from 400µs to less that 100µs"
 aliases = ["/rust/2017/12/29/making-trust-dns-fast.html"]
+
+[taxonomies]
+topics=["programming", "rust", "dns"]
 +++
 
 When I wrote [Taking TRust-DNS IntoFuture](https://bluejekyll.github.io/blog/rust/2016/12/03/trust-dns-into-future.html) regarding the initial implementation of TRust-DNS over the [Tokio](https://tokio.rs/) async library, one of the first questions I was asked (by one of the maintainers): "is it the fastest implementation out there?" Sadly the answer was no, not by a long shot. TRust-DNS was 400µs and BIND9 100µs (as measured on my getting older laptop, YMMV). 300µs is a miniscule amount of time to people, but to computers that's a lot of time. Given that inside datacenters a full round trip is [500µs]( https://gist.github.com/jboner/2841832), spending an extra 300µs on the node serving up the IP address of the service you're trying to connect to is not insubstantial. Shouldn't we be able to beat BIND? Of course we should. The rest of this post is going to document the path to get there, and some that I tried but didn't follow. As my knowledge of Rust has grown, it seemed like a good time to try some new things. It's an arbitrary goal, but it's a fun one.

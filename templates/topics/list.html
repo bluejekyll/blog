@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "macros/icons.html" as icons %}
+
+{% block content %}
+
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                {{ taxonomy.name }}
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="container is-max-desktop">
+    <div class="box mb-5 is-flex is-flex-direction-row is-flex-wrap-wrap">
+        {% for term in terms %}
+        {% set count = term.pages | length %}
+        <div class="block m-6">
+            <div class="title is-4">{{ term.name | capitalize }}<a href="{{ term.permalink | safe }}"><span>
+                        {{ icons::topic(name=term.name) }}</span><span>{{ count }}</span></a></div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock content %}

@@ -3,6 +3,9 @@ title = "Multicasting in Rust"
 date =  2018-03-18
 description = "A brief post to help others multicast in Rust"
 aliases = ["/rust/2018/03/18/multicasting-in-rust.html"]
+
+[taxonomies]
+topics=["programming", "rust"]
 +++
 
 In 2000 at a small startup I joined after college, I had discovered multicast and realized it was an amazing network tool. A service I had built made it possible to discover CORBA services on the network and link them together. This was just before zero-conf started becoming popular through, Apple's Bonjour, mDNS, LLMNR, and many other technologies that were being standardized. It was a lot of fun, and ever since working with it I have always wanted to use it for more things.
