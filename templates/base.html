@@ -1,3 +1,5 @@
+{% import "macros/icons.html" as icons %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -45,20 +47,13 @@
             <div id="navbar-data" class="navbar-menu">
                 <div class="navbar-end">
                     <a class="navbar-item" href="{{ config.base_url }}/posts">
-                        <span class="icon-text">
-                            <span class="icon">
-                                <i class="fas fa-th-list"></i>
-                            </span>
-                            <span>Posts</span>
-                        </span>
+                        {{ icons::inline(fa_class="fas fa-th-list", label="Posts") }}
+                    </a>
+                    <a class="navbar-item" href="{{ config.base_url }}/topics">
+                        {{ icons::inline(fa_class="fab fa-pagelines", label="Topics") }}
                     </a>
                     <a class="navbar-item" href="{{ config.extra.github }}">
-                        <span class="icon-text">
-                            <span class="icon">
-                                <i class="fab fa-github"></i>
-                            </span>
-                            <span>Github</span>
-                        </span>
+                        {{ icons::inline(fa_class="fab fa-github", label="Github") }}
                     </a>
                 </div>
             </div>
@@ -73,42 +68,22 @@
                     <h4 class="3sidebar-title text-center">Contact</h4>
                     <div>
                         <a class="" href="mailto:{{ config.extra.email }}">
-                            <span class="icon-text">
-                                <span class="icon">
-                                    <i class="fas fa-paper-plane"></i>
-                                </span>
-                                <span>{{ config.extra.email }}</span>
-                            </span>
+                            {{ icons::inline(fa_class="fas fa-paper-plane", label=config.extra.email) }}
                         </a>
                     </div>
                     <div>
                         <a class="" href="https://github.com/{{ config.extra.github }}">
-                            <span class="icon-text">
-                                <span class="icon">
-                                    <i class="fab fa-github"></i>
-                                </span>
-                                <span>Github</span>
-                            </span>
+                            {{ icons::inline(fa_class="fab fa-github", label="Github") }}
                         </a>
                     </div>
                     <div>
                         <a class="" href="https://twitter.com/{{ config.extra.twitter }}">
-                            <span class="icon-text">
-                                <span class="icon">
-                                    <i class="fab fa-twitter"></i>
-                                </span>
-                                <span>Twitter</span>
-                            </span>
+                            {{ icons::inline(fa_class="fab fa-twitter", label="Twitter") }}
                         </a>
                     </div>
                     <div>
                         <a class="" href="https://www.linkedin.com/in/{{ config.extra.linkedin }}">
-                            <span class="icon-text">
-                                <span class="icon">
-                                    <i class="fab fa-linkedin"></i>
-                                </span>
-                                <span>LinkedIn</span>
-                            </span>
+                            {{ icons::inline(fa_class="fab fa-linkedin", label="LinkedIn") }}
                         </a>
                     </div>
                 </section>

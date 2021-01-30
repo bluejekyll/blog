@@ -33,30 +33,15 @@
         <div>
             <a href="https://twitter.com/intent/tweet?text={{ page.title | safe }}&url={{ page.permalink | safe }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"
                 rel="nofollow" target="_blank" title="Share on Twitter">
-                <span class="icon-text button">
-                    <span class="icon">
-                        <i class="fab fa-twitter-square"></i>
-                    </span>
-                    <span>Tweet this</span>
-                </span>
+                {{ icons::button(fa_class="fab fa-twitter-square", label="Tweet") }}
             </a>
             <a href="http://www.reddit.com/submit?url={{ page.permalink | safe }}&title={{ page.title | safe }}"
                 rel="nofollow" target="_blank" title="Discuss on Reddit">
-                <span class="icon-text button">
-                    <span class="icon">
-                        <i class="fab fa-reddit-square"></i>
-                    </span>
-                    <span>Talk on Reddit</span>
-                </span>
+                {{ icons::button(fa_class="fab fa-reddit-square", label="Reddit") }}
             </a>
             <a href="https://news.ycombinator.com/submitlink?u={{ page.permalink | safe }}&t={{ page.title | safe }}"
                 title="Discuss on Hacker News">
-                <span class="icon-text button">
-                    <span class="icon">
-                        <i class="fab fa-hacker-news-square"></i>
-                    </span>
-                    <span>Discuss on Hacker News</span>
-                </span>
+                {{ icons::button(fa_class="fab fa-hacker-news-square", label="Hacker News") }}
             </a>
         </div>
     </section>

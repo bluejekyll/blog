@@ -19,7 +19,7 @@
         {% set count = term.pages | length %}
         <div class="block m-6">
             <div class="title is-4">{{ term.name | capitalize }}<a href="{{ term.permalink | safe }}"><span>
-                        {{ icons::topic(name=term.name) }}</span><span>{{ count }}</span></a></div>
+                        {{ icons::topic(name=term.name,has_tooltip=false) }}</span><span>{{ count }}</span></a></div>
         </div>
         {% endfor %}
     </div>

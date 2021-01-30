@@ -1,4 +1,46 @@
-{% macro topic(name) %}
+{#####################}
+{% macro inline(fa_class, label="", tooltip="") %}
+
+{% if tooltip %}
+{% set tooltip_class="tooltip" %}
+{% else %}
+{% set tooltip_class="" %}
+{% endif %}
+
+{% if tooltip_class %}
+<span class="{{ tooltip_class }}">{% endif %}
+    {% if label %}
+    <span class="icon-text">{% endif %}
+        <span class="icon">
+            <i class="{{ fa_class }}"></i>
+            {% if tooltip %}
+            <span class="tooltip-text is-6">{{ tooltip }}</span>
+            {% endif %}
+        </span>
+        {% if label %}
+        <span>{{ label }}</span>
+    </span>{% endif %}
+    {% if tooltip_class %}
+</span>{% endif %}
+
+
+{% endmacro inline %}
+{#####################}
+
+
+{#####################}
+{% macro button(fa_class, label, tooltip="") %}
+
+<span class="button">
+    {{ icons::inline(fa_class=fa_class, label=label, tooltip=tooltip) }}
+</span>
+
+{% endmacro icon %}
+{#####################}
+
+
+{#####################}
+{% macro topic(name, has_tooltip=true) %}
 
 {% if name == "rust" %}
 {% set icon="fab fa-rust" %}
@@ -26,8 +68,13 @@
 
 {% endif %}
 
-<span class="icon tooltip">
-    <i class="{{ icon }}"></i>
-    <span class="tooltip-text">{{ name }}</span>
-</span>
+{% if has_tooltip %}
+{% set tooltip=name %}
+{% else %}
+{% set tooltip="" %}
+{% endif %}
+
+{{ icons::inline(fa_class=icon, tooltip=tooltip ) }}
+
 {% endmacro topic %}
+{#####################}
