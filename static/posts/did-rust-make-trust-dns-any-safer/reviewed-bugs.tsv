@@ -1,84 +1,90 @@
-v	Issue	link	crate	category	opened	state	year	month
-#5	AXFR response ordering incorrect	https://github.com/bluejekyll/trust-dns/issues/5	server	protocol	11/11/2015	closed	2015	11
-#9	0.5.2 broken on Linux	https://github.com/bluejekyll/trust-dns/issues/9	proto	logic	4/6/2016	closed	2016	4
-#10	[Client] NSEC3 validation not correctly implemented	https://github.com/bluejekyll/trust-dns/issues/10	proto	protocol	5/9/2016	open	2016	5
-#25	Verify no resource leak in MIO and event registry	https://github.com/bluejekyll/trust-dns/issues/25	proto	leak	6/27/2016	closed	2016	6
-#27	Client fails to verify records with uppercased names	https://github.com/bluejekyll/trust-dns/issues/27	proto	protocol	8/7/2016	closed	2016	8
-#28	Wildcard is not handled correctly when verifying RRset	https://github.com/bluejekyll/trust-dns/issues/28	proto	protocol	8/9/2016	closed	2016	8
-#36	Remove panic!() from op_code From impl 	https://github.com/bluejekyll/trust-dns/issues/36	proto	crash	8/19/2016	closed	2016	8
-#37	License metadata disagrees with comment	https://github.com/bluejekyll/trust-dns/issues/37	all	docs	8/21/2016	closed	2016	8
-#44	Crash when creating journal from zone with allow_update=true	https://github.com/bluejekyll/trust-dns/issues/44	server	crash	9/8/2016	closed	2016	9
-#53	[Server] ResponseCode for NSEC on non-existent RecordType should be NoError	https://github.com/bluejekyll/trust-dns/issues/53	server	protocol	10/16/2016	closed	2016	10
-#56	Listen on all addresses	https://github.com/bluejekyll/trust-dns/issues/56	server	logic	10/25/2016	closed	2016	10
-#85	Inconsistent build (server + macOS): ssl linkage error	https://github.com/bluejekyll/trust-dns/issues/85	all	build	1/13/2017	closed	2017	1
-#100	Fix mtls, client auth feature	https://github.com/bluejekyll/trust-dns/issues/100	client	logic	3/8/2017	opened	2017	3
-#107	Build error under CentOS and Ubuntu	https://github.com/bluejekyll/trust-dns/issues/107	all	build	3/22/2017	closed	2017	3
-#118	calculation of key_tag is wrong	https://github.com/bluejekyll/trust-dns/issues/118	proto	protocol	4/21/2017	closed	2017	4
-#120	SIG(0) signature should include SIG's RDATA in hash	https://github.com/bluejekyll/trust-dns/issues/120	proto	protocol	4/24/2017	closed	2017	4
-#131	Issue building TRust-DNS 0.10 in Windows	https://github.com/bluejekyll/trust-dns/issues/131	all	build	5/10/2017	closed	2017	5
-#141	ECDSA support is broken	https://github.com/bluejekyll/trust-dns/issues/141	proto	protocol	6/6/2017	closed	2017	6
-#152	NSEC validation failing in nightly	https://github.com/bluejekyll/trust-dns/issues/152	proto	protocol	6/24/2017	closed	2017	6
-#200	DNSSEC Signature verification doesn't verify actual bytes received on the wire	https://github.com/bluejekyll/trust-dns/issues/200	proto	protocol	9/22/2017	opened	2017	9
-#209	[Server] DNSSEC doesn't want to work	https://github.com/bluejekyll/trust-dns/issues/209	server	protocol	9/26/2017	closed	2017	9
-#212	[Server] Can't sign while recovering from journal because keys are not loaded at this point	https://github.com/bluejekyll/trust-dns/issues/212	server	logic	9/27/2017	closed	2017	9
-#213	[Server] DNSSEC works only with RSASHA256	https://github.com/bluejekyll/trust-dns/issues/213	server	logic	9/27/2017	closed	2017	9
-#214	DNSKEY query not returning RRSIG (or DNSKEY not being signed)	https://github.com/bluejekyll/trust-dns/issues/214	server	logic	9/27/2017	closed	2017	9
-#227	Synchronous resolver is not Send + Sync	https://github.com/bluejekyll/trust-dns/issues/227	client	type	10/12/2017	closed	2017	10
-#243	Requests for unsupported types time out	https://github.com/bluejekyll/trust-dns/issues/243	server	logic	10/21/2017	closed	2017	10
-#253	Inappropriate use of the rand module	https://github.com/bluejekyll/trust-dns/issues/253	proto	logic	10/23/2017	closed	2017	10
-#255	Server TLS test keys need to be rotated	https://github.com/bluejekyll/trust-dns/issues/255	server	test	10/24/2017	closed	2017	10
-#263	Questionable implementation of DNSClass -> u16 conversion	https://github.com/bluejekyll/trust-dns/issues/263	proto	crash	10/24/2017	closed	2017	10
-#272	CNAME and ALL queries recursively resolve CNAMES, but shouldn't	https://github.com/bluejekyll/trust-dns/issues/272	resolver	protocol	10/26/2017	closed	2017	10
-#273	TTL for query results recursively resolved through CNAME (and SRV?) doesn't take CNAME (SRV?) TTL into account.	https://github.com/bluejekyll/trust-dns/issues/273	resolver	protocol	10/26/2017	closed	2017	10
-#274	When matching records by type and/or by name, the class (`IN`, etc.) needs to be matched too	https://github.com/bluejekyll/trust-dns/issues/274	resolver	protocol	10/26/2017	closed	2017	10
-#314	failure to parse a valid zone file	https://github.com/bluejekyll/trust-dns/issues/314	server	protocol	12/14/2017	open	2017	12
-#320	Ability to create invalid records	https://github.com/bluejekyll/trust-dns/issues/320	proto	type	12/18/2017	closed	2017	12
-#351	server panics when responding to AXFR on zone with absurd number of records	https://github.com/bluejekyll/trust-dns/issues/351	server	crash	2/25/2018	open	2018	2
-#355	error notifying wait, possible future leak	https://github.com/bluejekyll/trust-dns/issues/355	proto	logic	3/6/2018	closed	2018	3
-#357	Default google ipv6 addresses are incorrectly specified	https://github.com/bluejekyll/trust-dns/issues/357	resolver	config	3/7/2018	closed	2018	3
-#393	dns_sd::tests::test_list_services panics on my machine	https://github.com/bluejekyll/trust-dns/issues/393	resolver	logic	4/10/2018	closed	2018	4
-#408	Remove special logic for `.local.` with/without mDNS	https://github.com/bluejekyll/trust-dns/issues/408	resolver	logic	4/19/2018	closed	2018	4
-#431	Names like "1.2.3.4" are wrongly assumed to be IP addresses	https://github.com/bluejekyll/trust-dns/issues/431	resolver	logic	4/25/2018	closed	2018	4
-#454	Often receive error: No connections available	https://github.com/bluejekyll/trust-dns/issues/454	resolver	logic	5/11/2018	closed	2018	5
-#455	Different dns lookup result for same host	https://github.com/bluejekyll/trust-dns/issues/455	resolver	logic	5/11/2018	closed	2018	5
-#500	BasicClientHandle broken in 0.9 for Async use cases	https://github.com/bluejekyll/trust-dns/issues/500	client	logic	5/30/2018	closed	2018	5
-#511	Answers should use original query names, not what's in the catalog	https://github.com/bluejekyll/trust-dns/issues/511	server	protocol	6/12/2018	closed	2018	6
-#522	Security vulnerability in 'untrusted' crate which trust-dns uses	https://github.com/bluejekyll/trust-dns/issues/522	resolver	audit	7/4/2018	closed	2018	7
-#528	Problems with max_ttl on embedded systems	https://github.com/bluejekyll/trust-dns/issues/528	resolver	overflow	7/12/2018	closed	2018	7
-#546	udp connection shutting down: io error	https://github.com/bluejekyll/trust-dns/issues/546	proto	logging	8/7/2018	closed	2018	8
-#552	Question: usage of Service Discovery feature	https://github.com/bluejekyll/trust-dns/issues/552	resolver	docs	8/23/2018	open	2018	8
-#560	tcp connection shutting down: io error	https://github.com/bluejekyll/trust-dns/issues/560	proto	logic	9/23/2018	closed	2018	9
-#605	Is get_name_servers() on windows useful?	https://github.com/bluejekyll/trust-dns/issues/605	resolver	logic	11/6/2018	open	2018	11
-#606	Lookups fail when any nameserver returns SERVFAIL	https://github.com/bluejekyll/trust-dns/issues/606	resolver	protocol	11/7/2018	closed	2018	11
-#609	File openssl_tests.rs has executable permission	https://github.com/bluejekyll/trust-dns/issues/609	proto	repo	11/9/2018	closed	2018	11
-#629	packet injection vulnerability	https://github.com/bluejekyll/trust-dns/issues/629	proto	potocol	11/27/2018	closed	2018	11
-#633	Possible resource leak, UDP sockets	https://github.com/bluejekyll/trust-dns/issues/633	resolver	leak	12/8/2018	closed	2018	12
-#644	resolv.conf parsing fails when it contains a 'search …' line	https://github.com/bluejekyll/trust-dns/issues/644	server	logic	12/22/2018	closed	2018	12
-#664	named will panic on Windows when packet is larger than buffer	https://github.com/bluejekyll/trust-dns/issues/664	server	crash	1/19/2019	open	2019	1
-#687	"can't get next random port" spamming the logs	https://github.com/bluejekyll/trust-dns/issues/687	resolver	logging	2/12/2019	closed	2019	2
-#692	Memory leak in Trust-DNS client when used in Windows	https://github.com/bluejekyll/trust-dns/issues/692	all	leak	2/21/2019	closed	2019	2
-#696	DNSSEC signature problem for non-existent CAA record	https://github.com/bluejekyll/trust-dns/issues/696	server	protocol	2/27/2019	closed	2019	2
-#705	last line of zone file not loaded without newline	https://github.com/bluejekyll/trust-dns/issues/705	server	logic	3/5/2019	closed	2019	3
-#777	High memory usage with client	https://github.com/bluejekyll/trust-dns/issues/777	client	leak	5/21/2019	open	2019	5
-#799	Client read timeout on parser error	https://github.com/bluejekyll/trust-dns/issues/799	client	logic	6/17/2019	open	2019	6
-#821	Name and Label parsing still to restrictive, allow \"	https://github.com/bluejekyll/trust-dns/issues/821	proto	protocol	7/1/2019	open	2019	7
-#872	Not all records are returned from the additional section when making an SRV query	https://github.com/bluejekyll/trust-dns/issues/872	resolver	protocol	9/23/2019	open	2019	9
-#916	ResponseCode::from(u16) needs an Unknown or should be TryFrom	https://github.com/bluejekyll/trust-dns/issues/916	proto	crash	11/10/2019	closed	2019	11
-#922	ResolverOpts: Disable caching is ignored in 0.18.0-alpha.1	https://github.com/bluejekyll/trust-dns/issues/922	resolver	config	11/14/2019	open	2019	11
-#931	Cannot compile trust-dns-proto v0.18.0-alpha.1	https://github.com/bluejekyll/trust-dns/issues/9311	all	build	11/26/2019	closed	2019	11
-#933	Spurious resolution failure with concurrent requests	https://github.com/bluejekyll/trust-dns/issues/933	resolver	threading	11/28/2019	closed	2019	11
-#989	Resolver: cloudflare dns over tls possible future leak warning	https://github.com/bluejekyll/trust-dns/issues/989	resolver	leak	1/12/2020	closed	2020	1
-#1043	Resolver: HTTPS client never closes connections	https://github.com/bluejekyll/trust-dns/issues/1043	resolver	leak	3/17/2020	closed	2020	3
-#1065	Unable to resolve using MDNS. multithreaded_runtime example hangs	https://github.com/bluejekyll/trust-dns/issues/1065	resolver	protocol	4/7/2020	open	2020	4
-#1073	[resolver] ResolverOpts timeout value is not respected	https://github.com/bluejekyll/trust-dns/issues/1073	resolver	logic	4/13/2020	open	2020	4
-#1078	UDP - IO Error when EDNS max payload is larger then 2048	https://github.com/bluejekyll/trust-dns/issues/1078	resolver	protocol	4/24/2020	closed	2020	4
-#1085	Can't resolve internal host name via IPv4	https://github.com/bluejekyll/trust-dns/issues/1085	resolver	logic	4/27/2020	closed	2020	4
-#1131	Error parsing resolve.conf	https://github.com/bluejekyll/trust-dns/issues/1131	resolver	logic	6/7/2020	open	2020	6
-#1138	Parsing EDNS OPT fails with zero length option	https://github.com/bluejekyll/trust-dns/issues/1138	proto	logic	6/19/2020	closed	2020	6
-#1187	Can not query Glue Records with Resolver	https://github.com/bluejekyll/trust-dns/issues/1187	resolver	protocol	8/11/2020	closed	2020	8
-#1221	queries for SOA improperly identify as empty responses even when the SOA is present	https://github.com/bluejekyll/trust-dns/issues/1221	resolver	protocol	9/28/2020	open	2020	9
-#1232	"non NoError responses should have been converted to an error above" panic when querying SOA of a non-existent domain	https://github.com/bluejekyll/trust-dns/issues/1232	resolver	logic	10/5/2020	closed	2020	10
-#1277	client: AXFR not return all records	https://github.com/bluejekyll/trust-dns/issues/1277	client	protocol	11/8/2020	open	2020	11
-#1283	CNAME loops throws off the server	https://github.com/bluejekyll/trust-dns/issues/1283	server	logic	11/11/2020	open	2020	11
-#1331	CNAME TTL handling is broken when `LookupIpStrategy::Ipv4AndIpv6` or `LookupIpStrategy::Ipv6thenIpv4`	https://github.com/bluejekyll/trust-dns/issues/1331	resolver	logic	12/28/2020	open	2020	12
-#1342	Wildcards match only one label	https://github.com/bluejekyll/trust-dns/issues/1342	server	protocol	1/10/2021	open	2021	1
+v	Issue	link	crate	category	opened	state	sub-category
+#5	AXFR response ordering incorrect	https://github.com/bluejekyll/trust-dns/issues/5	server	protocol	11/11/2015	closed	
+#9	0.5.2 broken on Linux	https://github.com/bluejekyll/trust-dns/issues/9	proto	platform	4/6/2016	closed	linux
+#10	[Client] NSEC3 validation not correctly implemented	https://github.com/bluejekyll/trust-dns/issues/10	proto	protocol	5/9/2016	open	
+#25	Verify no resource leak in MIO and event registry	https://github.com/bluejekyll/trust-dns/issues/25	proto	leak	6/27/2016	closed	
+#27	Client fails to verify records with uppercased names	https://github.com/bluejekyll/trust-dns/issues/27	proto	protocol	8/7/2016	closed	
+#28	Wildcard is not handled correctly when verifying RRset	https://github.com/bluejekyll/trust-dns/issues/28	proto	protocol	8/9/2016	closed	
+#36	Remove panic!() from op_code From impl 	https://github.com/bluejekyll/trust-dns/issues/36	proto	crash	8/19/2016	closed	parsing
+#37	License metadata disagrees with comment	https://github.com/bluejekyll/trust-dns/issues/37	all	docs	8/21/2016	closed	
+#44	Crash when creating journal from zone with allow_update=true	https://github.com/bluejekyll/trust-dns/issues/44	server	crash	9/8/2016	closed	
+#53	[Server] ResponseCode for NSEC on non-existent RecordType should be NoError	https://github.com/bluejekyll/trust-dns/issues/53	server	protocol	10/16/2016	closed	
+#56	Listen on all addresses	https://github.com/bluejekyll/trust-dns/issues/56	server	logic	10/25/2016	closed	network
+#85	Inconsistent build (server + macOS): ssl linkage error	https://github.com/bluejekyll/trust-dns/issues/85	all	build	1/13/2017	closed	
+#100	Fix mtls, client auth feature	https://github.com/bluejekyll/trust-dns/issues/100	client	logic	3/8/2017	opened	TLS
+#107	Build error under CentOS and Ubuntu	https://github.com/bluejekyll/trust-dns/issues/107	all	build	3/22/2017	closed	
+#118	calculation of key_tag is wrong	https://github.com/bluejekyll/trust-dns/issues/118	proto	protocol	4/21/2017	closed	
+#120	SIG(0) signature should include SIG's RDATA in hash	https://github.com/bluejekyll/trust-dns/issues/120	proto	protocol	4/24/2017	closed	
+#131	Issue building TRust-DNS 0.10 in Windows	https://github.com/bluejekyll/trust-dns/issues/131	all	build	5/10/2017	closed	
+#141	ECDSA support is broken	https://github.com/bluejekyll/trust-dns/issues/141	proto	protocol	6/6/2017	closed	
+#152	NSEC validation failing in nightly	https://github.com/bluejekyll/trust-dns/issues/152	proto	protocol	6/24/2017	closed	
+#200	DNSSEC Signature verification doesn't verify actual bytes received on the wire	https://github.com/bluejekyll/trust-dns/issues/200	proto	protocol	9/22/2017	opened	
+#209	[Server] DNSSEC doesn't want to work	https://github.com/bluejekyll/trust-dns/issues/209	server	protocol	9/26/2017	closed	
+#212	[Server] Can't sign while recovering from journal because keys are not loaded at this point	https://github.com/bluejekyll/trust-dns/issues/212	server	logic	9/27/2017	closed	startup
+#213	[Server] DNSSEC works only with RSASHA256	https://github.com/bluejekyll/trust-dns/issues/213	server	logic	9/27/2017	closed	DNSSEC
+#214	DNSKEY query not returning RRSIG (or DNSKEY not being signed)	https://github.com/bluejekyll/trust-dns/issues/214	server	protocol	9/27/2017	closed	DNSSEC
+#227	Synchronous resolver is not Send + Sync	https://github.com/bluejekyll/trust-dns/issues/227	client	type	10/12/2017	closed	
+#243	Requests for unsupported types time out	https://github.com/bluejekyll/trust-dns/issues/243	server	logic	10/21/2017	closed	parsing
+#253	Inappropriate use of the rand module	https://github.com/bluejekyll/trust-dns/issues/253	proto	logic	10/23/2017	closed	trust
+#255	Server TLS test keys need to be rotated	https://github.com/bluejekyll/trust-dns/issues/255	server	test	10/24/2017	closed	
+#263	Questionable implementation of DNSClass -> u16 conversion	https://github.com/bluejekyll/trust-dns/issues/263	proto	crash	10/24/2017	closed	
+#272	CNAME and ALL queries recursively resolve CNAMES, but shouldn't	https://github.com/bluejekyll/trust-dns/issues/272	resolver	protocol	10/26/2017	closed	
+#273	TTL for query results recursively resolved through CNAME (and SRV?) doesn't take CNAME (SRV?) TTL into account.	https://github.com/bluejekyll/trust-dns/issues/273	resolver	protocol	10/26/2017	closed	
+#274	When matching records by type and/or by name, the class (`IN`, etc.) needs to be matched too	https://github.com/bluejekyll/trust-dns/issues/274	resolver	protocol	10/26/2017	closed	
+#314	failure to parse a valid zone file	https://github.com/bluejekyll/trust-dns/issues/314	server	protocol	12/14/2017	open	
+#320	Ability to create invalid records	https://github.com/bluejekyll/trust-dns/issues/320	proto	type	12/18/2017	closed	
+#339	Panic when serializing some messages	https://github.com/bluejekyll/trust-dns/issues/339	proto	crash	2/8/2018	closed	
+#340	Panic with "can not lookup IPs for no names"	https://github.com/bluejekyll/trust-dns/issues/340	resolver	crash	2/9/2018	closed	
+#351	server panics when responding to AXFR on zone with absurd number of records	https://github.com/bluejekyll/trust-dns/issues/351	server	crash	2/25/2018	open	
+#355	error notifying wait, possible future leak	https://github.com/bluejekyll/trust-dns/issues/355	proto	logic	3/6/2018	closed	futures
+#357	Default google ipv6 addresses are incorrectly specified	https://github.com/bluejekyll/trust-dns/issues/357	resolver	config	3/7/2018	closed	
+#360	UDP timeout tests hanging (tokio_core 0.1.13+)	https://github.com/bluejekyll/trust-dns/issues/360	proto	dep	3/12/2018	closed	
+#393	dns_sd::tests::test_list_services panics on my machine	https://github.com/bluejekyll/trust-dns/issues/393	resolver	protocol	4/10/2018	closed	mDNS
+#403	Server hangs on any malformed UDP packet	https://github.com/bluejekyll/trust-dns/issues/403	server	error	4/17/2018	closed	
+#408	Remove special logic for `.local.` with/without mDNS	https://github.com/bluejekyll/trust-dns/issues/408	resolver	protocol	4/19/2018	closed	mDNS
+#409	Add raw name for lookup when ndots is not met	https://github.com/bluejekyll/trust-dns/issues/409	resolver	protocol	4/19/2018	closed	
+#431	Names like "1.2.3.4" are wrongly assumed to be IP addresses	https://github.com/bluejekyll/trust-dns/issues/431	resolver	protocol	4/25/2018	closed	
+#454	Often receive error: No connections available	https://github.com/bluejekyll/trust-dns/issues/454	resolver	logic	5/11/2018	closed	futures
+#455	Different dns lookup result for same host	https://github.com/bluejekyll/trust-dns/issues/455	resolver	logic	5/11/2018	closed	futures
+#500	BasicClientHandle broken in 0.9 for Async use cases	https://github.com/bluejekyll/trust-dns/issues/500	client	logic	5/30/2018	closed	futures
+#511	Answers should use original query names, not what's in the catalog	https://github.com/bluejekyll/trust-dns/issues/511	server	protocol	6/12/2018	closed	
+#522	Security vulnerability in 'untrusted' crate which trust-dns uses	https://github.com/bluejekyll/trust-dns/issues/522	resolver	audit	7/4/2018	closed	
+#528	Problems with max_ttl on embedded systems	https://github.com/bluejekyll/trust-dns/issues/528	resolver	overflow	7/12/2018	closed	
+#546	udp connection shutting down: io error	https://github.com/bluejekyll/trust-dns/issues/546	proto	logging	8/7/2018	closed	
+#552	Question: usage of Service Discovery feature	https://github.com/bluejekyll/trust-dns/issues/552	resolver	docs	8/23/2018	open	
+#560	tcp connection shutting down: io error	https://github.com/bluejekyll/trust-dns/issues/560	proto	logic	9/23/2018	closed	
+#605	Is get_name_servers() on windows useful?	https://github.com/bluejekyll/trust-dns/issues/605	resolver	platform	11/6/2018	open	windows
+#606	Lookups fail when any nameserver returns SERVFAIL	https://github.com/bluejekyll/trust-dns/issues/606	resolver	protocol	11/7/2018	closed	
+#609	File openssl_tests.rs has executable permission	https://github.com/bluejekyll/trust-dns/issues/609	proto	repo	11/9/2018	closed	
+#629	packet injection vulnerability	https://github.com/bluejekyll/trust-dns/issues/629	proto	potocol	11/27/2018	closed	
+#633	Possible resource leak, UDP sockets	https://github.com/bluejekyll/trust-dns/issues/633	resolver	leak	12/8/2018	closed	
+#644	resolv.conf parsing fails when it contains a 'search …' line	https://github.com/bluejekyll/trust-dns/issues/644	server	logic	12/22/2018	closed	parsing
+#664	named will panic on Windows when packet is larger than buffer	https://github.com/bluejekyll/trust-dns/issues/664	server	crash	1/19/2019	open	windows
+#687	"can't get next random port" spamming the logs	https://github.com/bluejekyll/trust-dns/issues/687	resolver	logging	2/12/2019	closed	
+#692	Memory leak in Trust-DNS client when used in Windows	https://github.com/bluejekyll/trust-dns/issues/692	all	leak	2/21/2019	closed	windows, dep
+#696	DNSSEC signature problem for non-existent CAA record	https://github.com/bluejekyll/trust-dns/issues/696	server	protocol	2/27/2019	closed	
+#705	last line of zone file not loaded without newline	https://github.com/bluejekyll/trust-dns/issues/705	server	logic	3/5/2019	closed	parsing
+#777	High memory usage with client	https://github.com/bluejekyll/trust-dns/issues/777	client	leak	5/21/2019	open	
+#799	Client read timeout on parser error	https://github.com/bluejekyll/trust-dns/issues/799	client	logic	6/17/2019	open	parsing
+#821	Name and Label parsing still to restrictive, allow \"	https://github.com/bluejekyll/trust-dns/issues/821	proto	protocol	7/1/2019	open	
+#872	Not all records are returned from the additional section when making an SRV query	https://github.com/bluejekyll/trust-dns/issues/872	resolver	protocol	9/23/2019	open	
+#916	ResponseCode::from(u16) needs an Unknown or should be TryFrom	https://github.com/bluejekyll/trust-dns/issues/916	proto	crash	11/10/2019	closed	
+#922	ResolverOpts: Disable caching is ignored in 0.18.0-alpha.1	https://github.com/bluejekyll/trust-dns/issues/922	resolver	config	11/14/2019	open	
+#931	Cannot compile trust-dns-proto v0.18.0-alpha.1	https://github.com/bluejekyll/trust-dns/issues/9311	all	build	11/26/2019	closed	
+#933	Spurious resolution failure with concurrent requests	https://github.com/bluejekyll/trust-dns/issues/933	resolver	threading	11/28/2019	closed	
+#980	thread 'trust-dns-server-runtime' has overflowed its stack	https://github.com/bluejekyll/trust-dns/issues/980	server	recursion	1/4/2020	closed	
+#989	Resolver: cloudflare dns over tls possible future leak warning	https://github.com/bluejekyll/trust-dns/issues/989	resolver	leak	1/12/2020	closed	
+#1043	Resolver: HTTPS client never closes connections	https://github.com/bluejekyll/trust-dns/issues/1043	resolver	leak	3/17/2020	closed	
+#1065	Unable to resolve using MDNS. multithreaded_runtime example hangs	https://github.com/bluejekyll/trust-dns/issues/1065	resolver	protocol	4/7/2020	open	
+#1073	[resolver] ResolverOpts timeout value is not respected	https://github.com/bluejekyll/trust-dns/issues/1073	resolver	logic	4/13/2020	open	config
+#1078	UDP - IO Error when EDNS max payload is larger then 2048	https://github.com/bluejekyll/trust-dns/issues/1078	resolver	protocol	4/24/2020	closed	
+#1085	Can't resolve internal host name via IPv4	https://github.com/bluejekyll/trust-dns/issues/1085	resolver	logic	4/27/2020	closed	error handling
+#1131	Error parsing resolve.conf	https://github.com/bluejekyll/trust-dns/issues/1131	resolver	logic	6/7/2020	open	parsing
+#1138	Parsing EDNS OPT fails with zero length option	https://github.com/bluejekyll/trust-dns/issues/1138	proto	logic	6/19/2020	closed	parsing
+#1187	Can not query Glue Records with Resolver	https://github.com/bluejekyll/trust-dns/issues/1187	resolver	protocol	8/11/2020	closed	
+#1221	queries for SOA improperly identify as empty responses even when the SOA is present	https://github.com/bluejekyll/trust-dns/issues/1221	resolver	protocol	9/28/2020	open	
+#1232	"non NoError responses should have been converted to an error above" panic when querying SOA of a non-existent domain	https://github.com/bluejekyll/trust-dns/issues/1232	resolver	logic	10/5/2020	closed	error handling
+#1277	client: AXFR not return all records	https://github.com/bluejekyll/trust-dns/issues/1277	client	protocol	11/8/2020	open	
+#1283	CNAME loops throws off the server	https://github.com/bluejekyll/trust-dns/issues/1283	server	logic	11/11/2020	open	overflow
+#1331	CNAME TTL handling is broken when `LookupIpStrategy::Ipv4AndIpv6` or `LookupIpStrategy::Ipv6thenIpv4`	https://github.com/bluejekyll/trust-dns/issues/1331	resolver	logic	12/28/2020	open	caching
+#1342	Wildcards match only one label	https://github.com/bluejekyll/trust-dns/issues/1342	server	protocol	1/10/2021	open	
