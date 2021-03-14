@@ -2,15 +2,37 @@
 // blog overrides
 article pre
     @extend .box
+    border-color: $grey-darker
+    border-width: 1px
+    border-style: solid
 
-article
-    @extend .is-size-5
+article.content
+    font-family: $family-secondary
+
+article.content p
+    word-spacing: .15em
+    text-align: justify
+    text-indent: 2em
+
+article.content h1, article.content h2, article.content h3, article.content h4, article.content h5, article.content h6
+    font-family: $family-primary
+    color: $blue
 
 code
     border-radius: $radius-small
 
 img
     border-radius: $radius-small
+
+.button
+    margin-top: 3px
+    margin-bottom: 3px
+
+.content ul
+    list-style-type: square
+
+.content ol
+    list-style-type: upper-roman
 
 .tooltip
     position: relative
