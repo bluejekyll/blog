@@ -1,0 +1,100 @@
+/* NORMAL */
+
+/* vietnamese */
+@font-face {
+    font-family: 'Recursive Casual';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCCk310tQtBCYCK6v8xuQ.woff) format('woff');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Recursive Casual';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCCk317tQtBCYCK6v8.woff) format('woff');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+    /* ITALIC */
+/* vietnamese */
+/* @font-face {
+    font-family: 'Recursive Casual';
+    font-style: oblique 15deg;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vI-7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dm0faE5YaERmK-CImKsvxvU-MUEnWfSqasB-XlT6ZnI14ZeY9aA.woff2) format('woff2');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+  } */
+  /* latin */
+  /* @font-face {
+    font-family: 'Recursive Casual';
+    font-style: oblique 15deg;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vI-7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dm0faE5YaERmK-CImKsvxvU-MUEnWfSqasB-XlTGZnI14ZeY.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  } */
+
+/* vietnamese */
+@font-face {
+    font-family: 'Recursive Casual';
+    font-style: oblique 15deg;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vIz7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dm0faE61WMUiJ-CIm4ojbvmd9qtZlegeb.woff2) format('woff2');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Recursive Casual';
+    font-style: oblique 15deg;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vIz7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dm0faE61WMUiJ-CIm4ojbsWd9qtZleg.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  /* BOLD */
+  /* vietnamese */
+@font-face {
+    font-family: 'Recursive Casual';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dm0faE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadAClH10tQtBCYCK6v8xuQ.woff) format('woff');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Recursive Casual';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X-dm0faE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadAClH17tQtBCYCK6v8.woff) format('woff');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+
+/* MONO */
+  /* vietnamese */
+@font-face {
+    font-family: 'Recursive Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X8dpEfaE5YaERmK-CImqvTxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCCk310tQtBCYCK6v8xuQ.woff) format('woff');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Recursive Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbQr6Mk1QuAIcyEwG_X8dpEfaE5YaERmK-CImqvTxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCCk317tQtBCYCK6v8.woff) format('woff');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
