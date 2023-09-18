@@ -31,6 +31,10 @@
     </article>
     <section class="section p-1">
         <div>
+            <a href="{{ config.extra.mastodon }}"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                {{ icons::button(fa_class="fab fa-mastodon", label="Mastodon") }}
+            </a>
             <a href="https://twitter.com/intent/tweet?text={{ page.title | safe }}&url={{ page.permalink | safe }}&via={{ config.extra.twitter }}&related={{ config.extra.twitter }}"
                 rel="nofollow" target="_blank" title="Share on Twitter">
                 {{ icons::button(fa_class="fab fa-twitter-square", label="Tweet") }}

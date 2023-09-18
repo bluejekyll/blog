@@ -19,4 +19,4 @@ clean:
 
 .PHONY: serve
 serve:
-	zola serve
+	zola serve --drafts
