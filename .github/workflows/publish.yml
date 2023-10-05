@@ -12,14 +12,14 @@ jobs:
       name: gh-pages
     runs-on: ubuntu-latest
     steps:
-    # Checkout
-    - uses: actions/checkout@master
-    # Build & deploy
-    - name: shalzz/zola-deploy-action
-      uses: shalzz/zola-deploy-action@v0.13.0
+      # Checkout
+      - uses: actions/checkout@master
+      # Build & deploy
+      - name: shalzz/zola-deploy-action
+        uses: shalzz/zola-deploy-action@v0.17.2
 
-      env:
-        # Target branch
-        PAGES_BRANCH: gh-pages
-        # Provide personal access token
-        TOKEN: ${{ secrets.TOKEN }}
+        env:
+          # Target branch
+          PAGES_BRANCH: gh-pages
+          # Provide personal access token
+          TOKEN: ${{ secrets.TOKEN }}
