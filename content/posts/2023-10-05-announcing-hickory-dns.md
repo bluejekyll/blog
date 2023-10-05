@@ -2,14 +2,14 @@
 title = "Announcing Hickory DNS"
 date = 2023-10-05
 description = "Trust-DNS is becoming Hickory DNS"
-draft = true
+draft = false
 
 [taxonomies]
 topics=["rust", "dns"]
 +++
 
 
-*Trust-DNS after many years of development is attracting more industry interest. In order to support and protect investment in the project the project is being rebranded to Hickory DNS with properly registered trademarks. This article describes the reasoning behind that change. This post was also posted to the [Prossimo blog](https://www.memorysafety.org/blog/).*
+*Trust-DNS after many years of development is attracting more industry interest. In order to support and protect investment in the project the project is being rebranded to Hickory DNS with properly registered trademarks. This article describes the reasoning behind that change. This post was originally published to the [Prossimo blog](https://www.memorysafety.org/blog/announcing-hickory-dns/).*
 
 ![Hickory DNS](hickory-dns-horizontal.png)
 
