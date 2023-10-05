@@ -2,7 +2,7 @@
 title = "Announcing Hickory DNS"
 date = 2023-10-05
 description = "Trust-DNS is becoming Hickory DNS"
-draft = false
+draft = true
 
 [taxonomies]
 topics=["rust", "dns"]
