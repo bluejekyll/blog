@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Compiling libvirt and continuing use of polkit</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Compiling libvirt and continuing use of polkit
+            </p>
+            <p class="subtitle is-4 is-italic">
+                
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;outdated&#x2F;compiling-libvirt-and-continuing-use-of-polkit&#x2F;">
+                    <span class="is-family-monospace">2012-04-18</span>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p><em>edit: most people will just want to Docker or similar these days</em></p>
+<p>This drove me batty for a little bit. I compiled libvirt and I couldn't get polkit to allow a non-priviledged user to use qemu:///system. So here are the notes and why this ended up happening.</p>
+<p>First of all, whenever compiling a piece of software, I always use --prefix to make sure I don't clobber any system files managed by whatever OS you use. Personally I did this on Ubuntu.</p>
+<p>First download the version of libvirt you want, for my project I wanted to make sure I was compatible with 0.9.4 (the whole reason I couldn't use the version available from apt):</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$&gt; wget http://libvirt.org/sources/libvirt-0.9.4.tar.gz
+</span></code></pre>
+<p>The instructions on libvirts site tell you to do the basic gnu configure steps, i.e. ./configure, make, make install, but this is much too simplistic in my opinion and would potentially clobber system files.</p>
+<p>Here are my steps:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$&gt; tar -xzvf libvirt-0.9.4.tar.gz
+</span><span>$&gt; cd libvirt-0.9.4
+</span><span>$&gt; make clean
+</span></code></pre>
+<p>And my configuration options:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$&gt; ./configure --prefix=/opt/libvirt --with-polkit --with-app-armor --with-capng --with-qemu
+</span></code></pre>
+<p>For any errors you'll probably need to make sure you install certain dev packages of common things, like libapparmor-dev etc.</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$&gt; make
+</span><span>$&gt; sudo make install
+</span></code></pre>
+<p>Now here are somethings that are screwed up after installation:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span># permissions on the directories in the install path are wrong
+</span><span>$&gt; sudo find /opt/libvirt -type d -exec chmod go+rx {} \;
+</span><span>
+</span><span># I want to use actual /var not the one in the /opt/libvirt
+</span><span>$&gt; sudo rm -r /opt/libvirt/var &amp;&amp; pushd /opt/libvirt &amp;&amp; sudo ln -s /var &amp;&amp; popd
+</span></code></pre>
+<p>Here's the thing with polkit that I had missed and spent many hours trying to figure out, of course it was self imposed. virsh and the Java binding Connect kept giving me this error:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>error: Failed to connect to the hypervisor
+</span><span>error: authentication failed: authentication failed
+</span></code></pre>
+<p>polkit is a cool system, which I didn't know well until I ran into having to get this next thing setup. The purpose of polkit is to allow non-privileged users access to perform certain actions without the need of promoting to root via sudo. This is important if like me you want to use libvirt's Java bindings, you don't really want to run your JVM as root, do you? Anyway, polkit requires some configuration, first is that you need to define the new actions. Normally make install would do this properly, but since we specified a different --prefix, it ended up installing the action definitions in /opt/libvirt/share. To add it to the actual system just add a new link (that way if you ever reinstall, the link will point to the new file, as opposed to having to remember to copy it each time).</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$&gt; pushd /usr/share/polkit-1/actions &amp;&amp; sudo ln -s /opt/libvirt/share/polkit-1/actions/org.libvirt.unix.policy &amp;&amp; popd
+</span></code></pre>
+<p>Now install the new file that grants non-root users access to perform the libvirt actions</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$&gt; cat &gt; 50-libvirt-remote-access.pkla &lt;&lt;END
+</span><span>[libvirt Management Access]
+</span><span>Identity=unix-group:libvirt
+</span><span>Action=org.libvirt.unix.manage
+</span><span>ResultAny=yes
+</span><span>ResultInactive=yes
+</span><span>ResultActive=yes
+</span><span>
+</span><span>[libvirt Monitor Access]
+</span><span>Identity=unix-group:users
+</span><span>Action=org.libvirt.unix.monitor
+</span><span>ResultAny=yes
+</span><span>ResultInactive=yes
+</span><span>ResultActive=yes
+</span><span>END
+</span><span>
+</span><span>$&gt; sudo cp 50-libvirt-remote-access.pkla /etc/polkit-1/localauthority/50-local.d
+</span></code></pre>
+<p>Notice that the group for management is libvirt and monitoring is any user on the system. You will need to make sure both that the group exists (see /etc/group and groupadd) and that your user is a member (see id, and usermod).</p>
+<p>With all of that setup, now you just need to make sure that your environment is setup, add this to your .bashrc or equivalent:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>export LIBVIRT_HOME=/opt/libvirt
+</span><span>export PATH=$LIBVIRT_HOME/bin:$PATH
+</span><span>export LD_LIBRARY_PATH=$LIBVIRT_HOME/lib
+</span><span>export PYTHONPATH=$LIBVIRT_HOME/lib/python2.6/site-packages
+</span></code></pre>
+<p>Make sure to login or create a new terminal to reload your shell. Other things to note, I didn't mention starting libvirtd, you will need to do this. If you put things in the paths I specified this would be in /opt/libvirt/sbin/libvirtd. You probably will want this to be started automatically. If you need an upstart script, post a comment, and I can post one. Otherwise, you can just modify the one that is installed with the system to point to the proper location for everything.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Compiling libvirt and continuing use of polkit&url=https://bluejekyll.github.io/blog/outdated/compiling-libvirt-and-continuing-use-of-polkit/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/outdated/compiling-libvirt-and-continuing-use-of-polkit/&title=Compiling libvirt and continuing use of polkit"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/outdated/compiling-libvirt-and-continuing-use-of-polkit/&t=Compiling libvirt and continuing use of polkit"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

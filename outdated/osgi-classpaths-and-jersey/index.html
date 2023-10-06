@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OSGi Classpaths and Jersey</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                OSGi Classpaths and Jersey
+            </p>
+            <p class="subtitle is-4 is-italic">
+                
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;outdated&#x2F;osgi-classpaths-and-jersey&#x2F;">
+                    <span class="is-family-monospace">2012-04-18</span>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p><em>Since writing this, I do not recommend OSGi any more, just use <a href="http://www.dropwizard.io">DropWizard</a></em></p>
+<p>OSGi is cool, but it adds a ton of classpath constraints. I'll put up a complete OSGi page about some of the headaches I've run into and the basic setup I use at a later date, but today I want to share how to get rid of a ClassNotFoundException when trying to deploy Jersey.</p>
+<p>If you're not familiar with Jersey it's an implementation from Sun/Oracle of the JAX-RS spec. Basically an annotation system in java for deploying rest based web services.</p>
+<p>Anyway, this post isn't about that, it's about this:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>java.lang.ClassNotFoundException: com.sun.jersey.spi.container.servlet.ServletContainer
+</span><span> at org.eclipse.osgi.internal.loader.BundleLoader.findClassInternal(BundleLoader.java:513)
+</span><span> at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:429)
+</span><span> at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:417)
+</span><span> at org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader.loadClass(DefaultClassLoader.java:107)
+</span><span> at java.lang.ClassLoader.loadClass(ClassLoader.java:248)
+</span><span> at org.eclipse.jetty.webapp.WebAppClassLoader.loadClass(WebAppClassLoader.java:424)
+</span><span> ...
+</span><span> at org.eclipse.jetty.osgi.boot.OSGiAppProvider.addContext(OSGiAppProvider.java:232)
+</span><span> at org.eclipse.jetty.osgi.boot.OSGiAppProvider.addContext(OSGiAppProvider.java:214)
+</span><span> ...
+</span><span> at org.osgi.util.tracker.BundleTracker$Tracked.customizerAdding(BundleTracker.java:439)
+</span><span> at org.osgi.util.tracker.AbstractTracked.trackAdding(AbstractTracked.java:261)
+</span><span> at org.osgi.util.tracker.AbstractTracked.trackInitial(AbstractTracked.java:184)
+</span><span> at org.osgi.util.tracker.BundleTracker.open(BundleTracker.java:159)
+</span><span> at org.eclipse.jetty.osgi.boot.JettyBootstrapActivator.start(JettyBootstrapActivator.java:118)
+</span><span> at org.eclipse.osgi.framework.internal.core.BundleContextImpl$1.run(BundleContextImpl.java:711)
+</span><span> at java.security.AccessController.doPrivileged(Native Method)
+</span><span> at org.eclipse.osgi.framework.internal.core.BundleContextImpl.startActivator(BundleContextImpl.java:702)
+</span><span> at org.eclipse.osgi.framework.internal.core.BundleContextImpl.start(BundleContextImpl.java:683)
+</span><span> at org.eclipse.osgi.framework.internal.core.BundleHost.startWorker(BundleHost.java:381)
+</span><span> at org.eclipse.osgi.framework.internal.core.AbstractBundle.start(AbstractBundle.java:299)
+</span><span> at org.eclipse.osgi.framework.internal.core.AbstractBundle.start(AbstractBundle.java:291)
+</span></code></pre>
+<p>I'd been beating my head into the wall all morning when the problem/solution struck me. I'd doubled checked that I had these bundles installed and started (maven dependencies):</p>
+<pre data-lang="xml" style="background-color:#0f1419;color:#bfbab0;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;</span><span>jersey-core</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;</span><span>1.12</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;</span><span>jersey-server</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;</span><span>1.12</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;</span><span>jersey-servlet</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;</span><span>1.12</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span></code></pre>
+<p>They were right there in the OSGi runtime: &quot;Active&quot;. So what was up? The answer lies in how I was referencing the Jersey context in my web.xml:</p>
+<pre data-lang="xml" style="background-color:#0f1419;color:#bfbab0;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet.ServletContainer</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-class</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet.ServletContainer</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-class</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">init-param</span><span style="color:#39bae690;">&gt;
+</span><span>    </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">param-name</span><span style="color:#39bae690;">&gt;</span><span>javax.ws.rs.Application</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">param-name</span><span style="color:#39bae690;">&gt;
+</span><span>    </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">param-value</span><span style="color:#39bae690;">&gt;</span><span>com.my.Application</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">param-value</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">init-param</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">load-on-startup</span><span style="color:#39bae690;">&gt;</span><span>1</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">load-on-startup</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-mapping</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet.ServletContainer</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">url-pattern</span><span style="color:#39bae690;">&gt;</span><span>/*</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">url-pattern</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-mapping</span><span style="color:#39bae690;">&gt;
+</span></code></pre>
+<p>It turns out this is the only reference to the ServletContainer anywhere in my &quot;code&quot;, in the web.xml. I use the maven-bundle-plugin for generating the bundles. The Bnd tool at the core of that plugin automatically collects all the Import-Packages from what's being imported in your Java code.</p>
+<p>The classpath in OSGi is partly derived from your Import-Package statement, and since nowhere in my code was I explicitly referencing the ServletContainer, that class was never made available on the classpath.</p>
+<p>Solution, changed the configuration of the maven-bundle-plugin to add the package to the Import-Package statement:</p>
+<pre data-lang="xml" style="background-color:#0f1419;color:#bfbab0;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">Import-Package</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet,*</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">Import-Package</span><span style="color:#39bae690;">&gt;
+</span></code></pre>
+<p>And then Jersey was deployed, and the world was calm.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=OSGi Classpaths and Jersey&url=https://bluejekyll.github.io/blog/outdated/osgi-classpaths-and-jersey/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/outdated/osgi-classpaths-and-jersey/&title=OSGi Classpaths and Jersey"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/outdated/osgi-classpaths-and-jersey/&t=OSGi Classpaths and Jersey"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

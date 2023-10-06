@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Branchless #Rust2018</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Branchless #Rust2018
+            </p>
+            <p class="subtitle is-4 is-italic">
+                About an opportunity for Rust, as part of the #Rust2018 request
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;branchless-rust&#x2F;">
+                    <span class="is-family-monospace">2018-01-10</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>Recently there were two new issues discovered with CPUs, Meltdown (Intel) and Spectre (all &quot;fast&quot; CPUs?). Both of which basically exploit speculative branch prediction to gain access to memory via what's known as a side-channel attack. There was a Webkit <a href="https://webkit.org/blog/8048/what-spectre-and-meltdown-mean-for-webkit/">response</a> to this in which they mention they will start utilizing &quot;Branchless Security Checks&quot;. A <a href="https://blog.rust-lang.org/2018/01/03/new-years-rust-a-call-for-community-blogposts.html">request</a> was put out for the Rust community's aspirations of the language in 2018, this post is in that spirit. For me, I would love to see the language continue its explosive growth. Branchless code is potentially an accelerant toward that end.</p>
+<h1 id="the-branchless-opportunity">The Branchless Opportunity</h1>
+<p>In Rust it is possible to use generics as a means to write branchless code. It's not the only language that can do this, any language with monomorphization (C++) is capable of this. Here's an <a href="https://github.com/bluejekyll/trust-dns/blob/fb9e5cde20902b24462cdb234cbcd4113c89b081/proto/src/rr/domain.rs#L549">example</a> of code from the domain <code>Name</code> type in TRust-DNS that I've recently rewritten to be branchless:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">cmp_with_case</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>, </span><span style="color:#f29718;">ignore_case</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">bool</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() </span><span style="color:#f29668;">&amp;&amp;</span><span> other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() {
+</span><span>            </span><span style="color:#ff7733;">return </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Equal</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// we reverse the iters so that we are comparing from the root/domain to the local...
+</span><span>        </span><span style="color:#ff7733;">let</span><span> self_labels </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">rev</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> other_labels </span><span style="color:#f29668;">=</span><span> other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">rev</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">for </span><span>(l</span><span style="color:#bfbab0cc;">,</span><span> r) </span><span style="color:#f29668;">in</span><span> self_labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(other_labels) {
+</span><span style="font-style:italic;color:#5c6773;">///             | | | |
+</span><span style="font-style:italic;color:#5c6773;">/// LOOK HERE  | | | | The branch we&#39;ll remove
+</span><span style="font-style:italic;color:#5c6773;">///           V V V V
+</span><span>            </span><span style="color:#ff7733;">if</span><span> ignore_case {
+</span><span>                </span><span style="color:#ff7733;">match </span><span>(</span><span style="color:#f29668;">*</span><span>l)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>(</span><span style="color:#f29668;">*</span><span>r)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()) {
+</span><span>                    o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Less </span><span style="color:#f29668;">|</span><span> o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">,
+</span><span>                    Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                }
+</span><span>            } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>                </span><span style="color:#ff7733;">match</span><span> l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(r) {
+</span><span>                    o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Less </span><span style="color:#f29668;">|</span><span> o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">,
+</span><span>                    Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                }
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())
+</span><span>    }
+</span></code></pre>
+<p>This is the new code is now split across two objects, <a href="https://github.com/bluejekyll/trust-dns/blob/95e35576f7a1d4cf754750538ddf33838c6f4d42/proto/src/rr/domain/name.rs#L550"><code>Name</code></a> and <a href="https://github.com/bluejekyll/trust-dns/blob/95e35576f7a1d4cf754750538ddf33838c6f4d42/proto/src/rr/domain/label.rs#L113"><code>Label</code></a>. It now uses a generic to perform the comparison:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/// From Name
+</span><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">cmp_with_f</span><span>&lt;F</span><span style="color:#bfbab0cc;">:</span><span> LabelCmp&gt;(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() </span><span style="color:#f29668;">&amp;&amp;</span><span> other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() {
+</span><span>            </span><span style="color:#ff7733;">return </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Equal</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// we reverse the iters so that we are comparing from the root/domain to the local...
+</span><span>        </span><span style="color:#ff7733;">let</span><span> self_labels </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">rev</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> other_labels </span><span style="color:#f29668;">=</span><span> other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">rev</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">for </span><span>(l</span><span style="color:#bfbab0cc;">,</span><span> r) </span><span style="color:#f29668;">in</span><span> self_labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(other_labels) {
+</span><span style="font-style:italic;color:#5c6773;">///             | | | |
+</span><span style="font-style:italic;color:#5c6773;">/// LOOK HERE  | | | | No branch the &lt;F&gt; is a type parameter instead
+</span><span style="font-style:italic;color:#5c6773;">///           V V V V
+</span><span>            </span><span style="color:#ff7733;">match</span><span> l</span><span style="color:#f29668;">.</span><span>cmp_with_f</span><span style="color:#f29668;">::</span><span>&lt;F&gt;(r) {
+</span><span>                Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                not_eq </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> not_eq</span><span style="color:#bfbab0cc;">,
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())
+</span><span>    }
+</span><span>
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// From Label, this is the is where the type comes into play
+</span><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">cmp_with_f</span><span>&lt;F</span><span style="color:#bfbab0cc;">:</span><span> LabelCmp&gt;(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="color:#ff7733;">let</span><span> s </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> o </span><span style="color:#f29668;">=</span><span> other</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">for </span><span>(s</span><span style="color:#bfbab0cc;">,</span><span> o) </span><span style="color:#f29668;">in</span><span> s</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(o) {
+</span><span style="font-style:italic;color:#5c6773;">///             | | | |
+</span><span style="font-style:italic;color:#5c6773;">/// LOOK HERE  | | | | No branch for the comparison (the match is for the result of the comparison)
+</span><span style="font-style:italic;color:#5c6773;">///           V V V V
+</span><span>            </span><span style="color:#ff7733;">match </span><span>F</span><span style="color:#f29668;">::</span><span>cmp_u8(</span><span style="color:#f29668;">*</span><span>s</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">*</span><span>o) {
+</span><span>                Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                not_eq </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> not_eq</span><span style="color:#bfbab0cc;">,
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">len</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">len</span><span>())
+</span><span>    }
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// And here are the comparison types:
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// Label comparison trait for case sensitive or insensitive comparisons
+</span><span style="color:#ff7733;">pub trait </span><span style="color:#59c2ff;">LabelCmp </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">/// this should mimic the cmp method from [`PartialOrd`]
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">cmp_u8</span><span>(</span><span style="color:#f29718;">l</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>, </span><span style="color:#f29718;">r</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// For case sensitive comparisons
+</span><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">CaseSensitive</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">impl </span><span>LabelCmp </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">CaseSensitive </span><span>{
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">cmp_u8</span><span>(</span><span style="color:#f29718;">l</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>, </span><span style="color:#f29718;">r</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>r)
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// For case insensitive comparisons
+</span><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">CaseInsensitive</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">impl </span><span>LabelCmp </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">CaseInsensitive </span><span>{
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">cmp_u8</span><span>(</span><span style="color:#f29718;">l</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>, </span><span style="color:#f29718;">r</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_ascii_lowercase</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>r</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_ascii_lowercase</span><span>())
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>To make calling these easier I have two standard methods defined:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="font-style:italic;color:#5c6773;">/// Case sensitive comparison
+</span><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">cmp_case</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>cmp_with_f</span><span style="color:#f29668;">::</span><span>&lt;CaseSensitive&gt;(other)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">/// Case insensitive comparison
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>cmp_with_f</span><span style="color:#f29668;">::</span><span>&lt;CaseInsensitive&gt;(other)
+</span><span>    }
+</span></code></pre>
+<p>I did this to reduce errors around passing the wrong boolean parameter to the compare function. The point is that this is branchless. Here's another recent post from @RReverser, <a href="https://rreverser.com/conditional-enum-variants-in-rust/">&quot;Conditional enum variants in Rust&quot;</a>, while not explicitly about branchless programming, it's a similar usage of type parameters as a means improve the code.</p>
+<h1 id="things-could-be-better">Things could be better</h1>
+<p>If <a href="https://github.com/rust-lang/rfcs/blob/master/text/2000-const-generics.md">const generics</a> are implemented, I think we could change the case comparison logic to this:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">cmp_with</span><span>&lt;</span><span style="color:#ff7733;">const</span><span> CASE</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">bool</span><span>&gt;(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="color:#ff7733;">let</span><span> s </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> o </span><span style="color:#f29668;">=</span><span> other</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">for </span><span>(s</span><span style="color:#bfbab0cc;">,</span><span> o) </span><span style="color:#f29668;">in</span><span> s</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(o) {
+</span><span style="font-style:italic;color:#5c6773;">///             | | | |
+</span><span style="font-style:italic;color:#5c6773;">/// LOOK HERE  | | | | This branch will be optimized out by the compiler b/c it&#39;s a const bool
+</span><span style="font-style:italic;color:#5c6773;">///           V V V V
+</span><span>            </span><span style="color:#ff7733;">let </span><span>(s</span><span style="color:#bfbab0cc;">,</span><span> o) </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">if </span><span style="color:#f29718;">CASE </span><span>{
+</span><span>                (s</span><span style="color:#bfbab0cc;">,</span><span> o)
+</span><span>            } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>                (s</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()</span><span style="color:#bfbab0cc;">,</span><span> o</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>())
+</span><span>            }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="color:#ff7733;">match </span><span>s</span><span style="color:#f29668;">::</span><span>cmp(o) {
+</span><span>                Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                not_eq </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> not_eq</span><span style="color:#bfbab0cc;">,
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">len</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">len</span><span>())
+</span><span>    }
+</span></code></pre>
+<p>This requires that the compiler optimizes out the constant boolean dictated through the const generic. It's less code than the technique I used before, though possibly not as obvious that it's branchless. That's of course due to the fact that it's the compiler that would optimize out the branch for the case comparison. This of course is not necessary for branchless programming in Rust, but it might be more approachable.</p>
+<h1 id="excuse-me-ben">Excuse me, Ben</h1>
+<p><em>I just wanted to point out that your code is not actually branchless</em>, you're currently thinking, and you're right! All those match statements and the for loops are branches. Of which I am aware, but if you go back and read the Webkit <a href="https://webkit.org/blog/8048/what-spectre-and-meltdown-mean-for-webkit/">article</a>, perhaps you can see where type parameters could be used to make that style of programming easier.</p>
+<p>Thanks!</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Branchless #Rust2018&url=https://bluejekyll.github.io/blog/posts/branchless-rust/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/branchless-rust/&title=Branchless #Rust2018"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/branchless-rust/&t=Branchless #Rust2018"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

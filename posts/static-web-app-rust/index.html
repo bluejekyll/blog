@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A static web app in Rust</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                A static web app in Rust
+            </p>
+            <p class="subtitle is-4 is-italic">
+                A three day tour of Yew and WASM with Rust
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;static-web-app-rust&#x2F;">
+                    <span class="is-family-monospace">2018-07-22</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>I am not a frontend engineer. I don't generally have the patience for figuring out how to make something look the way I want; on top of that, all web work basically requires a knowledge of Javascript. I have no qualms in saying that I don't enjoy writing Javascript. This has basically kept me out of the web frontend space, even on hobby projects. But now I can target the web with my favorite language, Rust and deliver WASM. This post is about a minor little adventure in learning some of the tools for doing this.</p>
+<h1 id="kitchen-patrol">Kitchen Patrol</h1>
+<p>My family gets together in the summer at a cabin in the middle of nowhere. There are a lot of us, and each day has a set of work that needs to be done for everything to come together and no individuals being overtaxed with the effort. My sister-inlaw, being expert in organization, years ago devised a chore chart for all the work. Everyone gets assigned a job, somewhat indiscriminately (though age is a requirement for some jobs), the main goal being that no person does two major jobs in a day (like cooking for 24 and also doing all the dishes after the dinner). Filling this out always took time and energy, so this year I told her, &quot;hey why don't we build something for it?&quot;. So with her acting as the project manager and me the engineer, it was time to write an application to take care of this. Now I get to share that experience, and don't judge too harshly, my web UI skills are basically non-existent.</p>
+<p>I got my inspiration from this much more detailed and impressive post, <a href="https://medium.com/@saschagrunert/a-web-application-completely-in-rust-6f6bdb6c4471">A web application completely in Rust</a>. So if you want to really learn this, you should read that, not this. After reading that I realized now is a good time for me to try this. Every year, I decide to take a stab at some frontend development, mainly to keep up with the changing ecosystem. After reading the linked to article, it made it clear we would now be able to do something decent in Rust with minimal, even no, Javascript, awesome.</p>
+<h2 id="design">Design</h2>
+<p>I had a few goals:</p>
+<ul>
+<li>only use Rust for code (except CSS and initial <code>index.html</code>)</li>
+<li>target WASM, because this is the future ;)</li>
+<li>learn Yew, and see what it's like (build up components from scratch)</li>
+<li>build it as a static site (no backend, learn/use <code>LocalStorage</code>)</li>
+<li>build it as a single-page-app, it's literally one page</li>
+</ul>
+<p>Here's what the chart itself will end up generating (all names are fake):</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/static-web-app-rust/chart.png" alt="Chore Chart" /></p>
+<p>Initially this was a static page. I implemented it with a statically generated list of people and jobs (the jobs and number of days are still static). I decided the first thing we'd make dynamic would be the list of people associated to the jobs, for that we'd need another form that will look like this:</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/static-web-app-rust/edit-people.png" alt="Edit People" /></p>
+<p>As I'm no expert in the area, I decided not to fret too much if I couldn't get things to look right, again, if you're going to be bothered with fonts or look, you want to go elsewhere. Just for reference, the look/feel I was going for was a legal pad with a marker.</p>
+<h2 id="getting-started">Getting started</h2>
+<p>This all builds off the excellent work done on <code>stdweb</code> and <code>cargo-web</code>. For this we won't be using <code>stdweb</code> directly, though it is necessary for a component which uses <code>&lt;select/&gt;</code>, but instead the <code>Yew</code> framework. I went with this directory structure (mostly standard):</p>
+<pre data-lang="text" style="background-color:#0f1419;color:#bfbab0;" class="language-text "><code class="language-text" data-lang="text"><span>docs/      # contains the static site for Github pages
+</span><span>src/       # the Rust source code
+</span><span>src/data/  # non-web specific components (there&#39;s a simple CLI)
+</span><span>src/web/   # all web components
+</span><span>static/    # static content to be included with the app
+</span><span>static/index.html  # starting point for the App (very simple)
+</span><span>static/styles.css  # our stylesheet
+</span><span>Cargo.toml # Rust configs
+</span><span>Web.toml   # cargo-web configuration
+</span></code></pre>
+<p>For all the web components I put them into <code>src/web</code> and only compile that when the (default) feature <code>web-spa</code> is enabled. If I was going to build a &quot;prod&quot; application, I'd probably have this <code>src/web</code> be a separate crate all together.</p>
+<p>Let's get the environment ready:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$&gt; cargo install cargo-web
+</span></code></pre>
+<p>Woh, that's it! That will also install <code>wasm32-unknown-unknown</code> toolchain into your <code>rustup</code> env. Btw, you'll be needing the nightly <code>rustc</code>, so switch to that (also, I had a problem with compiling some of the tools on the most recent Rust version, so I needed to use <code>nightly-2018-07-17</code>):</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$&gt; rustup default nightly-2018-07-17
+</span></code></pre>
+<p>For our dependencies in <code>Cargo.toml</code> it isn't much:</p>
+<pre data-lang="toml" style="background-color:#0f1419;color:#bfbab0;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[</span><span style="color:#59c2ff;">dependencies</span><span>]
+</span><span style="color:#59c2ff;">serde </span><span>= </span><span style="color:#c2d94c;">&quot;1.0&quot;
+</span><span style="color:#59c2ff;">serde_derive </span><span>= </span><span style="color:#c2d94c;">&quot;1.0&quot;
+</span><span style="color:#59c2ff;">serde_json </span><span>= </span><span style="color:#c2d94c;">&quot;1.0&quot;
+</span><span style="color:#59c2ff;">stdweb </span><span>= </span><span style="color:#c2d94c;">&quot;0.4&quot;
+</span><span style="color:#59c2ff;">yew </span><span>= </span><span style="color:#c2d94c;">&quot;0.4&quot;
+</span></code></pre>
+<p>And now we're ready to write some code.</p>
+<h2 id="components">Components</h2>
+<p>Some of this stuff is documented well, other parts less so. To generate the docs, I needed to use the stable compiler, as there were some issues with nightly, but it's definitely worth generating those:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$&gt; cargo +stable doc --open
+</span></code></pre>
+<p>I have spent a little time familiarizing myself with <code>Vue</code> and <code>React</code> (only so far as tutorials and play apps in the past). I found the <code>Yew</code> framework to be very reminiscent of <code>React</code>, it claims to be <a href="https://github.com/DenisKolodin/yew">&quot;inspired by Elm and ReactJS&quot;</a> (I've never worked with <code>Elm</code>).</p>
+<p>There are two traits <code>Component</code> and <code>Renderable</code>. <code>Component</code> implements all of the functions around creating and updating the component. <code>Renderable</code> implements the functions for rendering the component, <code>view</code>. It's not yet clear to me why these two are separate traits and not just one, there's possibly a good reason, but it's not obvious to me yet. <code>Component</code> has three functions, <code>create</code>, <code>update</code>, and <code>change</code>; <code>change</code> is only required if your component carries a custom set of properties, this requirement is enforced at runtime (errors get spewed to the javascript console).</p>
+<p>Let's look at our simplest component for the Chart. First the types:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">derive</span><span>(Clone)]
+</span><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">Chart </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// this is a version marker we&#39;re using for determing when to reload data
+</span><span>    people_version</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">usize</span><span>,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// the actual chart data, for display
+</span><span>    week</span><span style="color:#bfbab0cc;">:</span><span> Week,
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// The chart properties, it just let&#39;s us know what version of the data we need
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">derive</span><span>(Clone</span><span style="color:#bfbab0cc;">,</span><span> Default</span><span style="color:#bfbab0cc;">,</span><span> PartialEq)]
+</span><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">ChartProps </span><span>{
+</span><span>    </span><span style="color:#ff7733;">pub </span><span>people_version</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">usize</span><span>,
+</span><span>}
+</span></code></pre>
+<p>Now the implementation of the chart's calculate function that will create the data for the chart: </p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span style="color:#59c2ff;">Chart </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">/// Our calculate function will construct a new week for the chart
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">calculate</span><span>(</span><span style="color:#f29718;">context</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> Context) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self </span><span>{
+</span><span>        context</span><span style="color:#f29668;">.</span><span>console</span><span style="color:#f29668;">.</span><span style="color:#f07178;">debug</span><span>(</span><span style="color:#c2d94c;">&quot;calculating new week&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// jobs are static
+</span><span>        </span><span style="color:#ff7733;">let</span><span> jobs </span><span style="color:#f29668;">= </span><span>kp_chart</span><span style="color:#f29668;">::</span><span>default_jobs()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// We&#39;ll come back to this, it&#39;s restoring the set of people from the
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//  local store
+</span><span>        </span><span style="color:#ff7733;">let </span><span>(people_version</span><span style="color:#bfbab0cc;">,</span><span> people) </span><span style="color:#f29668;">= </span><span>PeopleStore</span><span style="color:#f29668;">::</span><span>restore(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29668;">*</span><span>context)
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map</span><span>(|</span><span style="color:#f29718;">p</span><span>| (p</span><span style="color:#f29668;">.</span><span>inc</span><span style="color:#bfbab0cc;">,</span><span> p</span><span style="color:#f29668;">.</span><span>people))
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap_or_else</span><span>(|| (</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>kp_chart</span><span style="color:#f29668;">::</span><span>default_people()))</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">Self </span><span>{
+</span><span>            people_version</span><span style="color:#bfbab0cc;">:</span><span> people_version</span><span style="color:#bfbab0cc;">,
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// we&#39;re calculating 5 days worth of jobs
+</span><span>            week</span><span style="color:#bfbab0cc;">: </span><span>kp_chart</span><span style="color:#f29668;">::</span><span>calculate(</span><span style="color:#f29718;">5</span><span style="color:#bfbab0cc;">,</span><span> jobs</span><span style="color:#bfbab0cc;">,</span><span> people)</span><span style="color:#bfbab0cc;">,
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>And then here is the component implementation, which is pretty simple:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span>Component&lt;Context&gt; </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">Chart </span><span>{
+</span><span>    </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Message </span><span style="color:#f29668;">= </span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Properties </span><span style="color:#f29668;">=</span><span> ChartProps</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Initial state of the component, we&#39;re ignoring the props
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//   because the storage version will always be loaded here.
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">create</span><span>(</span><span style="color:#f29718;">_props</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Properties, </span><span style="color:#f29718;">context</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span>Env&lt;Context, </span><span style="color:#ff7733;">Self</span><span>&gt;) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self </span><span>{
+</span><span>        context</span><span style="color:#f29668;">.</span><span>console</span><span style="color:#f29668;">.</span><span style="color:#f07178;">debug</span><span>(</span><span style="color:#c2d94c;">&quot;creating Chart&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>calculate(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29668;">*</span><span>context)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// we don&#39;t accept any messages.
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">update</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">_msg</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Message, </span><span style="color:#f29718;">_context</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span>Env&lt;Context, </span><span style="color:#ff7733;">Self</span><span>&gt;) </span><span style="color:#bfbab0cc;">-&gt;</span><span> ShouldRender {
+</span><span>        </span><span style="color:#f29718;">true
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// for changes, we&#39;re going to update our chore chart if the version is different from the one we already have.
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">change</span><span>(
+</span><span>        </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>,
+</span><span>        </span><span style="color:#f29718;">props</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Properties,
+</span><span>        </span><span style="color:#f29718;">context</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span>Env&lt;Context, </span><span style="color:#ff7733;">Self</span><span>&gt;,
+</span><span>    ) </span><span style="color:#bfbab0cc;">-&gt;</span><span> ShouldRender {
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>people_version </span><span style="color:#f29668;">!=</span><span> props</span><span style="color:#f29668;">.</span><span>people_version {
+</span><span>            context</span><span style="color:#f29668;">.</span><span>console</span><span style="color:#f29668;">.</span><span style="color:#f07178;">debug</span><span>(</span><span style="color:#c2d94c;">&quot;updating Chart&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#f29668;">*</span><span style="font-style:italic;color:#39bae6;">self </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>calculate(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29668;">*</span><span>context)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#f29718;">true
+</span><span>        } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>            </span><span style="color:#f29718;">false
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>In the above we're not actually doing a lot. The actual logic for the <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/lib.rs#L69">calculation</a> is not complex (and needs to be better). It currently rotates through all the people and jobs, selecting between adults, teens, and children for each job. I'm hoping that the <code>Yew</code> console logging will eventually be integrated into the Rust logger that most people use, but it's easy enough to use.</p>
+<p>The <code>view</code> function is here for rendering:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span>Renderable&lt;Context, Chart&gt; </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">Chart </span><span>{
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">view</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Html&lt;Context, </span><span style="color:#ff7733;">Self</span><span>&gt; {
+</span><span>        </span><span style="color:#ff7733;">let </span><span style="color:#ffb454;">header </span><span style="color:#f29668;">= </span><span>|</span><span style="color:#f29718;">name</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">str</span><span>| {
+</span><span>            </span><span style="color:#f07178;">html!</span><span>{
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>th</span><span style="color:#f29668;">&gt;</span><span>{ </span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> name) }</span><span style="color:#f29668;">&lt;/</span><span>th</span><span style="color:#f29668;">&gt;
+</span><span>            }
+</span><span>        }</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let </span><span style="color:#ffb454;">people_cell </span><span style="color:#f29668;">= </span><span>|</span><span style="color:#f29718;">people</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>[Person]| {
+</span><span>            </span><span style="color:#ff7733;">let mut</span><span> people_str </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">String</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">for</span><span> person </span><span style="color:#f29668;">in</span><span> people {
+</span><span>                people_str</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push_str</span><span>(person</span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>                people_str</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push_str</span><span>(</span><span style="color:#c2d94c;">&quot;, &quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>            }
+</span><span>
+</span><span>            </span><span style="color:#f07178;">html!</span><span>{
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>td</span><span style="color:#f29668;">&gt;</span><span>{ people_str }</span><span style="color:#f29668;">&lt;/</span><span>td</span><span style="color:#f29668;">&gt;
+</span><span>            }
+</span><span>        }</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let </span><span style="color:#ffb454;">job_row </span><span style="color:#f29668;">= </span><span>|(</span><span style="color:#f29718;">job_idx</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">job</span><span>)</span><span style="color:#bfbab0cc;">: </span><span>(</span><span style="color:#ff7733;">usize</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>Job)| {
+</span><span>            </span><span style="color:#ff7733;">let</span><span> days </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>week</span><span style="color:#f29668;">.</span><span style="color:#f07178;">days</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#f07178;">html!</span><span>{
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>tr</span><span style="color:#f29668;">&gt;</span><span>{ </span><span style="color:#f07178;">header</span><span>(job</span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>()) } { </span><span style="color:#ff7733;">for</span><span> days</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">map</span><span>(|</span><span style="color:#f29718;">d</span><span>| </span><span style="color:#f07178;">people_cell</span><span>(d</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_job_people</span><span>(job_idx))) }</span><span style="color:#f29668;">&lt;/</span><span>tr</span><span style="color:#f29668;">&gt;
+</span><span>            }
+</span><span>        }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#f07178;">html! </span><span>{
+</span><span>            </span><span style="color:#f29668;">&lt;&gt;
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>h2</span><span style="color:#f29668;">&gt;</span><span>{</span><span style="color:#c2d94c;">&quot;Job Chart&quot;</span><span>}</span><span style="color:#f29668;">&lt;/</span><span>h2</span><span style="color:#f29668;">&gt;
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>table</span><span style="color:#f29668;">&gt;
+</span><span>                    </span><span style="color:#f29668;">&lt;</span><span>thead</span><span style="color:#f29668;">&gt;
+</span><span>                        </span><span style="color:#f29668;">&lt;</span><span>tr</span><span style="color:#f29668;">&gt;&lt;</span><span>th</span><span style="color:#f29668;">&gt;</span><span>{</span><span style="color:#c2d94c;">&quot;Job&quot;</span><span>}</span><span style="color:#f29668;">&lt;/</span><span>th</span><span style="color:#f29668;">&gt; </span><span>{ </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>week</span><span style="color:#f29668;">.</span><span style="color:#f07178;">days</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">map</span><span>(|</span><span style="color:#f29718;">d</span><span>| </span><span style="color:#f07178;">header</span><span>(d</span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>())) }</span><span style="color:#f29668;">&lt;/</span><span>tr</span><span style="color:#f29668;">&gt;
+</span><span>                    </span><span style="color:#f29668;">&lt;/</span><span>thead</span><span style="color:#f29668;">&gt;
+</span><span>                    </span><span style="color:#f29668;">&lt;</span><span>tbody</span><span style="color:#f29668;">&gt;
+</span><span>                        { </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>week</span><span style="color:#f29668;">.</span><span style="color:#f07178;">jobs</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">enumerate</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">map</span><span>(|</span><span style="color:#f29718;">j</span><span>| </span><span style="color:#f07178;">job_row</span><span>(j)) }
+</span><span>                    </span><span style="color:#f29668;">&lt;/</span><span>tbody</span><span style="color:#f29668;">&gt;
+</span><span>                </span><span style="color:#f29668;">&lt;/</span><span>table</span><span style="color:#f29668;">&gt;
+</span><span>            </span><span style="color:#f29668;">&lt;/&gt;
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>The above showcases the pretty amazing <code>html!</code> macro that gives us something very much like JSX. It's quite impressive in how it works, but has some interesting quirks. For example, notice the <code>for ...</code> construction. As I understand this, you need to something that is <code>IntoIterator&lt;Item=yew::html::Html&gt;</code>, this is why we call out to another function for the actual <code>header(...)</code> and <code>job_row(...)</code> rendering. It's really quite an amazing macro.</p>
+<p>This component is used in the <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/root.rs"><code>RootModel</code></a>, which is the top-level component. Let's look at it's usage:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span>Renderable&lt;Context, RootModel&gt; </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">RootModel </span><span>{
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">view</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Html&lt;Context, </span><span style="color:#ff7733;">Self</span><span>&gt; {
+</span><span>        </span><span style="color:#ff7733;">use </span><span>web</span><span style="color:#f29668;">::</span><span>Chart</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#f07178;">html! </span><span>{
+</span><span>            </span><span style="color:#f29668;">&lt;</span><span>div</span><span style="color:#f29668;">&gt;
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>h1</span><span style="color:#f29668;">&gt;</span><span>{</span><span style="color:#c2d94c;">&quot;Kitchen Patrol Charts&quot;</span><span>}</span><span style="color:#f29668;">&lt;/</span><span>h1</span><span style="color:#f29668;">&gt;
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// This is the binding for the Chart model:
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>Chart</span><span style="color:#bfbab0cc;">:</span><span> people_version</span><span style="color:#f29668;">=</span><span>{</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>people_version}</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29668;">/&gt;
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// Continue reading for discussion the PeopleModel...
+</span><span>                </span><span style="color:#f29668;">&lt;</span><span>PeopleModel</span><span style="color:#bfbab0cc;">: </span><span style="color:#ffb454;">on_save</span><span style="color:#f29668;">=</span><span>|</span><span style="color:#f29718;">inc</span><span>| RootMsg</span><span style="color:#f29668;">::</span><span>PeopleUpdated(inc)</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29668;">/&gt;
+</span><span>            </span><span style="color:#f29668;">&lt;</span><span>div</span><span style="color:#f29668;">/&gt;
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>You see in the above snippet, <code>people_version={self.people_version}</code> is the property that is bound to our properties type, <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/chart.rs#L16"><code>ChartProps::people_version</code></a>, which is very elegant, and vaguely like the React system, except that it's type-safe and validated at compile time! Honestly, this is my excitement for Rust in this context. We can have the elegance of HTML templates that live alongside the component implementation, and with <code>cargo web start</code> we even get a similar development experience to Javascript of the immediately updated experience during development. It's extremely hard to express my excitement here, as to me, Javascript is a hostile development environment, with many issues only discoverable at runtime. That is juxtaposed to this experience of compile time guarantees creating a sense of security so long lacking in web development.</p>
+<p>Now for a bit more complexity, you'll notice in the previous example this property:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#f29668;">&lt;</span><span>PeopleModel</span><span style="color:#bfbab0cc;">: </span><span style="color:#ffb454;">on_save</span><span style="color:#f29668;">=</span><span>|</span><span style="color:#f29718;">inc</span><span>| RootMsg</span><span style="color:#f29668;">::</span><span>PeopleUpdated(inc)</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29668;">/&gt;
+</span></code></pre>
+<h2 id="messaging-events-between-components">Messaging events between components</h2>
+<p>This introduces some message passing. The <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/root.rs#L10"><code>RootMsg::PeopleUpdated(inc)</code></a> enum type will be passed back to our <code>RootModel</code> on the (custom) <code>on_save</code> event. This is ultimately tied into an <code>onclick</code> DOM event binding to a save <code>&lt;button/&gt;</code> in the <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/people.rs#L219"><code>PeopleModel</code></a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#f07178;">html! </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//...
+</span><span>    </span><span style="color:#f29668;">&lt;</span><span>button </span><span style="color:#ffb454;">onclick</span><span style="color:#f29668;">=</span><span>|_| PeopleMsg</span><span style="color:#f29668;">::</span><span>SavePeople</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&gt;
+</span><span>        </span><span style="color:#f29668;">&lt;</span><span>i class</span><span style="color:#f29668;">=</span><span>(</span><span style="color:#c2d94c;">&quot;fa&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;fa-floppy-o&quot;</span><span>)</span><span style="color:#bfbab0cc;">,</span><span> aria</span><span style="color:#f29668;">-</span><span>hidden</span><span style="color:#f29668;">=</span><span style="color:#c2d94c;">&quot;true&quot;</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29668;">&gt;&lt;/</span><span>i</span><span style="color:#f29668;">&gt;
+</span><span>    </span><span style="color:#f29668;">&lt;/</span><span>button</span><span style="color:#f29668;">&gt;
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//...
+</span><span>}
+</span></code></pre>
+<p>That on event calls through the <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/people.rs#L16"><code>PeopleMsg::SavePeople</code></a> message type, which is processed in the <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/people.rs#L109"><code>PeopleModel::update</code></a> function:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">match</span><span> msg {
+</span><span>    PeopleMsg</span><span style="color:#f29668;">::</span><span>SavePeople </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        context</span><span style="color:#f29668;">.</span><span>console</span><span style="color:#f29668;">.</span><span style="color:#f07178;">debug</span><span>(</span><span style="color:#c2d94c;">&quot;saving PeopleModel&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let mut</span><span> people</span><span style="color:#bfbab0cc;">:</span><span> PeopleStore </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        people</span><span style="color:#f29668;">.</span><span style="color:#f07178;">store</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29668;">*</span><span>context)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#f29668;">*</span><span style="font-style:italic;color:#39bae6;">self </span><span style="color:#f29668;">= </span><span>PeopleModel</span><span style="color:#f29668;">::</span><span>from(people</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>on_save</span><span style="color:#f29668;">.</span><span style="color:#f07178;">take</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>on_save</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_ref</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">map</span><span>(|</span><span style="color:#f29718;">e</span><span>| e</span><span style="color:#f29668;">.</span><span style="color:#f07178;">emit</span><span>(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>inc))</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#f29718;">true
+</span><span>    }
+</span><span>    </span><span style="color:#f29668;">_ =&gt; </span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span></code></pre>
+<p>This emits the event to the upstream <code>RootModel</code> via <code>PeopleModel::on_save</code> callback that was registered through the properties passed in on the <code>RootModel</code>s creation of the <code>PeopleModel</code> via the <code>RootModel::view</code> method. Of course when the people model is saved, it needs to write it somewhere. <code>Yew</code> makes all of this very simple and easy. Of course, when you save something, it generally should be preserved somewhere and for this I had decided to only use LocalStorage in the browser, of course this means there are no backups and the data is tied to the access location, but still very cool. To use this, we just need to add the service to our <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/mod.rs#L4-L7"><code>Context</code></a> type:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">Context </span><span>{
+</span><span>    </span><span style="color:#ff7733;">pub </span><span>console</span><span style="color:#bfbab0cc;">:</span><span> ConsoleService,
+</span><span>    </span><span style="color:#ff7733;">pub </span><span>local_store</span><span style="color:#bfbab0cc;">:</span><span> StorageService,
+</span><span>}
+</span></code></pre>
+<p>The storage service is registered as <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/main.rs#L31"><code>Area::Local</code></a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">let</span><span> context </span><span style="color:#f29668;">=</span><span> Context {
+</span><span>    console</span><span style="color:#bfbab0cc;">: </span><span>ConsoleService</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#bfbab0cc;">,
+</span><span>    local_store</span><span style="color:#bfbab0cc;">: </span><span>StorageService</span><span style="color:#f29668;">::</span><span>new(Area</span><span style="color:#f29668;">::</span><span>Local)</span><span style="color:#bfbab0cc;">,
+</span><span>}</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>And this is easily <a href="https://github.com/bluejekyll/kp-chart/blob/caae42093e187bbbd0aab71ec7879c222e173339/src/web/people.rs#L42-L61">updated and used</a> as [String]'s (json in this case).</p>
+<p>All of this was really fun to do; thank you to <a href="https://bluejekyll.github.io/blog/posts/static-web-app-rust/%60https://github.com/DenisKolodin%60">Denis Kolodin</a> for <a href="https://github.com/DenisKolodin/yew">Yew</a>, it was a pleasure to learn and use. And now, you can use the ugly static app here: <a href="https://bluejekyll.github.io/kp-chart/">https://bluejekyll.github.io/kp-chart/</a>. The only thing server side is the loading of the static files: <code>index.html</code>, <code>kp-chart.js</code> (binding javascript for the WASM), <code>kp-chart.wasm</code>, and <code>styles.css</code>. After that everything is 100% on the client. When you save it will preserve to <code>LocalStorage</code> in your browser. I've tested this on iOS Safari, macOS Safari, Firefox, and Chrome. It all seems to work perfectly. What's also really cool, is there is no server side required at all, once compiled the files can be loaded directly from the filesystem and run as an SPA, which is really cool (at least on Firefox).</p>
+<p>Here are links to all the components I implemented for this, i.e. nothing off the shelf:</p>
+<ul>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/root.rs#L5-L52">RootModel</a> - starting point for the application</li>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/chart.rs#L9-L103">Chart</a> - chart/table of the rendered jobs and people</li>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/people.rs#L74-L229">PeopleModel</a> - people edit form</li>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/people.rs#L36-L72">PeopleStore</a> - storage object that reads and writes itself to LocalStorage (not a component)</li>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/people.rs#L269-L335">EditDelete</a> - Edit and Delete component for changing and removing people</li>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/people.rs#L338-L408">PersonName</a> - Person name field for displaying and editing a person's name</li>
+<li><a href="https://github.com/bluejekyll/kp-chart/blob/master/src/web/people.rs#L411-L500">PersonAbility</a> - Person ability, aka age, field for displaying and editing a person's age</li>
+</ul>
+<p>Pretty cool stuff I think, and none of it seems more complex than React. In point of fact, I think it's simpler because the compiler tells you when you've made any mistakes in your code.</p>
+<h2 id="fearless-web-development">Fearless web development</h2>
+<p>Rust already taught to be fearless in regards to systems programming while working on <a href="https://github.com/bluejekyll/trust-dns/">TRust-DNS</a>, now it's showing me that I can be fearless when working with frontend web design. While this little web-app wasn't much, it shows me that Rust is going to be amazing in this space, especially for those of us that enjoy the hand-holding of <code>rustc</code>.</p>
+<p>All the code for this can be found here: <a href="https://github.com/bluejekyll/kp-chart">kp-chart</a></p>
+<p><em>some gotchas</em>:</p>
+<ul>
+<li>multiple classes on a type:</li>
+</ul>
+<p>I wanted to write <code>&lt;i class=&quot;fa fa-trash fa-fw&quot;, aria-hidden=&quot;true&quot; /&gt;</code>, but instead we must write <code>&lt;i class=(&quot;fa&quot;, &quot;fa-trash&quot;, &quot;fa-fw&quot;), aria-hidden=&quot;true&quot;, /&gt;</code>. I just assume this is some limitation in the <code>html!</code> macro parser.</p>
+<ul>
+<li>property lists must be comma <code>,</code> separated and terminated:</li>
+</ul>
+<p>For example instead of <code>&lt;button class=&quot;button&quot; onclick=|_| PeopleMsg::AddPerson &gt;</code> you must write <code>&lt;button class=&quot;button&quot;, onclick=|_| PeopleMsg::AddPerson, &gt;</code>. This is true for standard HTML elements and custom components.</p>
+<ul>
+<li>raw character data must escaped:</li>
+</ul>
+<p>You can't write <code>&lt;p&gt;Random string&lt;/p&gt;</code> you must write <code>&lt;p&gt;{&quot;Random string&quot;}&lt;/p&gt;</code></p>
+<ul>
+<li><code>html!</code> macro arguments must have a single wrapping element</li>
+</ul>
+<p>For this it can be either the element you're using, or the handy empty element <code>&lt;&gt;&lt;/&gt;</code></p>
+<p>Thanks!</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=A static web app in Rust&url=https://bluejekyll.github.io/blog/posts/static-web-app-rust/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/static-web-app-rust/&title=A static web app in Rust"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/static-web-app-rust/&t=A static web app in Rust"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

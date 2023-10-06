@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>let blueJEKYLL=benjaminFRY; - writing</title>
+    <link href="https://bluejekyll.github.io/blog/topics/writing/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://bluejekyll.github.io/blog"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2021-01-23T00:00:00+00:00</updated>
+    <id>https://bluejekyll.github.io/blog/topics/writing/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Moved to Zola</title>
+        <published>2021-01-23T00:00:00+00:00</published>
+        <updated>2021-01-23T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://bluejekyll.github.io/blog/posts/moved-to-zola/" type="text/html"/>
+        <id>https://bluejekyll.github.io/blog/posts/moved-to-zola/</id>
+        
+        <content type="html">&lt;h2 id=&quot;301-moved-permanently&quot;&gt;301 Moved Permanently&lt;&#x2F;h2&gt;
+&lt;p&gt;Moved to Zola from Jekyll. Will be so much easier to maintain, the promise of Rust. Zola supports aliasing, so all old blog posts should have their alias with redirect to the new location.&lt;&#x2F;p&gt;
+&lt;p&gt;I followed these instructions from &lt;a href=&quot;https:&#x2F;&#x2F;www.getzola.org&#x2F;documentation&#x2F;getting-started&#x2F;overview&#x2F;&quot;&gt;Zola&lt;&#x2F;a&gt;. Zola supports aliases for URLs, which have been set for the previous sites layout. Please send me a note if an old article is noticed to be misconfigured. Compared to past tools I was using, Zola is such a pleasure because of it&#x27;s simplicity. There&#x27;s hardly anything more to using it than &lt;code&gt;brew install zola&lt;&#x2F;code&gt;... no dependency management hell.&lt;&#x2F;p&gt;
+&lt;p&gt;The site was built with the &lt;a href=&quot;https:&#x2F;&#x2F;bulma.io&quot;&gt;Bulma CSS&lt;&#x2F;a&gt; library. All icons come from &lt;a href=&quot;https:&#x2F;&#x2F;fontawesome.com&quot;&gt;Font Awesome&lt;&#x2F;a&gt;. The font is &lt;a href=&quot;https:&#x2F;&#x2F;www.recursive.design&quot;&gt;ArrowType Recursive&lt;&#x2F;a&gt;. I&#x27;m sure in other hands it could be made to look better, but for a backend dev, I&#x27;m happy with how it&#x27;s turned out.&lt;&#x2F;p&gt;
+&lt;p&gt;Thank you to everyone who&#x27;s contributed to the above projects!&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Moved to Github.io</title>
+        <published>2016-08-17T00:00:00+00:00</published>
+        <updated>2016-08-17T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://bluejekyll.github.io/blog/posts/moved-to-github/" type="text/html"/>
+        <id>https://bluejekyll.github.io/blog/posts/moved-to-github/</id>
+        
+        <content type="html">&lt;h1 id=&quot;301-moved-permanently&quot;&gt;301 Moved Permanently&lt;&#x2F;h1&gt;
+&lt;p&gt;I was stuck on Blogger. It was crap. It was never updated. I just spent a few
+days getting up on Jekyll (and moved some posts). Jekyll is awesome.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

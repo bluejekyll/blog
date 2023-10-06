@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Easy Postgres extensions in Rust with pg-extend-rs</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Easy Postgres extensions in Rust with pg-extend-rs
+            </p>
+            <p class="subtitle is-4 is-italic">
+                A project to make Postgres extensions in Rust easy, you might learn how to use macro_rules, attribute macros, allocators and some FFI in this post
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;announcing-pg-extend&#x2F;">
+                    <span class="is-family-monospace">2018-12-27</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-database"></i>
+            
+            <span class="tooltip-text is-6">postgres</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>There were a few things that happened this year that got me excited for the possibilities of <em>stable</em> Rust entering new spaces. They all come in the form of APIs that have become stabilized with a lot of effort from all of the developers contributing to the language. I wish I could say I helped with that effort, I do get to exploit all of that effort in this new project. I want to express my thanks and greatest esteem towards the people who continue to push the language forward, making it more useful and more pleasurable to use. For me to be able to write this, the stabilization of procedural macros, custom allocators, and panic handlers were all necessary. Each of these was stabilized over the last year, thank you!</p>
+<h1 id="postgres-extensions-in-rust">Postgres extensions in Rust</h1>
+<p>Initially I started playing around with wanting to build Postgres extensions in Rust a while ago, but realized that there was a lot of unstable API work still being done in Rust that I dropped my initial efforts and focused on other things. That's all changed now! I started working in my spare time on this extension library a few weeks ago (which I may have use for in my day job). Building these tools today in stable Rust is possible because a lot of features have stabilized recently. I'm no Postgres internals expert, and have never written an extension for it before, but I decided to do this in the vein of fearlessly taking on problems with Rust.</p>
+<h2 id="goal">Goal</h2>
+<p>To build a library that makes it effortless to create Postgres extensions in Rust. This library needs to do a few things, which are currently implemented as C macros in Postgres header files, hey, my ancient knowledge of C continues to be helpful! As an aside, I still think people should learn C, and this is mostly because it remains the lingua franca for all foreign function interfaces (FFI) between different programming languages (and there's lots of software written in it out there, like Postgres).</p>
+<p>First things first, we will need a macro to define the &quot;module magic&quot; that informs Postgres that a dynamic library is able to be loaded by it's loader. Next we need to create a way to call into Rust from Postgres such that we can write standard Rust code, without needing to know the inner workings of Postgres and it's conventions in C. This wrapper should also make sure that the FFI boundary is respected between the C and Rust. Finally, we will want to use Postgres' allocator <code>palloc</code> for allocating all memory in the extensions.</p>
+<p>This might jump the gun a bit, but let's jump straight to the final code example (derived from <a href="https://www.postgresql.org/docs/11/xfunc-c.html#id-1.8.3.13.8">Postgres C-Language Functions examples</a>):</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">use </span><span>pg_extern_attr</span><span style="color:#f29668;">::</span><span>pg_extern</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">use </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>{pg_sys</span><span style="color:#bfbab0cc;">,</span><span> pg_magic}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// This tells Postgres this library is a Postgres extension
+</span><span style="color:#f07178;">pg_magic!</span><span>(version</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">PG_VERSION_NUM</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// The pg_extern attribute wraps the function in the proper functions syntax for C extensions
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">pg_extern</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">add_one</span><span>(</span><span style="color:#f29718;">value</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">i32</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">i32 </span><span>{
+</span><span>    (value </span><span style="color:#f29668;">+ </span><span style="color:#f29718;">1</span><span>)
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// Validate that the add_one function works in Rust as expected
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">test</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_add_one</span><span>() {
+</span><span>    </span><span style="color:#f07178;">assert_eq!</span><span>(</span><span style="color:#f07178;">add_one</span><span>(</span><span style="color:#f29718;">1</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>Follow the comments above which describe each important section to pay attention to, the full example is <a href="https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/examples/add_one/src/lib.rs">available in the repo</a>.</p>
+<p>This is the way in which the function will be executed in Postgres:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>postgres=# SELECT add_one(3);
+</span><span> add_one
+</span><span>---------
+</span><span>       4
+</span><span>(1 row)
+</span></code></pre>
+<h2 id="prerequisites-we-need-the-c-bindings">Prerequisites, we need the C bindings</h2>
+<p>Bindgen to the rescue! One of the greatest tools in the Rust ecosystem when building FFI code, is bindgen. We're going to use this to define bindings to the Postgres C types we need in Rust. To do this, in the <code>pg_extend</code> <a href="https://crates.io/crates/pg-extend">crate</a>, we're going to define a <code>pg_sys</code> <a href="https://github.com/bluejekyll/pg-extend-rs/tree/f3e5620a43d325b413a9d0c069bcc99b12505e1d">module</a> and run bindgen in a <code>build.rs</code> <a href="https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/build.rs">script</a>.</p>
+<p>I won't go over this in detail, bindgen has a great set of <a href="https://rust-lang.github.io/rust-bindgen/">documentation</a> around it for generating FFI bindings to C. The headers we're using are from the <code>postgres/include/server</code>, and are defined in the <code>wrapper.h</code> <a href="https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/wrapper.h">file</a>.</p>
+<h2 id="defining-pg-magic">Defining pg_magic</h2>
+<p>The postgres magic macro, <code>pg_magic!(version)</code>, does a few different things. The primary goal is to tell Postgres that this is a module it can load. Secondarily, it also sets up some default global variables and functions. Before I display this, I should mention that I did look at the <code>pg_module</code> macro in <a href="https://github.com/thehydroimpulse/postgres-extension.rs">thehydroimpulse/postgres-extension.rs</a>, so I would be remiss if I didn't mention that it did help point me in the right direction. Let's look at what <code>pg_magic</code> generates, you can use the <code>cargo +nightly expand</code> command to get all macro expansions (I also like <code>cargo doc</code> for viewing all the APIs), see code comments for explanations:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// We set the allocator to a custom allocator for Postgres, we&#39;ll cover this later...
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">global_allocator</span><span>]
+</span><span style="color:#ff7733;">static </span><span style="color:#f29718;">GLOBAL</span><span style="color:#bfbab0cc;">: </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_alloc</span><span style="color:#f29668;">::</span><span>PgAllocator </span><span style="color:#f29668;">= </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_alloc</span><span style="color:#f29668;">::</span><span>PgAllocator</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// The magic function Postgres looks for on load of the module, without this Postgres will reject
+</span><span style="font-style:italic;color:#5c6773;">//    the library. `no_mangle` makes sure that the symbol name is not munged, `link_name` forces
+</span><span style="font-style:italic;color:#5c6773;">//    the binding name, It&#39;s probably not necessary.
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">no_mangle</span><span>]
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">allow</span><span>(non_snake_case)]
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">allow</span><span>(unused)]
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">link_name </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&quot;Pg_magic_func&quot;</span><span>]
+</span><span style="color:#ff7733;">pub extern </span><span style="color:#c2d94c;">&quot;C&quot; </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">Pg_magic_func</span><span>() </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;static </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Pg_magic_struct {
+</span><span>    </span><span style="color:#ff7733;">use </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>{pg_sys</span><span style="color:#bfbab0cc;">,</span><span> register_panic_handler}</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>mem</span><span style="color:#f29668;">::</span><span>size_of</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>os</span><span style="color:#f29668;">::</span><span>raw</span><span style="color:#f29668;">::</span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// This defines what configuration the extension was built with, the interface for the `Pg_magic_func`
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    returns a reference to this const, to match that which postgres requires.
+</span><span>    </span><span style="color:#ff7733;">const</span><span> my_magic</span><span style="color:#bfbab0cc;">: </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Pg_magic_struct </span><span style="color:#f29668;">= </span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Pg_magic_struct {
+</span><span>        len</span><span style="color:#bfbab0cc;">: </span><span>size_of</span><span style="color:#f29668;">::</span><span>&lt;pg_sys</span><span style="color:#f29668;">::</span><span>Pg_magic_struct&gt;() </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">,
+</span><span>        version</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">PG_VERSION_NUM </span><span style="color:#f29668;">as </span><span>std</span><span style="color:#f29668;">::</span><span>os</span><span style="color:#f29668;">::</span><span>raw</span><span style="color:#f29668;">::</span><span style="color:#ff7733;">c_int </span><span style="color:#f29668;">/ </span><span style="color:#f29718;">100</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// The rest of this options all come from compile time parameters in the Postgres build.
+</span><span>        funcmaxargs</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">FUNC_MAX_ARGS </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">,
+</span><span>        indexmaxkeys</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">INDEX_MAX_KEYS </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">,
+</span><span>        namedatalen</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">NAMEDATALEN </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">,
+</span><span>        float4byval</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">USE_FLOAT4_BYVAL </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">,
+</span><span>        float8byval</span><span style="color:#bfbab0cc;">: </span><span>pg_sys</span><span style="color:#f29668;">::</span><span style="color:#f29718;">USE_FLOAT8_BYVAL </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">,
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// As this is the entry point for the library loading, we use this as an opportunity
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    to register a panic handler, so that we can control errors being reported back
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    from Rust to C (Postgres). More on this later.
+</span><span>    </span><span style="color:#f07178;">register_panic_handler</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#f29668;">&amp;</span><span>my_magic
+</span><span>}
+</span></code></pre>
+<p>The <code>pg_magic</code> macro can only be used once in a library. This will become clear with the <code>register_panic_handler</code> which should only be called once (though I don't think it should matter if it happens more than that), and <code>#[global_allocator]</code> can only exist once in a library. I believe this implementation is correct, but if people have opinions on a better way to do this, please reach out.</p>
+<p>Now that we have that, the library is marked as a Postgres extension that can be loaded dynamically.</p>
+<h2 id="unwrapping-pg-extern">Unwrapping pg_extern</h2>
+<p>The pg_extern attribute macro is where all the fun is. There are a number of things it does, and feel free to look at it's <a href="https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extern-attr/src/lib.rs#L211">implementation</a>. I built this after looking at a lot of documentation, some examples I found online, and the experience I had building this other procedural macro, <a href="https://crates.io/crates/enum-as-inner">enum-as-inner</a>. It's not the most straight forward process, but given Rust's type safety, it's generally clear <em>why</em> it's wrong, if not <em>how</em> to fix it (also <code>cargo +nightly expand</code> is a godsend here). I'm not going to walk through the macro implementation here, but rather what it produces (again, see the code comments inline):</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// Again, an unmangled name
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">no_mangle</span><span>]
+</span><span style="color:#ff7733;">pub extern </span><span style="color:#c2d94c;">&quot;C&quot; </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">pg_add_one</span><span>(
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// This is the parameter as defined in Postgres,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    it actually is a type alias to `*mut FunctionCallInfoData`.
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    it&#39;s mutable, because we can use it for returning data from
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    the function (though this isn&#39;t supported by the library yet)
+</span><span>    </span><span style="color:#f29718;">func_call_info</span><span style="color:#bfbab0cc;">: </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>FunctionCallInfo,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// The return is a `Datum` type which is actually a type alias to `usize`,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    though we keep this hidden in the library.
+</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Datum {
+</span><span>    </span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>panic</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Here we unsafely get a mutable reference to the `FunctionCallInfoData`,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    again the type is actually `*mut FunctionCallInfoData`. After this point
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    the borrow checker will start guaranteeing that we&#39;re not doing anything
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    untoward with the data.
+</span><span>    </span><span style="color:#ff7733;">let</span><span> func_info</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>FunctionCallInfoData </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">unsafe </span><span>{
+</span><span>        func_call_info
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_mut</span><span>()
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;func_call_info was unexpectedly NULL&quot;</span><span>)
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// We&#39;re going to put as much as we can into the catch_unwind block, this
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    will allow us to handle the panic, and perform any cleanup with the
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    Postgres data that we need to
+</span><span>    </span><span style="color:#ff7733;">let</span><span> panic_result </span><span style="color:#f29668;">= </span><span>panic</span><span style="color:#f29668;">::</span><span>catch_unwind(|| {
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// This extracts references to the arguments that were passed into the function.
+</span><span>        </span><span style="color:#ff7733;">let </span><span>(args</span><span style="color:#bfbab0cc;">,</span><span> args_null) </span><span style="color:#f29668;">= </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>get_args(func_info)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// In this specific example, there is one parameter. It is converted from the
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//    Datum representation via a conversion defined in the `pg_extend::pg_datum`
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//    module.
+</span><span>        </span><span style="color:#ff7733;">let</span><span> arg_0</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">i32 </span><span style="color:#f29668;">= </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_datum</span><span style="color:#f29668;">::</span><span>TryFromPgDatum</span><span style="color:#f29668;">::</span><span>try_from(
+</span><span>            pg_extend</span><span style="color:#f29668;">::</span><span>pg_datum</span><span style="color:#f29668;">::</span><span>PgDatum</span><span style="color:#f29668;">::</span><span>from_raw(args[</span><span style="color:#f29718;">0</span><span style="color:#ff7733;">usize</span><span>]</span><span style="color:#bfbab0cc;">,</span><span> args_null[</span><span style="color:#f29718;">0</span><span style="color:#ff7733;">usize</span><span>])</span><span style="color:#bfbab0cc;">,
+</span><span>        )
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// it&#39;s safe for us to panic, as there is a panic handler registered.
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//    (this message can be far better, and will be).
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;unsupported function argument type for arg_0&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Here is the actual function call! We capture it&#39;s result.
+</span><span>        </span><span style="color:#ff7733;">let</span><span> result </span><span style="color:#f29668;">= </span><span style="color:#f07178;">add_one</span><span>(arg_0)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Now we convert the result into a PgDatum, which is our bridge type between this
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//    library, Rust types, and the `pg_extend::pg_sys` types.
+</span><span>        pg_extend</span><span style="color:#f29668;">::</span><span>pg_datum</span><span style="color:#f29668;">::</span><span>PgDatum</span><span style="color:#f29668;">::</span><span>from(result)
+</span><span>    })</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Here we inspect the panic result
+</span><span>    </span><span style="color:#ff7733;">match</span><span> panic_result {
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(result) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// if it&#39;s ok, and is_null, then we express that through the `&amp;mut` reference to
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">//    FunctionCallInfoData.
+</span><span>            func_info</span><span style="color:#f29668;">.</span><span>isnull </span><span style="color:#f29668;">=</span><span> result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_null</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// The PgDatum type has a conversion into the Postgres Datum type. We&#39;re outside the
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">//    the catch_unwind block, so it&#39;s important this next call never panics, it&#39;s
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">//    a direct conversion to Datum in `PgDatum::into_datum` so this should be true.
+</span><span>            result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into_datum</span><span>()
+</span><span>        }
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(err) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// In an error case, we&#39;re just expressing that there is no data to return.
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">//    In the future there may be more things we identify that should be cleaned up.
+</span><span>            func_info</span><span style="color:#f29668;">.</span><span>isnull </span><span style="color:#f29668;">= </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// Now continue the panic handling.
+</span><span>            panic</span><span style="color:#f29668;">::</span><span>resume_unwind(err)
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>The above code tries to do as little as possible inside the macro generated code. This is by design, as it's harder to write meta-code than it is to write <em>actual</em> code. Also, more shared library code should help with optimization and code size. I like that so little <code>unsafe</code> code was necessary, but I'm guessing there will be a lot more as we try to implement all the Datum type conversions. All the supported Datum conversions will be available in the <code>pg_extend::pg_datum</code> <a href="https://github.com/bluejekyll/pg-extend-rs/blob/f3e5620a43d325b413a9d0c069bcc99b12505e1d/pg-extend/src/pg_datum.rs#L53">module</a> (I should note, at the time of this writing there is only a conversion for <code>i32</code> to and from <code>Datum</code>, not very useful yet).</p>
+<p>There is also a function which declares the calling convention ABI this function supports:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">no_mangle</span><span>]
+</span><span style="color:#ff7733;">pub extern </span><span style="color:#c2d94c;">&quot;C&quot; </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">pg_finfo_pg_add_one</span><span>() </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;static </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Pg_finfo_record {
+</span><span>    </span><span style="color:#ff7733;">const</span><span> my_finfo</span><span style="color:#bfbab0cc;">: </span><span>pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Pg_finfo_record </span><span style="color:#f29668;">=
+</span><span>        pg_extend</span><span style="color:#f29668;">::</span><span>pg_sys</span><span style="color:#f29668;">::</span><span>Pg_finfo_record { api_version</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">1 </span><span>}</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#f29668;">&amp;</span><span>my_finfo
+</span><span>}
+</span></code></pre>
+<p>Which is fairly straight forward.</p>
+<p>By-the-way, this is the first time I've worked with panic handling in Rust, so please reach out if you see anything that looks wrong with the way I've written this. Tonight, I was even informed of a new library for trying to enforce no panics, named <a href="https://crates.io/crates/no-panic">no_panic</a>. As I mentioned above that we'd get to the panic handler, so let's look at that.</p>
+<h3 id="errors-and-panic-handling">Errors and Panic handling</h3>
+<p>The <code>register_panic_handler</code> function is responsible for taking all panics from Rust, and properly (I think) converting them into errors reported to Postgres.</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/// This will replace the current panic_handler
+</span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">register_panic_handler</span><span>() {
+</span><span>    </span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>panic</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">use crate</span><span style="color:#f29668;">::</span><span>pg_error</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// set (and replace the existing) panic handler, this will tell Postgres that the call failed
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//   a level of Fatal will force the DB connection to be killed.
+</span><span>    panic</span><span style="color:#f29668;">::</span><span>set_hook(</span><span style="font-style:italic;color:#39bae6;">Box</span><span style="color:#f29668;">::</span><span>new(|</span><span style="color:#f29718;">info</span><span>| {
+</span><span>        </span><span style="color:#ff7733;">let</span><span> level </span><span style="color:#f29668;">= </span><span>pg_error</span><span style="color:#f29668;">::</span><span>Level</span><span style="color:#f29668;">::</span><span>Fatal</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        pg_error</span><span style="color:#f29668;">::</span><span>log(level</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">file!</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">line!</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">module_path!</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;panic in Rust extension: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> info))</span><span style="color:#bfbab0cc;">;
+</span><span>    }))</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>The <code>Fatal</code> error type has a side-effect of failing any running transaction, and closing the connection to the DB. In my testing, if we panicked without a handler, it would cause Postgres to kill the entire DB process, restart and recover. This would be undesirable to say the least, thus the panic handler. Let's look at <code>pg_error::log</code> function, because it was really annoying:</p>
+<h3 id="how-to-easily-lose-3-days-of-development-time">How to easily lose 3 days of development time</h3>
+<p>Everything in building this library was fairly straightforward up to this point, and just worked. Which was a great feeling. Then while trying to call the log routines in Postgres, I nearly gave up. It was the first case where I was attempting to call Postgres APIs from the Rust, rather than the other direction, and I couldn't get it to link, here's the code:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// The log method implicitly needs to allocate a C style string. I&#39;m not super happy with this
+</span><span style="font-style:italic;color:#5c6773;">//    interface as it doesn&#39;t allow a caller to just pass in a `Cstr` directly, so this will
+</span><span style="font-style:italic;color:#5c6773;">//    change in the future. Also, `file` and `func_name` will be `&amp;&#39;static str` in almost all
+</span><span style="font-style:italic;color:#5c6773;">//    cases, so we&#39;ll probably change this back to that.
+</span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">log</span><span>&lt;T1, T2, T3&gt;(</span><span style="color:#f29718;">level</span><span style="color:#bfbab0cc;">:</span><span> Level, </span><span style="color:#f29718;">file</span><span style="color:#bfbab0cc;">:</span><span> T1, </span><span style="color:#f29718;">line</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u32</span><span>, </span><span style="color:#f29718;">func_name</span><span style="color:#bfbab0cc;">:</span><span> T2, </span><span style="color:#f29718;">msg</span><span style="color:#bfbab0cc;">:</span><span> T3)
+</span><span style="color:#ff7733;">where
+</span><span>    T1</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Into</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;&gt;,
+</span><span>    T2</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Into</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;&gt;,
+</span><span>    T3</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Into</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;&gt;,
+</span><span>{
+</span><span>    </span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>ffi</span><span style="color:#f29668;">::</span><span>CString</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// convert to C ffi, we need to allocate on conversion from Rust strings to C strings, due to
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    the fact that they are stored differently. i.e. Rust stores the length of the string,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//    whereas C is null terminated.
+</span><span>    </span><span style="color:#ff7733;">let</span><span> file </span><span style="color:#f29668;">= </span><span>CString</span><span style="color:#f29668;">::</span><span>new(file</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>())</span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;this should not fail: file&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> line </span><span style="color:#f29668;">=</span><span> line </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">c_int</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> func_name </span><span style="color:#f29668;">= </span><span>CString</span><span style="color:#f29668;">::</span><span>new(func_name</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>())</span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;this should not fail: func_name&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> msg </span><span style="color:#f29668;">= </span><span>CString</span><span style="color:#f29668;">::</span><span>new(msg</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>())</span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;this should not fail: msg&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// now we perform the conversions as required by the FFI interfaces.
+</span><span>    </span><span style="color:#ff7733;">let</span><span> file</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">*const c_char </span><span style="color:#f29668;">=</span><span> file</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_ptr</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> func_name</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">*const c_char </span><span style="color:#f29668;">=</span><span> func_name</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_ptr</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> msg</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">*const c_char </span><span style="color:#f29668;">=</span><span> msg</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_ptr</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">let</span><span> errlevel</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">c_int </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">c_int</span><span style="color:#f29668;">::</span><span>from(level)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// log the data:
+</span><span>    </span><span style="color:#ff7733;">unsafe </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// I don&#39;t know the reasoning behind these interfaces in Postgres, but I was able to unwrap
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//    these from the standard `ereport` macro in the Postgres headers. `errstart`, `errmsg`,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">//    and `errfinish` are calls into Postgres from this library.
+</span><span>        </span><span style="color:#ff7733;">if </span><span>pg_sys</span><span style="color:#f29668;">::</span><span>errstart(errlevel</span><span style="color:#bfbab0cc;">,</span><span> file</span><span style="color:#bfbab0cc;">,</span><span> line</span><span style="color:#bfbab0cc;">,</span><span> func_name</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">ERR_DOMAIN</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_ptr</span><span>() </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">*const c_char</span><span>) {
+</span><span>            </span><span style="color:#ff7733;">let</span><span> msg_result </span><span style="color:#f29668;">= </span><span>pg_sys</span><span style="color:#f29668;">::</span><span>errmsg(msg)</span><span style="color:#bfbab0cc;">;
+</span><span>            pg_sys</span><span style="color:#f29668;">::</span><span>errfinish(msg_result)</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>This all works <em>now</em>, but it took me a while to get it to build. The reason was <code>Undefined symbols for architecture x86_64</code>! I tried everything to get this to link. I tried linking against every <code>dylib</code> (I'm on macOS) and <code>.a</code> in the <code>brew</code> installed version of Postgres, searched them all with <code>nm</code>. Then I built Postgres from scratch and scoured every built artifact again with <code>nm</code> to find the what I should link against, statically or dynamically, for those symbols. I almost gave up, but then came across this <a href="https://stackoverflow.com/questions/41456777/how-to-build-a-postgres-extension-using-cgo">answer</a> on stackoverflow for building postgres extensions with <code>cgo</code>. And then I spent a bunch of time trying to figure out how pass similar flags to the Rust compiler, and here's the answer:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$&gt; RUSTFLAGS=&quot;-C link-arg=-undefineddynamic_lookup&quot; cargo build
+</span><span>   Compiling pg-extend v0.2.0 (${PATH_TO_LIBRARY}/pg-extend-rs/pg-extend)
+</span><span>   Compiling add-one v0.1.0 (${PATH_TO_LIBRARY}/pg-extend-rs/examples/add_one)
+</span><span>   Finished release [optimized + debuginfo] target(s) in 8.89s
+</span></code></pre>
+<p>The relief of something finally building after beating your head against that virtual wall behind the computer screen is the greatest of gifts. It let's you finally sleep and stop considering all the possible things you haven't tried yet to fix the problem.</p>
+<p>From the docs, here's what that argument does to <code>ld</code> in the <code>llvm</code> tools: <code>Specifies how undefined symbols are to be treated. Options are: error, warning, suppress, or dynamic_lookup.  The default is error.</code></p>
+<p>Now, one last thing, the allocators.</p>
+<h2 id="properly-allocating-memory-in-postgres">Properly allocating memory in Postgres</h2>
+<p>Postgres has it's own allocator, <code>palloc</code>, as well as an associated <code>pfree</code>. All memory allocated with <code>palloc</code> is guaranteed to be deallocated when a transaction and/or connection are closed. This is a nice feature for not leaking memory. Somewhat recently, Rust stabilized overriding the global allocator. This was the line in the <code>pg_magic</code> macro that was annotated with <code>#[global_allocator]</code>. The allocator implementation is straight forward, but I have some open questions about whether or not it's correct, here it is:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">PgAllocator</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">unsafe impl </span><span>GlobalAlloc </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">PgAllocator </span><span>{
+</span><span>    </span><span style="color:#ff7733;">unsafe fn </span><span style="color:#ffb454;">alloc</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">layout</span><span style="color:#bfbab0cc;">:</span><span> Layout) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">*mut u8 </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// TODO: is there anything we need ot do in terms of layout, etc?
+</span><span>        pg_sys</span><span style="color:#f29668;">::</span><span>palloc(layout</span><span style="color:#f29668;">.</span><span style="color:#f07178;">size</span><span>()) </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">*mut u8
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">unsafe fn </span><span style="color:#ffb454;">dealloc</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">*mut u8</span><span>, </span><span style="color:#f29718;">_layout</span><span style="color:#bfbab0cc;">:</span><span> Layout) {
+</span><span>        pg_sys</span><span style="color:#f29668;">::</span><span>pfree(ptr </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">*mut c_void</span><span>)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>It's pretty simple (also requires the <code>RUSTFLAG</code> linker setting), it just calls into the Postgres allocator. You'll notice the <code>TODO</code> there as I'm unclear what to do about alignment or other layout issues.</p>
+<h2 id="load-the-extension-in-posrgres">Load the extension in Posrgres</h2>
+<p>Connect to the DB and load the function (your DB connection probably differs):</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$&gt; psql postgres
+</span><span>psql (11.1)
+</span><span>Type &quot;help&quot; for help.
+</span><span>
+</span><span>postgres=# CREATE FUNCTION add_one(integer) RETURNS integer AS &#39;${PATH_TO_LIBRARY}/pg-extend-rs/target/release/libadd_one.dylib&#39;, &#39;pg_add_one&#39; LANGUAGE C STRICT;
+</span><span>CREATE FUNCTION
+</span><span>postgres=# SELECT add_one(3);
+</span><span> add_one
+</span><span>---------
+</span><span>       4
+</span><span>(1 row)
+</span><span>
+</span><span>postgres=# \q
+</span></code></pre>
+<p>Notice that the symbol to load is <code>pg_add_one</code> and not <code>add_one</code>, as the latter would have conflicted with the original function in Rust. As a future task, I want to build generators for the psql scripts to load the function</p>
+<h2 id="just-the-beginning">Just the beginning</h2>
+<p>This is really just the beginning of this library. There is going to be a long road to complete it, as there are a lot of type conversions to implement for the <code>PgDatum</code> type. As I have time, I will get to it, but if you find this useful and want to contribute, please feel welcome. I've picked as open a set of licenses as possible to allow people from all walks to get in on the fun, <a href="https://github.com/bluejekyll/pg-extend-rs">bluejekyll/pg-extend-rs</a>.</p>
+<p>As always, thank you to all the Rust contributors who continue to make the language an absolute pleasure.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Easy Postgres extensions in Rust with pg-extend-rs&url=https://bluejekyll.github.io/blog/posts/announcing-pg-extend/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/announcing-pg-extend/&title=Easy Postgres extensions in Rust with pg-extend-rs"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/announcing-pg-extend/&t=Easy Postgres extensions in Rust with pg-extend-rs"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

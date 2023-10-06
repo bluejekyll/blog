@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rust and the most elegant FSM</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Rust and the most elegant FSM
+            </p>
+            <p class="subtitle is-4 is-italic">
+                Finite state machines should be a foundation upon which Software Engineers build complex systems. In this post I want to show how Rust&#x27;s enum type supports building FSM&#x27;s in a very simple and elegant manner.
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;rust-and-the-most-elegant-fsm&#x2F;">
+                    <span class="is-family-monospace">2015-08-13</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <h1 id="fsm-what">FSM, what?</h1>
+<p>For anyone who has studied Computer Science, finite state machines are drilled into your head without mercy (or should have been, go ask for you $$$,$$$'s back if these were not drilled into your head). The first CS class I took in college was basically all FSM's, DFA's (deterministic finite automaton) and Turing machines. I don't want to get into the difference between all of these, I'm only going to refer to FSM's. In this example I'm more specifically defining a DFA, as all of the states are known, and there is a begin and end.</p>
+<p>Ok, but why is this important? FSM's can simplify problems where you have a known input and known outputs. Specifically what I want to use one for in this example is parsing, boring old parsing. It actually wasn't until I was in the industry that I truly began to appreciate how much simpler and more maintainable your code became if you took the time to define state machines to determine how to move from one state to another.</p>
+<h1 id="background">Background</h1>
+<p>Firstly, I'm still somewhat new to the Rust language, so when a &quot;real&quot; Rust person reads this, they'll probably complain that I've done xyz wrong, or should do it another way. Let me know! I'd love to understand what I could be doing better. I've been searching for a meaty project to work on to hone my skills in this language, and then I finally found one; It seems like there are security advisories that come out around DNS and specifically Bind all the time. Here is the list of all known Security Advisories in Bind9. Reading through some of the issues made me think, wtf, I'll just write a new DNS server in Rust, b/c you know, why not and it will be safe implicitly, right? While doing that, I was writing the parsers for the binary record data from the DNS rfc's and fell on a really nice way of doing FSM's in Rust.</p>
+<p>Now in Java I've used lots of different FSM generators, because I wanted strong language guarantees, for reference, my favorite right now was written by a friend of mine and is annotation based called Tron. This is useful because Java's enums and other basic constructs are not quite as expressive as some of the expressions you can make in Rust.</p>
+<h1 id="on-to-the-fsm">On to the FSM!</h1>
+<p>The definition of what we need to parse from RFC1035:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>3.1. Name space definitions
+</span><span>Domain names in messages are expressed in terms of a sequence of labels.
+</span><span>Each label is represented as a one octet length field followed by that
+</span><span>number of octets. Since every domain name ends with the null label of
+</span><span>the root, a domain name is terminated by a length byte of zero. The
+</span><span>high order two bits of every length octet must be zero, and the
+</span><span>remaining six bits of the length field limit the label to 63 octets or
+</span><span>less.
+</span><span>To simplify implementations, the total length of a domain name (i.e.,
+</span><span>label octets and label length octets) is restricted to 255 octets or
+</span><span>less. Although labels can contain any 8 bit values in octets that make up a
+</span><span>label, it is strongly recommended that labels follow the preferred
+</span><span>syntax described elsewhere in this memo, which is compatible with
+</span><span>existing host naming conventions. Name servers and resolvers must
+</span><span>compare labels in a case-insensitive manner (i.e., A=a), assuming ASCII
+</span><span>with zero parity. Non-alphabetic codes must match exactly.
+</span></code></pre>
+<p>There are some more sections that provide details on things like pointers, you can read the spec if you want. Here are the states (I used <a href="http://madebyevan.com/fsm/">http://madebyevan.com/fsm/</a> to build this, which doesn't have edge avoidance so I added some extra states to keep the lines in order):</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/rust-and-the-most-elegant-fsm/DomainNameParserStates.png" alt="Domain Name Parser  States" /></p>
+<p>This state diagram basically represents the above, so I decided to translate this (minus the 'offset' and 'store' states) to Rust enums.</p>
+<p>This ended up being pretty elegant. but first a side note on enums in Rust.</p>
+<h1 id="enum-really">'enum' really?</h1>
+<p>So I've noticed this come up in discussions online a few times now. With questions like, &quot;how do you enumerate a Rust enum?&quot; (which has a really funny answer, IMO): You can't! Wait what? You can't enumerate a Rust enum? Why is it called an enum? No, seriously, I don't have an answer to this, why was it called 'enum', when you can't enumerate it's values (other then writing them in order, you can't in code treat them as an array or series as you can in other languages, Java/C/C++ to name a few).</p>
+<p>I'm sure someone has an answer to that, but in the mean time I needed to clarify them in my mind. I think they should have been called 'union's because that is what they are most closely related to. In C a union is a data type which which occupies enough memory space to only hold the largest member of the union, but what C doesn't give you is a way to know which thing in that union it really is! (read more here: <a href="http://www.tutorialspoint.com/cprogramming/c_unions.htm">C unions</a>)</p>
+<p>What's cool in Rust is that it does tell you what's stored in the, ahem, enum. So you can write matching (or destructuring) logic like this:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">if let </span><span>MyEnum</span><span style="color:#f29668;">::</span><span>Type1 </span><span style="color:#f29668;">=</span><span> my_var {
+</span><span>   </span><span style="color:#f07178;">do_something_really_awesome</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>Which is very powerful and cool.</p>
+<h1 id="fsm-now">FSM Now!</h1>
+<p>Ok so now for the super awesomeness of Rust. My enum is going to have four states, <code>LabelLengthOrPointer == start</code>, <code>Label</code>, <code>Pointer</code>, <code>Root == end</code>.</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/// This is the list of states for the label parsing state machine
+</span><span style="color:#ff7733;">enum </span><span style="color:#59c2ff;">LabelParseState </span><span>{
+</span><span>  LabelLengthOrPointer</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#5c6773;">// basically the start of the FSM
+</span><span>  Label(</span><span style="color:#ff7733;">u8</span><span>)</span><span style="color:#bfbab0cc;">,   </span><span style="font-style:italic;color:#5c6773;">// storing length of the label
+</span><span>  Pointer(</span><span style="color:#ff7733;">u8</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#5c6773;">// location of pointer in slice,
+</span><span>  Root</span><span style="color:#bfbab0cc;">,        </span><span style="font-style:italic;color:#5c6773;">// root is the end of the labels list, aka null
+</span><span>}
+</span></code></pre>
+<p>Ok, now for the code to run the state machine:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/// parses the chain of labels
+</span><span style="font-style:italic;color:#5c6773;">/// this has a max of 255 octets, with each label being less than 63.
+</span><span style="font-style:italic;color:#5c6773;">/// all names will be stored lowercase internally.
+</span><span style="font-style:italic;color:#5c6773;">/// This will consume the portions of the Vec which it is reading...
+</span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">parse</span><span>(</span><span style="color:#f29718;">slice</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="font-style:italic;color:#39bae6;">Result</span><span>&lt;Name, FromUtf8Error&gt; {
+</span><span>  </span><span style="color:#ff7733;">let mut</span><span> state</span><span style="color:#bfbab0cc;">:</span><span> LabelParseState </span><span style="color:#f29668;">= </span><span>LabelParseState</span><span style="color:#f29668;">::</span><span>LabelLengthOrPointer</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let mut</span><span> labels</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt; </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">Vec</span><span style="color:#f29668;">::</span><span>with_capacity(</span><span style="color:#f29718;">3</span><span>)</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#5c6773;">// www.example.com
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// assume all chars are utf-8. We&#39;re doing byte-by-byte operations,
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">//   no endianess issues...
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// reserved: (1000 0000 aka 0800) &amp;&amp; (0100 0000 aka 0400)
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// pointer: (slice == 1100 0000 aka C0), then 03FF &amp; slice = offset
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// label: 03FF &amp; slice = length; slice.next(length) = label
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// root: 0000
+</span><span>  </span><span style="color:#ff7733;">loop </span><span>{
+</span><span>    state </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">match</span><span> state {
+</span><span>      LabelParseState</span><span style="color:#f29668;">::</span><span>LabelLengthOrPointer </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// determine what the next label is
+</span><span>        </span><span style="color:#ff7733;">match</span><span> slice</span><span style="color:#f29668;">.</span><span style="color:#f07178;">pop</span><span>() {
+</span><span>          </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(</span><span style="color:#f29718;">0</span><span>) </span><span style="color:#f29668;">| </span><span style="font-style:italic;color:#39bae6;">None </span><span style="color:#f29668;">=&gt; </span><span>LabelParseState</span><span style="color:#f29668;">::</span><span>Root</span><span style="color:#bfbab0cc;">,
+</span><span>          </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(byte) </span><span style="color:#ff7733;">if</span><span> byte </span><span style="color:#f29668;">&amp; </span><span style="color:#f29718;">0xC0 </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0xC0 </span><span style="color:#f29668;">=&gt;
+</span><span>                                           LabelParseState</span><span style="color:#f29668;">::</span><span>Pointer(byte </span><span style="color:#f29668;">&amp; </span><span style="color:#f29718;">0x3F</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>          </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(byte) </span><span style="color:#ff7733;">if</span><span> byte </span><span style="color:#f29668;">&lt;= </span><span style="color:#f29718;">0x3F </span><span style="color:#f29668;">=&gt; </span><span>LabelParseState</span><span style="color:#f29668;">::</span><span>Label(byte)</span><span style="color:#bfbab0cc;">,
+</span><span>          </span><span style="color:#f29668;">_ =&gt; </span><span style="color:#f07178;">unimplemented!</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>        }
+</span><span>      }</span><span style="color:#bfbab0cc;">,
+</span><span>      LabelParseState</span><span style="color:#f29668;">::</span><span>Label(count) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push</span><span>(</span><span style="color:#f07178;">try!</span><span>(util</span><span style="color:#f29668;">::</span><span>parse_label(slice</span><span style="color:#bfbab0cc;">,</span><span> count)))</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// reset to collect more data
+</span><span>        LabelParseState</span><span style="color:#f29668;">::</span><span>LabelLengthOrPointer
+</span><span>      }</span><span style="color:#bfbab0cc;">,
+</span><span>      LabelParseState</span><span style="color:#f29668;">::</span><span>Pointer(offset) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// lookup in the hashmap the label to use
+</span><span>        </span><span style="color:#f07178;">unimplemented!</span><span>()
+</span><span>      }</span><span style="color:#bfbab0cc;">,
+</span><span>      LabelParseState</span><span style="color:#f29668;">::</span><span>Root </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// technically could return here...
+</span><span>        </span><span style="color:#ff7733;">break</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(Name { labels</span><span style="color:#bfbab0cc;">:</span><span> labels })
+</span><span>}
+</span></code></pre>
+<p>code <a href="https://github.com/bluejekyll/trust-dns/blob/master/src/rr/domain.rs">here</a>.</p>
+<p>So I'll just point out a couple of things that Rust does for us here: 1) guarantee that all states are considered 2) that each state has a result because of the assignment to the state. You'll notice that there are some unimplemented!()'s in there, that's because this is a work in progress, but I was so excited about how easy it was to write an FSM in Rust with just the standard language semantics, that I just had to share.</p>
+<p>Basically, the sweet sauce here is that the 'state' can carry context implicitly in the enum as part of it's tuple definition. You can obviously make that more complex than what I did here, but this was such a simple and elegant solution to a common problem.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Rust continues to impress me while learning it. There are definitely some oddities like enum's being called enum's when they really are something else. Also, I continue to fight the compiler on mutability around ownership, etc. It's not that I don't get the ownership model, I do... it's that after working with a GC in Java for so long, I have to train myself to think about it each time I pass a reference to something, and as far as I can tell 90% of the time I'm getting it wrong the first time.</p>
+<p>Anyway, getting back to hacking DNS now.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Rust and the most elegant FSM&url=https://bluejekyll.github.io/blog/posts/rust-and-the-most-elegant-fsm/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/rust-and-the-most-elegant-fsm/&title=Rust and the most elegant FSM"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/rust-and-the-most-elegant-fsm/&t=Rust and the most elegant FSM"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

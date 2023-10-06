@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Announcing Hickory DNS</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Announcing Hickory DNS
+            </p>
+            <p class="subtitle is-4 is-italic">
+                Trust-DNS is becoming Hickory DNS
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;announcing-hickory-dns&#x2F;">
+                    <span class="is-family-monospace">2023-10-05</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-network-wired"></i>
+            
+            <span class="tooltip-text is-6">dns</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p><em>Trust-DNS after many years of development is attracting more industry interest. In order to support and protect investment in the project the project is being rebranded to Hickory DNS with properly registered trademarks. This article describes the reasoning behind that change. This post was originally published to the <a href="https://www.memorysafety.org/blog/announcing-hickory-dns/">Prossimo blog</a>.</em></p>
+<p><img src="https://bluejekyll.github.io/blog/posts/announcing-hickory-dns/hickory-dns-horizontal.png" alt="Hickory DNS" /></p>
+<p>Trust-DNS, a project I started on August 7, 2015, will now be known as <strong>Hickory DNS</strong>. Since its inception, the project has been an exciting experiment to build a systems level component in the memory safe, low overhead language, Rust. Over the years it's gone from a standard implementation of classic DNS to a toolbox capable of serving many needs. The Hickory DNS project supports DNSSEC, DoT, DoH, and DoQ. It has been used to build stub-resolvers, DNS authorities, experimental recursive resolvers, and low level protocol implementations.  I had a lot of personal goals for this project and with this name change I hope that it will help attract more interest to achieve them all.</p>
+<h2 id="why-make-this-change">Why make this change?</h2>
+<p>I chose the Trust-DNS name for good reasons, Rust was in the name, and I had the desire to make something trust-worthy. This has always been a project supported out of passion and as it’s attracted more interest from others we want to ensure that it has a future with a more widely appealing identity for consumers, developers, and funders. On top of that, we wanted to select a defensible trademark. The Trust-DNS brand name was deemed to be less defensible since it is a combination of generic words, especially in an industry where any DNS provider will want to talk about the trust their service provides. Hickory in this context is far less likely to occur unintentionally without directly referring to this project. Over the past year there's been a conversation going on with <a href="https://www.abetterinternet.org/about/">ISRG</a> to receive some support by way of their <a href="https://www.memorysafety.org/about/">Prossimo</a> project to add features and robustness to this software. They also intend to eventually use it in <a href="https://letsencrypt.org/about/">Let's Encrypt</a>. Since we are in the midst of a major push to advance functionality, it seemed like a good time to make the necessary changes to the name as well.</p>
+<p>Where did the name Hickory DNS come from? While considering the goals of this project, trust, security, reliability, safety arose as top priorities; the Hickory tree seemed like a good representation of those goals. A tree has some obvious relationships to the graph in DNS. The Hickory tree itself is a strong hardwood tree that tends to grow straight and look quite elegant. It's known for being hardy, growing all over North America. It’s tough and shock-resistant. These properties are all things that we've grown to appreciate in regards to having developed the project with the Rust language. By choosing something from nature to represent this, we're calling out the organic way in which this project has attracted interest and development from all over the world. As the project’s founder, I hope that with this name we can all feel proud of what's been built so far and recognize how much further the project can grow. Our contribution policies will remain unchanged and we will always welcome new contributions assuming they fit with our goals. We want the trust we've gained over the years to be something which people will continue to rely on.</p>
+<h2 id="how-will-this-impact-existing-users-and-contributors">How will this impact existing users and contributors?</h2>
+<p>We will be moving the project into the <a href="https://github.com/hickorydns">Hickory DNS</a> organization on GitHub. During this move we will also be changing the project name to Hickory DNS. This transition to an organization and away from my personal github account will allow for a greater set of administrative options for other collaborators, like <a href="https://github.com/djc">Dirkjan Ochtman</a> who’s been helping maintain the project for a couple of years now. All of the crates will start being published under the <code>hickory-*</code> name, for example the popular crates <code>trust-dns-resolver</code> and <code>trust-dns-proto</code> will become <code>hickory-resolver</code> and <code>hickory-proto</code>, while the server will be <code>hickory-dns</code>. There may be other changes that need to occur, if others have gone through similar moves, we'd be open to feedback about how to make it most effective. Things that we will not change: licensing (MIT or Apache 2.0), Code of Conduct, and seeking to make the best DNS software available.</p>
+<p>I want to thank the many users of and contributors to the Trust-DNS project and I hope you will join us by continuing to collaborate on the same project under the new name, Hickory DNS. This project would not be where it is without your support of 2,560 commits and 71,318 lines of code written by 170 collaborators. All of that has led to, according to GitHub, 1,136 dependent projects that use the software. Crates.io shows 20,310,799 downloads of the <a href="https://crates.io/crates/trust-dns-proto">proto</a> crate and 19,003,768 of the <a href="https://crates.io/crates/trust-dns-resolver">resolver</a> crate. With these new investments in the project, we hope to grow the usage of the <a href="https://crates.io/crates/trust-dns">server</a> and make it something people are comfortable deploying in their production systems. Thank you everyone for your confidence, I am excited for the future of this project, and I hope you are too. If you have any questions or concerns related to this change, feel free to reach out to me. Here's a Hickory tree in the woods near my parents’ house in New York, it’s probably 20 or 30 years old. I hope that together we can build something as beautiful.</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/announcing-hickory-dns/hickory-tree.png" alt="Hickory Tree" /></p>
+<p>Again, <strong>thank you!</strong></p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Announcing Hickory DNS&url=https://bluejekyll.github.io/blog/posts/announcing-hickory-dns/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/announcing-hickory-dns/&title=Announcing Hickory DNS"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/announcing-hickory-dns/&t=Announcing Hickory DNS"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OSGi, Jersey and Jetty</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                OSGi, Jersey and Jetty
+            </p>
+            <p class="subtitle is-4 is-italic">
+                
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;outdated&#x2F;osgi-jetty-jersey&#x2F;">
+                    <span class="is-family-monospace">2012-04-23</span>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p><em>Since writing this, I do not recommend OSGi any more, just use <a href="http://www.dropwizard.io">DropWizard</a></em></p>
+<p>This is a mini how-to on setting up Jersey (JAX-RS) with Jetty running in OSGi. I wouldn't necessarily say that this the recommended setup, and I encourage comments for better ways of doing what I've done.</p>
+<p>First off if you're not familiar with Jersey and JAX-RS, I'd recommend looking at it. It's a framework for developing RESTful applications using annotations and other methods to simplify deploying said applications. What's nice about this is you get to forget about all the boiler-plate code and just develop. Another cool feature is that if you write your code properly, then you can test it without the need of doing a full integration test (though, it's still a good idea to have those).</p>
+<p>Ok, first step, make sure your web-app's bundle is setup correctly for Jetty, put this in your manifest:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>Web-ContextPath: /bfry
+</span></code></pre>
+<p>The bfry being the root path of the web-app. When Jetty starts up, you should see some logs about the web-app being loaded. For this to work, in addition to the standard Jetty dependencies, I use these:</p>
+<pre data-lang="xml" style="background-color:#0f1419;color:#bfbab0;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;</span><span>org.eclipse.jetty.osgi</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;</span><span>jetty-osgi-boot</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;</span><span>${jetty.version}</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;</span><span>org.eclipse.jetty.osgi</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">groupId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;</span><span>jetty-httpservice</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">artifactId</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;</span><span>${jetty.version}</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">version</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">dependency</span><span style="color:#39bae690;">&gt;
+</span></code></pre>
+<p>With that, your standard web-app should be loaded with your OSGi startup. Hooking up Jersey with OSGi takes a little more work. Your WEB-INF/web.xml file should be read by Jetty with the above config. This configuration will install Jersey:</p>
+<pre data-lang="xml" style="background-color:#0f1419;color:#bfbab0;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet.ServletContainer</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-class</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet.ServletContainer</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-class</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">init-param</span><span style="color:#39bae690;">&gt;
+</span><span>    </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">param-name</span><span style="color:#39bae690;">&gt;</span><span>javax.ws.rs.Application</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">param-name</span><span style="color:#39bae690;">&gt;
+</span><span>    </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">param-value</span><span style="color:#39bae690;">&gt;</span><span>benjaminfry.api.BenjaminFryApplication</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">param-value</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">init-param</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-mapping</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;</span><span>com.sun.jersey.spi.container.servlet.ServletContainer</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-name</span><span style="color:#39bae690;">&gt;
+</span><span>  </span><span style="color:#39bae690;">&lt;</span><span style="color:#59c2ff;">url-pattern</span><span style="color:#39bae690;">&gt;</span><span>/*</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">url-pattern</span><span style="color:#39bae690;">&gt;
+</span><span style="color:#39bae690;">&lt;/</span><span style="color:#59c2ff;">servlet-mapping</span><span style="color:#39bae690;">&gt;
+</span></code></pre>
+<p>What this says is that the BenjaminFryApplication (which I'll show you the code for below), should be the basis for the Jersey Container. There may be other (and perhaps better) ways to do this, but this works well for me. The Application is installed at /bfry/*, so all requests to this location will go through Jersey. Here's the code for the Application:</p>
+<pre data-lang="java" style="background-color:#0f1419;color:#bfbab0;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#ff7733;">package </span><span style="color:#59c2ff;">benjaminfry</span><span style="color:#f29668;">.</span><span style="color:#59c2ff;">api</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">org</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">apache</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">log4j</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Logger</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">org</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">osgi</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">framework</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">BundleContext</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">org</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">osgi</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">framework</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ServiceReference</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">javax</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">servlet</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ServletContext</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">javax</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ws</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">rs</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">core</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Application</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">javax</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ws</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">rs</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">core</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Context</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">java</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">util</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Collections</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">java</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">util</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Set</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/**
+</span><span style="font-style:italic;color:#5c6773;"> * This is the Jersey Application implementation for passing back references to the Jersey Resource handlers.
+</span><span style="font-style:italic;color:#5c6773;"> *  In this example there are two resources, one is the LocationResource which implements the Location app.
+</span><span style="font-style:italic;color:#5c6773;"> *  The other is the OSGiResource with is wired up with the OSGiService
+</span><span style="font-style:italic;color:#5c6773;"> *  so that it has access to OSGi system. The LocationResource does not, so I won&#39;t show that one.
+</span><span style="font-style:italic;color:#5c6773;"> */
+</span><span style="font-style:italic;color:#5c6773;">public class BenjaminFryApplication extends Application {
+</span><span style="font-style:italic;color:#5c6773;">    private static final Logger logger = Logger.getLogger(BenjaminFryApplication.class);
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">    private final Set</span><span style="font-style:italic;color:#39bae690;">&lt;</span><span style="font-style:italic;color:#59c2ff;">Class</span><span style="font-style:italic;color:#ff3333;">&lt;</span><span style="font-style:italic;color:#ffb454;">?</span><span style="font-style:italic;color:#39bae690;">&gt;</span><span style="font-style:italic;color:#5c6773;">&gt; resourceClasses;
+</span><span style="font-style:italic;color:#5c6773;">    private final Set</span><span style="font-style:italic;color:#39bae690;">&lt;</span><span style="font-style:italic;color:#59c2ff;">Object</span><span style="font-style:italic;color:#39bae690;">&gt;</span><span style="font-style:italic;color:#5c6773;"> resourceSingletons;
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">    /**
+</span><span style="font-style:italic;color:#5c6773;">     * Constructor for the Application. This wires up all the Resources and stores the final map for retrieval
+</span><span style="font-style:italic;color:#5c6773;">     *  at any point.
+</span><span style="font-style:italic;color:#5c6773;">     * </span><span style="font-style:italic;color:#ff7733;">@param </span><span style="font-style:italic;color:#f29718;">sc</span><span style="font-style:italic;color:#5c6773;"> ServletContext is automatically passed in from the Jersey framework, this is used to retrieve the OSGi
+</span><span style="font-style:italic;color:#5c6773;">     *           BundleContext which is specified by Jetty through its OSGi support.
+</span><span style="font-style:italic;color:#5c6773;">     */
+</span><span style="font-style:italic;color:#5c6773;">    public BenjaminFryApplication(@Context ServletContext sc) {
+</span><span style="font-style:italic;color:#5c6773;">        try {
+</span><span style="font-style:italic;color:#5c6773;">            BundleContext bundleContext = (BundleContext)sc.getAttribute(&quot;osgi-bundlecontext&quot;);
+</span><span style="font-style:italic;color:#5c6773;">            if (bundleContext == null) throw new IllegalStateException(&quot;osgi-bundlecontext not registered&quot;);
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">            ServiceReference</span><span style="font-style:italic;color:#39bae690;">&lt;</span><span style="font-style:italic;color:#59c2ff;">OSGiResource</span><span style="font-style:italic;color:#39bae690;">&gt;</span><span style="font-style:italic;color:#5c6773;"> ref = bundleContext.getServiceReference(OSGiResource.class);
+</span><span style="font-style:italic;color:#5c6773;">            if (ref == null) throw new IllegalStateException(OSGiResource.class.getSimpleName() + &quot; not registered&quot;);
+</span><span style="font-style:italic;color:#5c6773;">            OSGiResource osgiResource = bundleContext.getService(ref);
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">            resourceSingletons = Collections.</span><span style="font-style:italic;color:#39bae690;">&lt;</span><span style="font-style:italic;color:#59c2ff;">Object</span><span style="font-style:italic;color:#39bae690;">&gt;</span><span style="font-style:italic;color:#5c6773;">singleton(meanResource);
+</span><span style="font-style:italic;color:#5c6773;">            resourceClasses = Collections.</span><span style="font-style:italic;color:#39bae690;">&lt;</span><span style="font-style:italic;color:#59c2ff;">Class</span><span style="font-style:italic;color:#ff3333;">&lt;</span><span style="font-style:italic;color:#ffb454;">?</span><span style="font-style:italic;color:#39bae690;">&gt;</span><span style="font-style:italic;color:#5c6773;">&gt;singleton(LocationResource.class);
+</span><span style="font-style:italic;color:#5c6773;">        } catch (Exception e) {
+</span><span style="font-style:italic;color:#5c6773;">            logger.error(e);
+</span><span style="font-style:italic;color:#5c6773;">            throw new RuntimeException(e);
+</span><span style="font-style:italic;color:#5c6773;">        }
+</span><span style="font-style:italic;color:#5c6773;">    }
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">    /**
+</span><span style="font-style:italic;color:#5c6773;">     * </span><span style="font-style:italic;color:#ff7733;">@return</span><span style="font-style:italic;color:#5c6773;"> per request Jersey Resources which are used to create objects for handling the request.
+</span><span style="font-style:italic;color:#5c6773;">     */
+</span><span style="font-style:italic;color:#5c6773;">    @Override
+</span><span style="font-style:italic;color:#5c6773;">    public Set&lt;Class&lt;?&gt;&gt; getClasses() {
+</span><span style="font-style:italic;color:#5c6773;">        return resourceClasses;
+</span><span style="font-style:italic;color:#5c6773;">    }
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">    /**
+</span><span style="font-style:italic;color:#5c6773;">     * </span><span style="font-style:italic;color:#ff7733;">@return</span><span style="font-style:italic;color:#5c6773;"> singleton Jersey Resources, these are pre-constructed objects, each one needs to be idempotent and
+</span><span style="font-style:italic;color:#5c6773;">     *  thread safe.
+</span><span style="font-style:italic;color:#5c6773;">     */
+</span><span style="font-style:italic;color:#5c6773;">    @Override
+</span><span style="font-style:italic;color:#5c6773;">    public Set&lt;Object&gt; getSingletons() {
+</span><span style="font-style:italic;color:#5c6773;">        return resourceSingletons;
+</span><span style="font-style:italic;color:#5c6773;">    }
+</span><span style="font-style:italic;color:#5c6773;">}
+</span></code></pre>
+<p>In the above code there are some things to point out. The Jersey system supports different types of context information being passed in as parameters with the @Context annotation. The ServletContext has an attribute that is set by the Jetty OSGi system with the BundleContext for our OSGi Bundle. With this BundleContext we get a reference to the registered OSGiResource. The method getSingletons() is used by Jersey to get references to the Jersey REST Servlets. Each of these objects must be threadsafe, reentrant, etc.</p>
+<p>Here's the code for the Jersey REST Servlet which also, through the use of OSGi Dynamic Services, is registered with the OSGi System:</p>
+<pre data-lang="java" style="background-color:#0f1419;color:#bfbab0;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#ff7733;">package </span><span style="color:#59c2ff;">benjaminfry</span><span style="color:#f29668;">.</span><span style="color:#59c2ff;">api</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>aQute</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">bnd</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">annotation</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">component</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Component</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span>aQute</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">bnd</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">annotation</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">component</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Reference</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">benjaminfry</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">osgi</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">pub</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">OSGiService</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">com</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">sun</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">jersey</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">spi</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">resource</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Singleton</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">javax</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ws</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">rs</span><span style="color:#f29668;">.*</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">javax</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ws</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">rs</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">core</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">MediaType</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span style="font-style:italic;color:#39bae6;">javax</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">ws</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">rs</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">core</span><span style="color:#f29668;">.</span><span style="font-style:italic;color:#39bae6;">Response</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/**
+</span><span style="font-style:italic;color:#5c6773;"> * OSGiResource is the Jersey resource for giving access to the OSGi Service.
+</span><span style="font-style:italic;color:#5c6773;"> *  the path is bfry/osgi/*, anything outside this path will return a 404. This is defined as an
+</span><span style="font-style:italic;color:#5c6773;"> *  OSGi DynamicServices Component which will instantiate the object and register it with OSGi automatically.
+</span><span style="font-style:italic;color:#5c6773;"> */
+</span><span style="font-style:italic;color:#5c6773;">@Component(provide = OSGiResource.class)
+</span><span style="font-style:italic;color:#5c6773;">@Path(&quot;osgi/{myParam}&quot;)
+</span><span style="font-style:italic;color:#5c6773;">@Singleton
+</span><span style="font-style:italic;color:#5c6773;">public class OSGiResource {
+</span><span style="font-style:italic;color:#5c6773;">    private volatile OSGiService osgiService;
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">    /**
+</span><span style="font-style:italic;color:#5c6773;">     * Only registered the get method for retrieving the mean and variance for the specified httpCode.
+</span><span style="font-style:italic;color:#5c6773;">     */
+</span><span>    </span><span style="color:#bfbab0cc;">@</span><span style="color:#ffb454;">GET
+</span><span>    </span><span style="color:#bfbab0cc;">@</span><span style="color:#ffb454;">Produces</span><span>(</span><span style="font-style:italic;color:#39bae6;">MediaType</span><span style="color:#f29668;">.</span><span style="color:#f29718;">TEXT_PLAIN</span><span>)
+</span><span>    </span><span style="color:#ff7733;">public </span><span style="font-style:italic;color:#39bae6;">String </span><span style="color:#ffb454;">get</span><span>(@</span><span style="color:#ffb454;">PathParam</span><span>(</span><span style="color:#c2d94c;">&quot;myParam&quot;</span><span>) </span><span style="font-style:italic;color:#39bae6;">String</span><span> myParam) {
+</span><span>        </span><span style="color:#ff7733;">if </span><span>(meanService </span><span style="color:#f29668;">== </span><span style="color:#f29718;">null</span><span>) </span><span style="color:#ff7733;">throw new </span><span style="font-style:italic;color:#39bae6;">WebApplicationException</span><span>(</span><span style="font-style:italic;color:#39bae6;">Response</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">serverError</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">entity</span><span>(</span><span style="color:#c2d94c;">&quot;osgiService is not set&quot;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">build</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">String</span><span> myValue </span><span style="color:#f29668;">=</span><span> osgiService</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">getMyValue</span><span>(myParam)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return</span><span> myValue</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">/**
+</span><span style="font-style:italic;color:#5c6773;">     * OSGi Dynamic Services reference for wiring up the osgiService.
+</span><span style="font-style:italic;color:#5c6773;">     */
+</span><span style="font-style:italic;color:#5c6773;">    @Reference
+</span><span style="font-style:italic;color:#5c6773;">    public void setOSGiService(OSGiService osgiService) {
+</span><span style="font-style:italic;color:#5c6773;">        this.meanService = meanService;
+</span><span style="font-style:italic;color:#5c6773;">    }
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">
+</span><span style="font-style:italic;color:#5c6773;">    public void unsetOSGiService(OSGiService osgiService) {
+</span><span style="font-style:italic;color:#5c6773;">        this.osgiService = null;
+</span><span style="font-style:italic;color:#5c6773;">    }
+</span><span style="font-style:italic;color:#5c6773;">}
+</span></code></pre>
+<p>This class has Jersey and Bndlib annotations intermingled, and yes it works. The @Component specifies that this application should be registered with OSGi. @Path is a Jersey annotation that specifies the location of this REST servlet, with the addition of the web.xml config from above it means this would be located at /bfry/osgi/{myParam}. The {myParam} portion tells Jersey that myParam is a path parameter (which can be a regex, look at the Jersey docs). The @PathParam tells Jersey which variable of the get() method to pass the path parameter to.</p>
+<p>The lifecycle of this object works like this; The BenjaminFryApplication gets a reference to the OSGiResource service, this causes the OSGi environment to initialize the OSGiResource object to be initialized. During initialization, the OSGi Dynamic Services framework links up the field osgiService via the setOSGiService() method. When a request is made, Jersey looks up the path information say related to the request 'http://localhost/bfry/osgi/someParam'. Jersey sees the GET request, and calls the get() method based on the @GET annotation.</p>
+<p>There are some cool things here, but the most interesting thing I think is that this &quot;servlet&quot; can actually be unit tested, no need for an integration test, because of the annotations. The unit test merely needs to construct the object, set either a mocked OSGiService implementation or a real implementation, and then call the get() method with whatever data you want to test. No need to start up Jetty at all for your tests! This makes testing the logic of the servlet simpler and the test itself more reliable. I'm not going to show this, it should be pretty obvious.</p>
+<p>REST easy.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=OSGi, Jersey and Jetty&url=https://bluejekyll.github.io/blog/outdated/osgi-jetty-jersey/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/outdated/osgi-jetty-jersey/&title=OSGi, Jersey and Jetty"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/outdated/osgi-jetty-jersey/&t=OSGi, Jersey and Jetty"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

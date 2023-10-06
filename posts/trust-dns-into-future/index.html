@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Taking TRust-DNS IntoFuture</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Taking TRust-DNS IntoFuture
+            </p>
+            <p class="subtitle is-4 is-italic">
+                Written to explain why I paused feature development of TRust-DNS to focus on implementing futures-rs and tokio-rs support
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;trust-dns-into-future&#x2F;">
+                    <span class="is-family-monospace">2016-12-03</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-network-wired"></i>
+            
+            <span class="tooltip-text is-6">dns</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>If you read my last post on TRust-DNS, <a href="http://bluejekyll.github.io/blog/rust/dns/2016/08/21/a-year-of-rust-and-dns.html">A year of Rust and DNS</a>,
+then you might be thinking, &quot;why hasn't more progress been made toward supporting
+some more features in DNS?&quot; The answer lies in this blog post, <a href="https://aturon.github.io/blog/2016/08/11/futures/">Zero-cost futures in Rust</a>. I read that
+and realized that much of the future work that I wanted to do on TRust-DNS would
+benefit from porting from <a href="https://docs.rs/mio/0.6.1/mio/">MIO</a> to <a href="https://docs.rs/futures/0.1.6/futures/">futures-rs</a> and <a href="https://docs.rs/tokio-core/0.1.1/tokio_core/">tokio-rs</a>. Also, since no one
+actually pays me for any of this work, I get to choose what to work on when,
+and what I think is the most important thing to deliver. This is such a huge leap for Rust that it was completely worth adding a couple of months to the delivery of new features.</p>
+<p>This<a href="https://bluejekyll.github.io/blog/posts/trust-dns-into-future/?#1">[1]</a> is the story of the journey into the future; including the pain, the joy and some thoughts on the future. I will forewarn you that should you attempt to follow this path, things will probably have changed quite a bit during the time that this was written and when you attempt the journey. I should also mention, that I built most of this somewhat isolated from the on-going development around tokio-rs, so it's completely likely that I have made decisions that are not idiomatic according to people more deeply involved in that effort.</p>
+<h1 id="what-is-async-i-o-briefly">What is Async I/O? (briefly)</h1>
+<p>To understand where we are going, you must first understand what asynchronous input and output (async I/O) is and why it is important. In network software (all I/O based software in fact), there are basically two forms of I/O. The standard one which people generally learn first is blocking I/O. In blocking I/O operations you write some code like:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">let</span><span> socket </span><span style="color:#f29668;">= </span><span>UdpSocket</span><span style="color:#f29668;">::</span><span>bind(</span><span style="color:#c2d94c;">&quot;127.0.0.1:52&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">let mut</span><span> buffer</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt; </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">Vec</span><span style="color:#f29668;">::</span><span>with_capacity(</span><span style="color:#f29718;">512</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">recv_from</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> buffer)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>That <code>recv_from(..)</code> is a blocking request. It will never return until there is data to receive from the socket, i.e. a packet arrives at the specified port. A big negative consequence of using blocking I/O is that in order to execute any other logic, a new thread would need to be created.</p>
+<p>In non-blocking, async I/O there is a substantial difference: it will not block (hard to guess from the name I know); instead it will return immediately and tell you it's not ready. For example:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">let</span><span> socket </span><span style="color:#f29668;">= </span><span>UdpSocket</span><span style="color:#f29668;">::</span><span>bind(</span><span style="color:#c2d94c;">&quot;127.0.0.1&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_nonblocking</span><span>(</span><span style="color:#f29718;">true</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">let mut</span><span> buffer</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt; </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">Vec</span><span style="color:#f29668;">::</span><span>with_capacity(</span><span style="color:#f29718;">512</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">loop </span><span>{
+</span><span>  </span><span style="color:#ff7733;">match</span><span> socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">recv_from</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> buffer) {
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>((</span><span style="color:#f29668;">_</span><span>)) </span><span style="color:#f29668;">=&gt; </span><span style="font-style:italic;color:#5c6773;">/* do something with data */</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(</span><span style="color:#ff7733;">ref</span><span> e) </span><span style="color:#ff7733;">if</span><span> e</span><span style="color:#f29668;">.</span><span style="color:#f07178;">kind</span><span>() </span><span style="color:#f29668;">== </span><span>io</span><span style="color:#f29668;">::</span><span>ErrorKind</span><span style="color:#f29668;">::</span><span>WouldBlock </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">/* do something while waiting */
+</span><span>      </span><span style="color:#ff7733;">continue
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    error </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> error</span><span style="color:#bfbab0cc;">,
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>The code is more complex, but it has a special feature: instead of blocking you get the nice option of doing something else when there is no data ready. The really cool thing about this is that you can create two or more execution paths in your code, without threads. To learn more,  <a href="http://www.kohala.com/start/">Richard Stevens</a> and his tomes on &quot;UNIX Networking Programming&quot; remain excellent reading in my opinion, there may be better resources now but I still pull those off the shelf from time to time. If your program is small, and not used much, then blocking I/O has traditionally been the easier thing to use, but to do anything concurrently you need to turn to threads. Threads are expensive, and when there are many of them, they can cause scalability issues due to resource consumption and context switching.</p>
+<p>The holy grail is when async, non-blocking I/O becomes as simple to write as synchronous I/O, and tokio-rs is doing that for Rust.</p>
+<h1 id="you-said-you-had-fun-with-mio">You said you had fun with MIO</h1>
+<p>Non-blocking I/O is the fundamental building block for asynchronous I/O operations, and subsequently, event driven systems. Many operating systems have higher order utilities for building event driven network software. POSIX defined <code>poll</code> and <code>select</code>, Linux has <code>epoll</code>, the BSD's use <code>kqueue</code>, and Windows <code>IOCP</code> (with which I am not personally familiar). These libraries provide an API for registering a lot of I/O handles, sockets, in a central place such that it's simpler to ask if any of those handles are ready in one system call.</p>
+<p>MIO, metal I/O, is awesome because it's an abstraction over these different OS primitives. When I first used it, I was completely amazed at how seamlessly it works across all OSes. It's still a fairly low level interface, just one step above the others. In order to use it properly, it was important to build many state machines. Here is an example of the state machine for the <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/server/src/server/server.rs#L190">TCPListener</a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span>DnsHandler </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">TcpListener </span><span>{
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">handle</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">events</span><span style="color:#bfbab0cc;">:</span><span> EventSet, </span><span style="color:#f29668;">_</span><span>: </span><span style="color:#f29668;">&amp;</span><span>Arc&lt;Catalog&gt;) </span><span style="color:#bfbab0cc;">-&gt; </span><span>(</span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;EventSet&gt;, </span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;(DnsHandlerType, EventSet)&gt;) {
+</span><span>    </span><span style="color:#ff7733;">if</span><span> events</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_error</span><span>() { </span><span style="color:#f07178;">panic!</span><span>(</span><span style="color:#c2d94c;">&quot;unexpected error state on: {:?}&quot;</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">self</span><span>) }
+</span><span>    </span><span style="color:#ff7733;">else if</span><span> events</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_hup</span><span>() { </span><span style="color:#f07178;">panic!</span><span>(</span><span style="color:#c2d94c;">&quot;listening socket hungup: {:?}&quot;</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">self</span><span>) }
+</span><span>    </span><span style="color:#ff7733;">else if</span><span> events</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_readable</span><span>() </span><span style="color:#f29668;">||</span><span> events</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_writable</span><span>() {
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">// there&#39;s a new connection coming in
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">// give it a new token and insert the stream on the event listener
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">// then store in the map for reference when dealing with new streams
+</span><span>      </span><span style="color:#ff7733;">for </span><span style="color:#f29668;">_ in </span><span style="color:#f29718;">0</span><span style="color:#f29668;">..</span><span style="color:#f29718;">100 </span><span>{ </span><span style="font-style:italic;color:#5c6773;">// loop a max of 100 times, don&#39;t want to starve the responses.
+</span><span>        </span><span style="color:#ff7733;">match </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f07178;">accept</span><span>() {
+</span><span>          </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(</span><span style="font-style:italic;color:#39bae6;">Some</span><span>((stream</span><span style="color:#bfbab0cc;">,</span><span> addr))) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="color:#f07178;">info!</span><span>(</span><span style="color:#c2d94c;">&quot;new tcp connection from: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> addr)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">return </span><span>(</span><span style="font-style:italic;color:#39bae6;">Some</span><span>(EventSet</span><span style="color:#f29668;">::</span><span>all())</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">Some</span><span>((DnsHandlerType</span><span style="color:#f29668;">::</span><span>TcpHandler(TcpHandler</span><span style="color:#f29668;">::</span><span>new_server_handler(stream))</span><span style="color:#bfbab0cc;">,
+</span><span>                                                </span><span style="color:#f29668;">!</span><span>EventSet</span><span style="color:#f29668;">::</span><span>writable())))
+</span><span>          }</span><span style="color:#bfbab0cc;">,
+</span><span>          </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(</span><span style="font-style:italic;color:#39bae6;">None</span><span>) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span>(</span><span style="font-style:italic;color:#39bae6;">Some</span><span>(EventSet</span><span style="color:#f29668;">::</span><span>all())</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">None</span><span>)
+</span><span>          }</span><span style="color:#bfbab0cc;">,
+</span><span>          </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(e) </span><span style="color:#f29668;">=&gt; </span><span style="color:#f07178;">panic!</span><span>(</span><span style="color:#c2d94c;">&quot;unexpected error accepting: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e)</span><span style="color:#bfbab0cc;">,
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// this should never happen
+</span><span>    (</span><span style="font-style:italic;color:#39bae6;">Some</span><span>(EventSet</span><span style="color:#f29668;">::</span><span>all())</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">None</span><span>)
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>This is registered into an MIO event loop. I worked to come up with an abstraction with which I was happy. This needs to support building state machines for different protocols, currently just UDP and TCP are supported; there are other transits that I hope to support with TRust-DNS (of course, PR's are always welcome). You'll notice in the above implementation I'm dealing with the raw <code>events</code>. It took a little bit to get this logic correct, and I don't think there are any bugs in it. If there are bugs, it doesn't matter because I deprecated all the MIO based modules; they await the great executor of deletion. After reading about futures-rs and tokio-rs (which is built on top of MIO) I immediately recognized that there would be great benefits to switch to those tools. It paid off really well. Here is the <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/server/src/server/server_future.rs#L76">same logic</a> as above, but utilizing the tokio-rs <code>TcpListener</code> and the <code>Incoming</code> stream:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">let</span><span> listener </span><span style="color:#f29668;">= </span><span>tokio_core</span><span style="color:#f29668;">::</span><span>net</span><span style="color:#f29668;">::</span><span>TcpListener</span><span style="color:#f29668;">::</span><span>from_listener(</span><span style="color:#f29668;">..</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// for each incoming request...
+</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>io_loop</span><span style="color:#f29668;">.</span><span style="color:#f07178;">handle</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">spawn</span><span>(
+</span><span>  listener</span><span style="color:#f29668;">.</span><span style="color:#f07178;">incoming</span><span>()
+</span><span>          </span><span style="color:#f29668;">.</span><span style="color:#f07178;">for_each</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>(tcp_stream</span><span style="color:#bfbab0cc;">,</span><span> src_addr)</span><span style="color:#f29668;">| </span><span>{
+</span><span>            </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;accepted request from: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> src_addr)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// take the created stream...
+</span><span>            </span><span style="color:#ff7733;">let </span><span>(buf_stream</span><span style="color:#bfbab0cc;">,</span><span> stream_handle) </span><span style="color:#f29668;">= </span><span>TcpStream</span><span style="color:#f29668;">::</span><span>with_tcp_stream(tcp_stream)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">let</span><span> timeout_stream </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(TimeoutStream</span><span style="color:#f29668;">::</span><span>new(buf_stream</span><span style="color:#bfbab0cc;">,</span><span> timeout</span><span style="color:#bfbab0cc;">,</span><span> handle</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()))</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">let</span><span> request_stream </span><span style="color:#f29668;">= </span><span>RequestStream</span><span style="color:#f29668;">::</span><span>new(timeout_stream</span><span style="color:#bfbab0cc;">,</span><span> stream_handle)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">let</span><span> catalog </span><span style="color:#f29668;">=</span><span> catalog</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// and spawn to the io_loop
+</span><span>            handle</span><span style="color:#f29668;">.</span><span style="color:#f07178;">spawn</span><span>(
+</span><span>              request_stream</span><span style="color:#f29668;">.</span><span style="color:#f07178;">for_each</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>(request</span><span style="color:#bfbab0cc;">,</span><span> response_handle)</span><span style="color:#f29668;">| </span><span>{
+</span><span>                </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>handle_request(request</span><span style="color:#bfbab0cc;">,</span><span> response_handle</span><span style="color:#bfbab0cc;">,</span><span> catalog</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>())
+</span><span>              })
+</span><span>              </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>e</span><span style="color:#f29668;">| </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;error in TCP request_stream src: {:?} error: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> src_addr</span><span style="color:#bfbab0cc;">,</span><span> e))
+</span><span>            )</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(())
+</span><span>          })
+</span><span>          </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|</span><span style="color:#f29718;">e</span><span>| </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;error in inbound tcp_stream: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e))
+</span><span>)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Actually, this isn't the same as the MIO based implementation. This implementation collapses two of the original state machines into one. It both accepts requests from the <code>TcpListener</code>, and also spawns a new Future to handle the newly established <code>TcpStream</code>. The TRust-DNS client was the first thing rebuilt on these new tools, which took a lot longer than anticipated. The payoff came when it literally took two nights to implement the new <code>ServerFuture</code>: one for UDP and the other for TCP.</p>
+<p>While it may not be obvious at first glance, this implementation is both much simpler and also shows some very powerful features of building on top of tokio-rs. It's no longer dealing with raw events for one thing. Also, notice the wrappers around <code>TcpStream</code> (that's a TRust-DNS TcpStream), <code>timeout_stream</code> (will timeout if a TcpStream is inactive) and <code>request_stream</code> (deserializes bytes into DNS requests). Because everything is now based on futures-rs, it's now dead simple to combine different state machines to create awesome abstractions. Let me break this down a little more.</p>
+<h1 id="the-internal-vs-external-state-of-a-future">The internal vs. external state of a Future</h1>
+<p>The <code>Future</code> trait in Rust follows the std libraries dedication to chained function interfaces. Let's take a look at a subset of it's function traits quickly:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub trait </span><span style="color:#59c2ff;">Future </span><span>{
+</span><span>    </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Item</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Error</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">poll</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Poll&lt;</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Item, </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Error&gt;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">map</span><span>&lt;F, U&gt;(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">f</span><span style="color:#bfbab0cc;">:</span><span> F) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Map&lt;</span><span style="color:#ff7733;">Self</span><span>, F&gt; </span><span style="color:#ff7733;">where</span><span> F</span><span style="color:#bfbab0cc;">:</span><span> FnOnce(</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Item) -&gt; U, </span><span style="color:#ff7733;">Self</span><span style="color:#bfbab0cc;">:</span><span> Sized { </span><span style="color:#f29668;">... </span><span>}
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">and_then</span><span>&lt;F, B&gt;(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">f</span><span style="color:#bfbab0cc;">:</span><span> F) </span><span style="color:#bfbab0cc;">-&gt; </span><span>AndThen&lt;</span><span style="color:#ff7733;">Self</span><span>, B, F&gt; </span><span style="color:#ff7733;">where</span><span> F</span><span style="color:#bfbab0cc;">:</span><span> FnOnce(</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Item) -&gt; B, B</span><span style="color:#bfbab0cc;">: </span><span>IntoFuture&lt;Error=</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Error&gt;, </span><span style="color:#ff7733;">Self</span><span style="color:#bfbab0cc;">:</span><span> Sized { </span><span style="color:#f29668;">... </span><span>}
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">or_else</span><span>&lt;F, B&gt;(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">f</span><span style="color:#bfbab0cc;">:</span><span> F) </span><span style="color:#bfbab0cc;">-&gt; </span><span>OrElse&lt;</span><span style="color:#ff7733;">Self</span><span>, B, F&gt; </span><span style="color:#ff7733;">where</span><span> F</span><span style="color:#bfbab0cc;">:</span><span> FnOnce(</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Error) -&gt; B, B</span><span style="color:#bfbab0cc;">: </span><span>IntoFuture&lt;Item=</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Item&gt;, </span><span style="color:#ff7733;">Self</span><span style="color:#bfbab0cc;">:</span><span> Sized { </span><span style="color:#f29668;">... </span><span>}
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">select</span><span>&lt;B&gt;(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">:</span><span> B) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Select&lt;</span><span style="color:#ff7733;">Self</span><span>, </span><span style="color:#ff7733;">B</span><span style="color:#f29668;">::</span><span>Future&gt; </span><span style="color:#ff7733;">where</span><span> B</span><span style="color:#bfbab0cc;">: </span><span>IntoFuture&lt;Item=</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Item, Error=</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Error&gt;, </span><span style="color:#ff7733;">Self</span><span style="color:#bfbab0cc;">:</span><span> Sized { </span><span style="color:#f29668;">... </span><span>}
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">join</span><span>&lt;B&gt;(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">:</span><span> B) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Join&lt;</span><span style="color:#ff7733;">Self</span><span>, </span><span style="color:#ff7733;">B</span><span style="color:#f29668;">::</span><span>Future&gt; </span><span style="color:#ff7733;">where</span><span> B</span><span style="color:#bfbab0cc;">: </span><span>IntoFuture&lt;Error=</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Error&gt;, </span><span style="color:#ff7733;">Self</span><span style="color:#bfbab0cc;">:</span><span> Sized { </span><span style="color:#f29668;">... </span><span>}
+</span><span>}
+</span></code></pre>
+<p>These allow you to chain executions together based on the Future's success or failure. Some quick definitions, and then I'll show a practical use case:</p>
+<ul>
+<li><code>poll()</code>- 'drives' the Future, i.e. check it it's complete</li>
+<li><code>map()</code>- process the successful result of a Future and return some other value</li>
+<li><code>and_then()</code>- on success, do something, then return a new Future</li>
+<li><code>or_else()</code>- on failure, counterpart to <code>and_then()</code></li>
+<li><code>select()</code>- select this or another Future, whichever finishes first</li>
+<li><code>join()</code>- join two futures waiting for both to succeed</li>
+</ul>
+<p>While migrating TRust-DNS to tokio-rs those are the functions I found most useful. You should explore the <a href="https://docs.rs/futures/0.1.6/futures/future/trait.Future.html">documentation</a> for more details.</p>
+<p>Let's ignore <code>poll()</code> for a minute, the other functions allow for what I like to think of 'external state' to be captured in the processing logic after a Future yields a result. A good example of this is in <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/client/src/client/secure_client_handle.rs#L106">SecureClientHandle</a>, which is responsible for <a name="proving">proving</a> a DNSSec chain:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>client
+</span><span style="color:#f29668;">.</span><span style="color:#f07178;">send</span><span>(message)
+</span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>message_response</span><span style="color:#f29668;">|</span><span>{
+</span><span>  </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;validating message_response: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> message_response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_id</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">verify_rrsets</span><span>(client</span><span style="color:#bfbab0cc;">,</span><span> message_response</span><span style="color:#bfbab0cc;">,</span><span> dns_class)
+</span><span>})
+</span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>verified_message</span><span style="color:#f29668;">| </span><span>{
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// at this point all of the message is verified.
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">//  This is where NSEC (and possibly NSEC3) validation occurs
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// As of now, only NSEC is supported.
+</span><span>  </span><span style="color:#ff7733;">if</span><span> verified_message</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_answers</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> nsecs </span><span style="color:#f29668;">=</span><span> verified_message</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name_servers</span><span>()
+</span><span>    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()
+</span><span>    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">filter</span><span>(|</span><span style="color:#f29718;">rr</span><span>| rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>() </span><span style="color:#f29668;">== </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">NSEC</span><span>)
+</span><span>    </span><span style="color:#f29668;">.</span><span>collect</span><span style="color:#f29668;">::</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#f29668;">_</span><span>&gt;&gt;()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span style="color:#f07178;">verify_nsec</span><span>(</span><span style="color:#f29668;">&amp;</span><span>query</span><span style="color:#bfbab0cc;">,</span><span> nsecs) {
+</span><span>      </span><span style="color:#ff7733;">return </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(ClientErrorKind</span><span style="color:#f29668;">::</span><span>Message(</span><span style="color:#c2d94c;">&quot;could not validate nxdomain with NSEC&quot;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>())
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(verified_message)
+</span><span>})
+</span></code></pre>
+<p>In this snippet from the function, it is using a <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/client/src/client/client_future.rs">ClientFuture</a>, the TRust-DNS tokio-rs based DNS client, to send a query. Subsequent to a successful response  after sending the future query, it then validates all the resource record sets returned from the server. If the processing is also successful, it then checks to see if the responses were actually <code>NSEC</code> records, which then triggers additional logic to validate a negative cache response. Each of those operations <code>send(..)</code>, <code>and_then(..)</code>, <code>and_then(..)</code> captures the logic to be performed at each state transition, i.e. 'external state'. This is pretty cool, and I'm sure all you functional programmers are thinking &quot;duh&quot;, but for me, learning to use this has been a very eye-opening experience.</p>
+<p>Now Coming back to <code>poll(..)</code>, this is our internal state function. Sadly, most of my code here is fairly complex, you can take a look at <a href="https://github.com/bluejekyll/trust-dns/blob/master/client/src/udp/udp_stream.rs#L113">UdpStream</a> and <a href="https://github.com/bluejekyll/trust-dns/blob/master/client/src/tcp/tcp_stream.rs#L88">TcpStream</a><a href="https://bluejekyll.github.io/blog/posts/trust-dns-into-future/?#2">[2]</a> for the actual inner I/O examples, but I don't want this post to be excessively long, so let's look at a simpler one, <a href="https://github.com/bluejekyll/trust-dns/blob/master/server/src/server/timeout_stream.rs#L43">TimeoutStream</a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">TimeoutStream</span><span>&lt;S&gt; {
+</span><span>  stream</span><span style="color:#bfbab0cc;">:</span><span> S,
+</span><span>  reactor_handle</span><span style="color:#bfbab0cc;">:</span><span> Handle,
+</span><span>  timeout_duration</span><span style="color:#bfbab0cc;">:</span><span> Duration,
+</span><span>  timeout</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;Timeout&gt;,
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">impl</span><span>&lt;S, I&gt; Stream </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">TimeoutStream</span><span>&lt;S&gt;
+</span><span style="color:#ff7733;">where</span><span> S</span><span style="color:#bfbab0cc;">: </span><span>Stream&lt;Item=I, Error=io</span><span style="color:#f29668;">::</span><span>Error&gt; {
+</span><span>  </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Item </span><span style="color:#f29668;">=</span><span> I</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Error </span><span style="color:#f29668;">= </span><span>io</span><span style="color:#f29668;">::</span><span>Error</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">poll</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Poll&lt;</span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Item&gt;, </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Error&gt; {
+</span><span>    </span><span style="color:#ff7733;">match </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>stream</span><span style="color:#f29668;">.</span><span style="color:#f07178;">poll</span><span>() {
+</span><span>      r </span><span style="color:#f29668;">@ </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(Async</span><span style="color:#f29668;">::</span><span>Ready(</span><span style="color:#f29668;">_</span><span>)) </span><span style="color:#f29668;">|</span><span> r </span><span style="color:#f29668;">@ </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(</span><span style="color:#f29668;">_</span><span>) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// reset the timeout to wait for the next request...
+</span><span>        </span><span style="color:#ff7733;">let</span><span> timeout </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(</span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>timeout(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>timeout_duration</span><span style="color:#bfbab0cc;">,      </span><span style="color:#f29668;">&amp;</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>reactor_handle))</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#f07178;">drop</span><span>(mem</span><span style="color:#f29668;">::</span><span>replace(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>timeout</span><span style="color:#bfbab0cc;">,</span><span> timeout))</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">return</span><span> r
+</span><span>      }</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(Async</span><span style="color:#f29668;">::</span><span>NotReady) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>timeout</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_none</span><span>() { </span><span style="color:#ff7733;">return </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(Async</span><span style="color:#f29668;">::</span><span>NotReady) }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// otherwise check if the timeout has expired.
+</span><span>        </span><span style="color:#ff7733;">match </span><span style="color:#f07178;">try_ready!</span><span>(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>timeout</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_mut</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">poll</span><span>()) {
+</span><span>          () </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;timeout on stream&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(io</span><span style="color:#f29668;">::</span><span>Error</span><span style="color:#f29668;">::</span><span>new(io</span><span style="color:#f29668;">::</span><span>ErrorKind</span><span style="color:#f29668;">::</span><span>TimedOut</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;nothing ready in </span><span style="color:#f29718;">{:?}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>timeout_duration)))
+</span><span>          }</span><span style="color:#bfbab0cc;">,
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>Ok, I realize I haven't mentioned <a href="https://docs.rs/futures/0.1.6/futures/stream/trait.Stream.html">Stream</a>'s yet. Simply put, they are Futures which return more than one result: they return streams of results! I know - totally unexpected. For Java hacks out there, this shouldn't be confused with Java <code>Stream</code>s, which are more similar to Rust's <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">Iterator</a>; oh, you shouldn't click that link, you will get jealous... in fact, can someone implement <a href="https://github.com/bluejekyll/palindrome-rs/blob/master/src/lib.rs#L13">this</a> in Java Streams? I took a crack at it, and it wasn't obvious that it would be easy...</p>
+<p>The <code>poll()</code> operation above simply does two things: it checks if the inner <code>Stream</code> is ready to yield data, or it checks to see if the timeout Future has expired. The entire point of this stream implementation is to guard the server against unused TCP connections. I'm sure the authors of tokio-rs will look at this and think there are better ways to implement this timeout, but this felt the cleanest to me (I would of course love feedback). In the case where there is data, the timeout is reset. If it did timeout, an error will be returned, and further up the stack the connection will be closed. For people unfamiliar with TCP, this can't be done with simple receive timeouts on the socket because those don't guard against a client which might be trickling data in over extended periods of time. This forces the client to send a full query a minimum of <em>X</em> number of seconds or the connection will be closed.</p>
+<p>That's pretty cool, right? Or maybe I'm crazy for loving this stuff.</p>
+<h1 id="to-thread-or-not-to-thread">To thread or not to thread?</h1>
+<p>So now that you have a complete and total understanding of tokio-rs and futures-rs, we can move to some really exciting topics, like, concurrency. At the very beginning, I mentioned that you could &quot;do something while waiting&quot; for a future I/O event to occur. This is where futures-rs has some really nifty stuff to offer. I/O and especially network I/O can take a long time (in CPU terms), which means there's lots of other stuff you can do in that time, like, more I/O! It blew my mind when I realized what <code>join()</code> and <code>select()</code> are in futures-rs, they are functions that actually allow for concurrent execution of code, but without threads! I bet you want to see an example. Let's look at the <code>SecureClientHandle</code> again. In DNSSec, there may be many <code>DNSKEY</code>s present in a zone. <code>DNSKEY</code>s are used to sign records and produce <code>RRSIG</code>s which are signed records for a particular resource record set. This might be a little hard to picture, so let's illustrate it with one:</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/trust-dns-into-future/concurrent_rrset_proof.svg" alt="RRSIG proof graph" /></p>
+<p>To trust the A records requires fetching each of the records back to the ROOT in order to validate it. TRust-DNS validates records from the bottom up (it can also be performed top down for public domains), the proof is <em>anchored</em> with the <code>ROOT CERT</code>. The public key for this certificate is available to anyone who seeks it; TRust-DNS compiles this key into the binaries. Any chain is valid, once you have a proof that all the records in the chain are signed back to a valid anchor. TRust-DNS allows for custom anchors to be associated with clients, as part of the Rust API (there is no <code>host</code> or <code>dig</code> binary for TRust-DNS yet, though I'd like to at least add <code>host</code> at some point).</p>
+<p>The chain basically works like this: The ROOT zone, aka <code>.</code>, stores a <code>DS</code> record for any valid <code>DNSKEY</code> which the <code>com.</code> zone has registered. The <a href="https://github.com/bluejekyll/trust-dns/blob/master/client/src/rr/rdata/ds.rs">DS</a> record is a hash of the <a href="https://github.com/bluejekyll/trust-dns/blob/master/client/src/rr/rdata/dnskey.rs">DNSKEY</a>, which is the public key associated to the private key used to sign RRSETs and produce the associated <a href="https://github.com/bluejekyll/trust-dns/blob/master/client/src/rr/rdata/sig.rs">RRSIG</a>, which is a cryptographically signed hash of the RRSET (the only thing that would make that run-on-sentence better is if it was recursive, which the proof algorithm is). In the above example there are two valid <code>RRSIG</code>s for the <code>www</code> resource record, <code>1</code> and <code>2</code>. These were produced by two different <code>DNSKEY</code>s, which both had two different <code>DS</code> records that validate those <code>DNSKEY</code>s and so on. <code>3</code> was signed with an invalid <code>DNSKEY</code>, there are legitimate reasons for invalid keys to exist in the wild (i.e. it's not necessarily a hacked domain or attempted man-in-the-middle): one case would be that keys are currently being rotated. Even though it might eventually be a valid key, <code>DNSKEY 3</code> can not be trusted, and <code>RRSIG 3</code> must be thrown away.</p>
+<p>If you've read up to this point then I bet you're really excited for some code. Here is another snippet from <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/client/src/client/secure_client_handle.rs#L147">SecureClientHandle</a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">verify_rrsets</span><span>&lt;H&gt;(
+</span><span>  </span><span style="color:#f29718;">client</span><span style="color:#bfbab0cc;">: </span><span>SecureClientHandle&lt;H&gt;,
+</span><span>  </span><span style="color:#f29718;">message_result</span><span style="color:#bfbab0cc;">:</span><span> Message,
+</span><span>  </span><span style="color:#f29718;">dns_class</span><span style="color:#bfbab0cc;">:</span><span> DNSClass,
+</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="font-style:italic;color:#39bae6;">Box</span><span>&lt;Future&lt;Item=Message, Error=ClientError&gt;&gt;
+</span><span style="color:#ff7733;">where</span><span> H</span><span style="color:#bfbab0cc;">:</span><span> ClientHandle {
+</span><span>  </span><span style="color:#ff7733;">let mut</span><span> rrset_types</span><span style="color:#bfbab0cc;">: </span><span>HashSet&lt;(domain</span><span style="color:#f29668;">::</span><span>Name, RecordType)&gt; </span><span style="color:#f29668;">= </span><span>HashSet</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">for</span><span> rrset </span><span style="color:#f29668;">in</span><span> message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_answers</span><span>()
+</span><span>      </span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()
+</span><span>      </span><span style="color:#f29668;">.</span><span style="color:#f07178;">chain</span><span>(message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name_servers</span><span>())
+</span><span>      </span><span style="color:#f29668;">.</span><span style="color:#f07178;">filter</span><span>(|</span><span style="color:#f29718;">rr</span><span>| rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>() </span><span style="color:#f29668;">!= </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">RRSIG </span><span style="color:#f29668;">&amp;&amp;
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">// if we are at a depth greater than 1, we are only interested in proving evaluation chains
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">//   this means that only DNSKEY and DS are intersting at that point.
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">//   this protects against looping over things like NS records and DNSKEYs in responses.
+</span><span>      </span><span style="font-style:italic;color:#5c6773;">// TODO: is there a cleaner way to prevent cycles in the evaluations?
+</span><span>                   (client</span><span style="color:#f29668;">.</span><span>request_depth </span><span style="color:#f29668;">&lt;= </span><span style="color:#f29718;">1 </span><span style="color:#f29668;">||
+</span><span>                    rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>() </span><span style="color:#f29668;">== </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">DNSKEY </span><span style="color:#f29668;">||
+</span><span>                    rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>() </span><span style="color:#f29668;">== </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">DS</span><span>))
+</span><span>      </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map</span><span>(|</span><span style="color:#f29718;">rr</span><span>| (rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">,</span><span> rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>())) {
+</span><span>    rrset_types</span><span style="color:#f29668;">.</span><span style="color:#f07178;">insert</span><span>(rrset)</span><span style="color:#bfbab0cc;">;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// collect all the rrsets to verify
+</span><span>  </span><span style="color:#ff7733;">let mut</span><span> rrsets </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">Vec</span><span style="color:#f29668;">::</span><span>with_capacity(rrset_types</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">for </span><span>(name</span><span style="color:#bfbab0cc;">,</span><span> record_type) </span><span style="color:#f29668;">in</span><span> rrset_types {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// collect the RRSET from the answers, name_servers and additional sections.
+</span><span>    </span><span style="color:#ff7733;">let</span><span> rrset</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;Record&gt; </span><span style="color:#f29668;">=</span><span> message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_answers</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">chain</span><span>(message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name_servers</span><span>())
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">chain</span><span>(message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_additionals</span><span>())
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">filter</span><span>(|</span><span style="color:#f29718;">rr</span><span>| rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>() </span><span style="color:#f29668;">==</span><span> record_type </span><span style="color:#f29668;">&amp;&amp;</span><span> rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name</span><span>() </span><span style="color:#f29668;">== &amp;</span><span>name)
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">cloned</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">collect</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// collect the RRSIG that covers that RRSET from the same sections.
+</span><span>    </span><span style="color:#ff7733;">let</span><span> rrsigs</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;Record&gt; </span><span style="color:#f29668;">=</span><span> message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_answers</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">chain</span><span>(message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name_servers</span><span>())
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">chain</span><span>(message_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_additionals</span><span>())
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">filter</span><span>(|</span><span style="color:#f29718;">rr</span><span>| rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>() </span><span style="color:#f29668;">== </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">RRSIG</span><span>)
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">filter</span><span>(|</span><span style="color:#f29718;">rr</span><span>| </span><span style="color:#ff7733;">if let </span><span style="color:#f29668;">&amp;</span><span>RData</span><span style="color:#f29668;">::</span><span style="color:#f29718;">SIG</span><span>(</span><span style="color:#ff7733;">ref</span><span> rrsig) </span><span style="color:#f29668;">=</span><span> rr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rdata</span><span>() {
+</span><span>          rrsig</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_type_covered</span><span>() </span><span style="color:#f29668;">==</span><span> record_type
+</span><span>        } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>          </span><span style="color:#f29718;">false
+</span><span>        })
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">cloned</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">collect</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// create the RRSET for evaluation.
+</span><span>    </span><span style="color:#ff7733;">let</span><span> rrset </span><span style="color:#f29668;">=</span><span> Rrset { name</span><span style="color:#bfbab0cc;">:</span><span> name</span><span style="color:#bfbab0cc;">,
+</span><span>      record_type</span><span style="color:#bfbab0cc;">:</span><span> record_type</span><span style="color:#bfbab0cc;">,
+</span><span>      record_class</span><span style="color:#bfbab0cc;">:</span><span> dns_class</span><span style="color:#bfbab0cc;">,
+</span><span>      records</span><span style="color:#bfbab0cc;">:</span><span> rrset
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;verifying: {}, record_type: {:?}, rrsigs: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> rrset</span><span style="color:#f29668;">.</span><span>name</span><span style="color:#bfbab0cc;">,</span><span> record_type</span><span style="color:#bfbab0cc;">,</span><span> rrsigs</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// push a VerifyRrsetFuture into the rrsets to validate.
+</span><span>    rrsets</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push</span><span>(</span><span style="color:#f07178;">verify_rrset</span><span>(client</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone_with_context</span><span>()</span><span style="color:#bfbab0cc;">,</span><span> rrset</span><span style="color:#bfbab0cc;">,</span><span> rrsigs))</span><span style="color:#bfbab0cc;">;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// spawn a select_all over this vec, these are the individual RRSet validators
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// these occur in &quot;parallel&quot;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> rrsets_to_verify </span><span style="color:#f29668;">= </span><span style="color:#f07178;">select_all</span><span>(rrsets)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// return the full Message validator
+</span><span>  </span><span style="font-style:italic;color:#39bae6;">Box</span><span style="color:#f29668;">::</span><span>new(VerifyRrsetsFuture{
+</span><span>    message_result</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(message_result)</span><span style="color:#bfbab0cc;">,
+</span><span>    rrsets</span><span style="color:#bfbab0cc;">:</span><span> rrsets_to_verify</span><span style="color:#bfbab0cc;">,
+</span><span>    verified_rrsets</span><span style="color:#bfbab0cc;">: </span><span>HashSet</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#bfbab0cc;">,
+</span><span>  })
+</span><span>}
+</span></code></pre>
+<p>There is a lot of code there; I've removed a bit, but I thought it would be interesting to see something more complex. This function is intended to be called as part of a function chain of a Future, if you <a href="https://bluejekyll.github.io/blog/posts/trust-dns-into-future/?#proving">scroll up</a> you can see where this is called, which means that this function and it's logic will only be run on a successful request. What happens here is that the <code>Rrset</code>s which need to be validated are collected with their related <code>RRSIG</code>s. These sets of futures from <code>verify_rrset</code> are then passed to <code>select_all()</code>, which is magic. It returns a <code>SelectAll</code> future which issues all of those proofs in parallel! This means that creating parallel execution blocks of events waiting for responses from I/O streams, in this case an upstream DNS server, is dead simple. There are still no threads, which is amazing! The abstractions with futures-rs will of course work with anything, not just I/O futures which tokio-rs provides.</p>
+<p>I'd be remise if I didn't mention that in this example there isn't really a ton of concurrency going on. The reason for this is that in the context of the DNS client, only a single connection is being used. To reduce the number of queries being sent I implemented two Futures. One is <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/client/src/client/memoize_client_handle.rs#L25">MemoizeClientHandle</a> which will store/cache results from queries during a DNSSec evaluation. I don't want to add to the already significant amount of DNS traffic out there unnecessarily. That Future at it's core uses <a href="https://github.com/bluejekyll/trust-dns/blob/7d3e56dec5cabdf2ff94278394954d13047b03bb/client/src/client/rc_future.rs#L13">RcFuture</a> which is a Future that will return copies of references to an inner future result, or the result if it's finished. <code>RcFuture</code> is a purely generic Future, which could be used in any other context. <code>RcFuture</code> makes the trade-off that it's cheaper to <code>clone()</code>, aka copy, the data than it is to query the data. The fact that I could just add these Futures as wrappers to existing logic, should make some of the benefits of these two libraries and the paradigm apparent.</p>
+<h1 id="the-future-is-now">The future is now</h1>
+<p>These abstractions are excellent. By adopting futures-rs for TRust-DNS, and specifically tokio-rs, it means that these <em>should</em> integrate easily with any code which also chooses to use tokio-rs. Based on my experience, if you're doing I/O in Rust, you probably should be looking at using tokio-rs. Now, everyone is going to ask, &quot;do you have benchmarks? I heard Rust is faster than a cheetah! Prove it!&quot;. Well, I <a href="https://github.com/bluejekyll/trust-dns/commit/7d3e56dec5cabdf2ff94278394954d13047b03bb">finally added</a> some bench tests to TRust-DNS, with a test harness for running BIND9 as a comparison. Sadly, it turns out by just writing something in Rust you don't end up with the fastest program ever. The story of making TRust-DNS fast is not part of this post. You're going to have to wait until my next post where we can discover how to benchmark TRust-DNS, profile it, and then make it faster; the goal, of course, being to make it faster than BIND9. To be fair, I haven't been trying to make TRust-DNS fast. Until now I've been trying to make it correct, safe, and secure. Currently the server processes requests in 400µs.</p>
+<p>If you want to play with the TRust-DNS futures, ClientFuture was <a href="https://crates.io/crates/trust-dns">published</a> in the <a href="https://crates.io/crates/trust-dns">0.8 release</a>. The ServerFuture will be coming in 0.9, for which there is not yet a date, but probably soonish. 0.9 also will split the server and client into separate crates, so keep an eye out for that. I plan to implement DNS over TLS, multicast DNS and other things, which will all be simpler now, because I can have a single common high level interface for interacting with any of them. Fun, right? It has me dreaming of all the things that I did in the past, and how I can make them better in the future.</p>
+<h1 id="thank-you">Thank you!</h1>
+<p>Thank you to <a href="https://github.com/alexcrichton">@alexcrichton</a> for helping guide me through some initial issues I had when implementing the UDP and TCP streams. Also, thank you to all of the contributors of <a href="https://github.com/alexcrichton/futures-rs/graphs/contributors">furures-rs</a> and <a href="https://github.com/tokio-rs/tokio-core/graphs/contributors">tokio-rs</a> who made all of this possible. A huge thank you to the <a href="https://github.com/bluejekyll/trust-dns/graphs/contributors">contributors</a> of TRust-DNS; I deeply appreciate your efforts in helping drive this project forward.</p>
+<ul>
+<li>
+<p><a name="1">1</a>) Taking TRust-DNS IntoFuture is a pun, not a typo on the type <a href="https://docs.rs/futures/0.1.6/futures/future/trait.IntoFuture.html">IntoFuture</a> in the futures-rs library.</p>
+</li>
+<li>
+<p><a name="2">2</a>) I implemented these streams prior to <a href="https://docs.rs/tokio-core/0.1.1/tokio_core/io/struct.Framed.html">tokio_core::io::Framed</a> being stabilized. I'd highly recommend looking at that for request/response type protocols.</p>
+</li>
+</ul>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Taking TRust-DNS IntoFuture&url=https://bluejekyll.github.io/blog/posts/trust-dns-into-future/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/trust-dns-into-future/&title=Taking TRust-DNS IntoFuture"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/trust-dns-into-future/&t=Taking TRust-DNS IntoFuture"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

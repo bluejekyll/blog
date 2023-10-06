@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>They&#x27;re not Generics; they&#x27;re TypeParameters</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                They&#x27;re not Generics; they&#x27;re TypeParameters
+            </p>
+            <p class="subtitle is-4 is-italic">
+                A story about grokking Generics in Rust
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;type-parameters&#x2F;">
+                    <span class="is-family-monospace">2017-08-06</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>A while back I was writing some Rust, and the compiler yelled at me, it's such a perfectionist. Luckily it also gave me a very helpful hint about how to fix the problem. I copy-and-pasted the hint into my code (yeah I know, you just lost some respect for me), and promised myself to go back and understand why later. I finally had to write some new code that used these interfaces and so I got to revisit the error message and why it was necessary. Before we get into that argument with the compiler, it might be helpful to walk down memory lane with Generics.</p>
+<h1 id="my-brief-history-with-generics">My brief history with &quot;Generics&quot;</h1>
+<p>My first introduction to the concept of Generics was with the <code>C++</code> Template system in a <a href="https://computerscience.vassar.edu">Computer Science</a> class in <a href="https://www.vassar.edu">College</a>. It's been a while, but I still have this <code>typedef</code> name in my head, <code>interator</code> (notice the 'int-erator', an iterator of integers). I had typedeffed it to reduce my typing throughout the code, it was something like:</p>
+<pre data-lang="c++" style="background-color:#0f1419;color:#bfbab0;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#ff7733;">typedef</span><span> std</span><span style="color:#f29668;">::</span><span>vector&lt;</span><span style="color:#ff7733;">int</span><span>&gt;</span><span style="color:#f29668;">::</span><span>iterator </span><span style="color:#59c2ff;">interator</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>To this day I frequently mistype iterator as interator... crazy how that stuff can stick with you. Most of my time was actually spent with Java and it's Generics system, though. It was definitely something initially missing from Java after switching from C++ (they were finally added in 1.5). Some people don't like Generics, let me just say, I am firmly in the camp of Generics being awesome. An example of why Generics are necessary in Java is most obvious with collections like Map, before Generics:</p>
+<pre data-lang="java" style="background-color:#0f1419;color:#bfbab0;" class="language-java "><code class="language-java" data-lang="java"><span style="font-style:italic;color:#39bae6;">String</span><span> foo </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&quot;foo&quot;</span><span style="color:#bfbab0cc;">;
+</span><span style="font-style:italic;color:#39bae6;">String</span><span> bar </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&quot;bar&quot;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#39bae6;">ArrayList</span><span> vec </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">new </span><span style="font-style:italic;color:#39bae6;">ArrayList</span><span>(</span><span style="font-style:italic;color:#39bae6;">Arrays</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">asList</span><span>(</span><span style="color:#c2d94c;">&quot;abc&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;123&quot;</span><span>))</span><span style="color:#bfbab0cc;">;
+</span><span style="font-style:italic;color:#39bae6;">String</span><span> str </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&quot;123&quot;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#39bae6;">Map</span><span> map </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">new </span><span style="font-style:italic;color:#39bae6;">HashMap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">put</span><span>(foo</span><span style="color:#bfbab0cc;">,</span><span> vec)</span><span style="color:#bfbab0cc;">;
+</span><span>map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">put</span><span>(bar</span><span style="color:#bfbab0cc;">,</span><span> str)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// we need to cast because map.get() returns Object, not ArrayList
+</span><span style="font-style:italic;color:#39bae6;">List</span><span> list </span><span style="color:#f29668;">= </span><span>(</span><span style="font-style:italic;color:#39bae6;">List</span><span>)map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">get</span><span>(foo)</span><span style="color:#bfbab0cc;">;
+</span><span style="font-style:italic;color:#5c6773;">// ClassCastException! this is a String, but this map doesn&#39;t care!
+</span><span style="font-style:italic;color:#39bae6;">List</span><span> not_list </span><span style="color:#f29668;">= </span><span>(</span><span style="font-style:italic;color:#39bae6;">List</span><span>)map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">get</span><span>(bar)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>With Generics we can at least turn that into a compile time error. Compile time errors mean things don't blow up in production, effectively giving you a free unit test:</p>
+<pre data-lang="java" style="background-color:#0f1419;color:#bfbab0;" class="language-java "><code class="language-java" data-lang="java"><span style="font-style:italic;color:#5c6773;">// A Map of String to an Object which implements List
+</span><span style="font-style:italic;color:#39bae6;">Map</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">List</span><span>&gt; map </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">new </span><span style="font-style:italic;color:#39bae6;">HashMap</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">List</span><span>&gt;()</span><span style="color:#bfbab0cc;">;
+</span><span>map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">put</span><span>(foo</span><span style="color:#bfbab0cc;">,</span><span> vec)</span><span style="color:#bfbab0cc;">;
+</span><span style="font-style:italic;color:#5c6773;">// compiler error! expected List, found String
+</span><span style="font-style:italic;color:#5c6773;">//  one less runtime bug!
+</span><span>map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">put</span><span>(bar</span><span style="color:#bfbab0cc;">,</span><span> str)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// If we got here, there would be no need to cast!
+</span><span style="font-style:italic;color:#39bae6;">List</span><span> list </span><span style="color:#f29668;">=</span><span> map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">get</span><span>(foo)</span><span style="color:#bfbab0cc;">;
+</span><span style="font-style:italic;color:#5c6773;">// the compiler never even got here!
+</span><span style="font-style:italic;color:#39bae6;">List</span><span> not_list </span><span style="color:#f29668;">=</span><span> map</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">get</span><span>(bar)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>And then I started learning Rust...</p>
+<h1 id="you-thought-you-knew-generics-welcome-to-rust">You thought you knew Generics? Welcome to Rust</h1>
+<p>Rust definitely raises the conceptual bar with it's Generics and type system. To understand why, it's important to understand the difference between monomorphism and <em>runtime</em><a href="https://bluejekyll.github.io/blog/posts/type-parameters/?#1">[1]</a> polymorphism (to clarify, my usage of polymorphism is specifically in regards to dynamic runtime polymorphism, see comment below). Object Oriented languages all support polymorphic functions. In C++ this (runtime polymorphism) is opt-in with the <code>virtual</code> keyword, and in Java it's opt-out with the <code>final</code> keyword. Rust also supports <em>runtime</em> polymorphism with <a href="https://doc.rust-lang.org/book/first-edition/trait-objects.html">Trait Objects</a>, to use it you must cast a reference to a to a trait object, for example:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">let</span><span> obj </span><span style="color:#f29668;">= </span><span>Object</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">let</span><span> trait_obj </span><span style="color:#f29668;">= &amp;</span><span>obj </span><span style="color:#f29668;">as &amp;</span><span>Trait</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>This makes Rust similar to C++ in the sense that <em>runtime</em> polymorphism is opt-in. The issue with this is that at runtime it's a little bit more expensive. So what do we do to make this less expensive? We get to use monomorphism, and this is where the Generic system in Rust shines. Let's quickly review polymorphism in Rust:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">trait </span><span style="color:#59c2ff;">Animal </span><span>{
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// default impl, don&#39;t most animals have 4 legs? j/k
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">num_legs</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">usize </span><span>{ </span><span style="color:#f29718;">4 </span><span>}
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Define a Dog and implement Animal for it
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">Dog</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">impl </span><span>Animal </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">Dog </span><span>{
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// use the default impl
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Define a Chicken and implement Animal for it
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">Chicken</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">impl </span><span>Animal </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">Chicken </span><span>{
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">num_legs</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">usize </span><span>{ </span><span style="color:#f29718;">2 </span><span>}
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">print_num_legs</span><span>(</span><span style="color:#f29718;">animal</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>Animal) {
+</span><span>  </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;legs: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> animal</span><span style="color:#f29668;">.</span><span style="color:#f07178;">num_legs</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> dog </span><span style="color:#f29668;">=</span><span> Dog</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> chicken </span><span style="color:#f29668;">=</span><span> Chicken</span><span style="color:#bfbab0cc;">;
+</span><span>    
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Notice the cast to the Trait Object
+</span><span>    </span><span style="color:#f07178;">print_num_legs</span><span>(</span><span style="color:#f29668;">&amp;</span><span>dog </span><span style="color:#f29668;">as &amp;</span><span>Animal)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#f07178;">print_num_legs</span><span>(</span><span style="color:#f29668;">&amp;</span><span>chicken </span><span style="color:#f29668;">as &amp;</span><span>Animal)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span></code></pre>
+<p>The above <code>print_num_legs</code> function is polymorphic, because it operates on the concept of Animal. This is a bit of a contrived example, obviously. An interesting difference between Rust and C++/Java at this point is where the opt-in/opt-out of polymorphism occurs. In Rust it's from the reference to the Animal object, but in C++/Java, it's actually in the definition of the class itself. Initially this struck me as odd, but only because I wasn't used to it. Now of course I find it funny that C++ and Java did it the other way (C++ also requires references to objects for polymorphism, if the variable is stack based, then polymorphism will not come into play in the way that it always does in Java). <em>Runtime</em> polymorphism comes at a cost, and that's the fact that when you cast a reference to a Trait Object the compiler must capture additional information behind the pointer to that memory, mainly the virtual function table. This is the table of functions which the object, Dog for example, implement with references to the function actually provided by that instance of the object.</p>
+<p>This cost can be removed by using monomorphism, and if you're following along (and I'm doing a decent job explaining), Generics. It should be mentioned that <em>runtime</em> polymorphism comes at the cost of runtime memory, where as monomorphism comes at the cost of additional binary size. There is no free beer here. The logic from above isn't all that different, it all comes in the <code>print_num_legs</code> function definition:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">print_num_legs</span><span>&lt;A</span><span style="color:#bfbab0cc;">:</span><span> Animal&gt;(</span><span style="color:#f29718;">animal</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>A) {
+</span><span>  </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;legs: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> animal</span><span style="color:#f29668;">.</span><span style="color:#f07178;">num_legs</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> dog </span><span style="color:#f29668;">=</span><span> Dog</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> chicken </span><span style="color:#f29668;">=</span><span> Chicken</span><span style="color:#bfbab0cc;">;
+</span><span>    
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Notice no cast is necessary
+</span><span>    </span><span style="color:#f07178;">print_num_legs</span><span>(</span><span style="color:#f29668;">&amp;</span><span>dog)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#f07178;">print_num_legs</span><span>(</span><span style="color:#f29668;">&amp;</span><span>chicken)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>This is now a monomorpic call. The compiler literally generates different code for each variation of the call to <code>print_num_legs</code>. This reduces our runtime cost, but we get to keep the nice fact that we still only needed to write a single function for all types of Animals.</p>
+<h1 id="generic-experts-only">Generic experts only</h1>
+<p>Ok, now that we're all experts with polymorphism and monomorphism in Rust, let's dive deeper in to the depths of this type system. Take a look at the interface that tripped me up and took a while to understand, from <a href="https://github.com/bluejekyll/trust-dns/blob/a46d1bbe996b69df9dcd964540de57df2d44681e/client/src/client/client.rs#L424">here</a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">new</span><span>&lt;CC&gt;(</span><span style="color:#f29718;">client_connection</span><span style="color:#bfbab0cc;">:</span><span> CC) </span><span style="color:#bfbab0cc;">-&gt; </span><span>SecureSyncClientBuilder&lt;CC&gt;
+</span><span>  </span><span style="color:#ff7733;">where</span><span> CC</span><span style="color:#bfbab0cc;">:</span><span> ClientConnection,
+</span><span>        &lt;CC </span><span style="color:#f29668;">as</span><span> ClientConnection&gt;</span><span style="color:#f29668;">::</span><span>MessageStream</span><span style="color:#bfbab0cc;">: </span><span>Stream&lt;Item=</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;, Error=io</span><span style="color:#f29668;">::</span><span>Error&gt; + </span><span style="color:#ff7733;">&#39;static
+</span></code></pre>
+<p>OMG, that is a complex signature! Let's break it down, but first a quick review of Generics in Rust:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// A normal function
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">normal</span><span>(</span><span style="color:#f29718;">a</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">str</span><span>) { </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{:?}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> a) } 
+</span></code></pre>
+<p>But what if we want that same function to work with any type? We add a Generic Type Parameter:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">generic</span><span>&lt;T&gt;(</span><span style="color:#f29718;">a</span><span style="color:#bfbab0cc;">:</span><span> T) { </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{:?}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> a) }
+</span></code></pre>
+<p>This doesn't compile because we didn't tell Rust that you can print the type T with Debug, let's do that:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">generic</span><span>&lt;T</span><span style="color:#bfbab0cc;">:</span><span> Debug&gt;(</span><span style="color:#f29718;">a</span><span style="color:#bfbab0cc;">:</span><span> T) { </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{:?}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> a) }
+</span></code></pre>
+<p>That's nice and simple. But here's the thing, Generics are just other parameters to the function, TypeParameters. By using the term <em>parameter</em>, it helps with understanding more complex use cases. For example, if you want to cast one variable from one type to another you do this with traditional values:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// Cast the 32 bit number, 128 to an 8 bit number
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">cast</span><span>() </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">u8 </span><span>{ </span><span style="color:#f29718;">128_</span><span style="color:#ff7733;">u32 </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">u8 </span><span>}
+</span></code></pre>
+<p>TypeParameters work just the same way! To show what I mean, we need to build up to a more complex example:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// inline TypeParameter with Trait bound
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">fun_generic</span><span>&lt;T</span><span style="color:#bfbab0cc;">: </span><span>Add&lt;T, Output=T&gt;&gt;(</span><span style="color:#f29718;">a</span><span style="color:#bfbab0cc;">:</span><span> T, </span><span style="color:#f29718;">b</span><span style="color:#bfbab0cc;">:</span><span> T) </span><span style="color:#bfbab0cc;">-&gt;</span><span> T { a </span><span style="color:#f29668;">+</span><span> b }
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// equivalent with a where clause
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">fun_generic</span><span>&lt;T&gt;(</span><span style="color:#f29718;">a</span><span style="color:#bfbab0cc;">:</span><span> T, </span><span style="color:#f29718;">b</span><span style="color:#bfbab0cc;">:</span><span> T) </span><span style="color:#bfbab0cc;">-&gt;</span><span> T </span><span style="color:#ff7733;">where</span><span> T</span><span style="color:#bfbab0cc;">: </span><span>Add&lt;T, Ouput=T&gt; { a </span><span style="color:#f29668;">+</span><span> b }
+</span></code></pre>
+<p>The <code>Output</code> parameter of the <code>Add</code> trait is an Associated Type, it's defined like this:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">trait </span><span style="color:#59c2ff;">Add</span><span>&lt;RHS = Self&gt; {
+</span><span>    </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Output</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#5c6773;">// associated type
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">add</span><span>(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">rhs</span><span style="color:#bfbab0cc;">:</span><span> RHS) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Output</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>This allows the return type, <code>Output</code> to be declared separately from the <code>Add</code> trait. The trait bound for <code>add</code> basically says this, <code>add</code> can be defined for any type, but it can only be added to itself (turns out I learned something new today, the RHS is just defaulted to the same type, see examples below <a href="https://bluejekyll.github.io/blog/posts/type-parameters/?#2">[2]</a>). This means that <code>2 /*usize*/ + &quot;3&quot; /*&amp;str*/;</code> is not legal. It does allow us to change the output though. Let's make up some types, say <code>BitField8</code> and <code>BitField16</code> types. We'll define <code>add</code> on <code>BitField8</code> which will append one to another and return a <code>BitField16</code>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">BitField8</span><span>(</span><span style="color:#ff7733;">u8</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">BitField16</span><span>(</span><span style="color:#ff7733;">u16</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">impl </span><span>Add&lt;BitField8&gt; </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">BitField8 </span><span>{
+</span><span>  </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Output </span><span style="color:#f29668;">=</span><span> BitField16</span><span style="color:#bfbab0cc;">;
+</span><span>  
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">add</span><span>(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">rhs</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Output {
+</span><span>     </span><span style="color:#ff7733;">let</span><span> high</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u16 </span><span style="color:#f29668;">= </span><span>(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0 </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">u16</span><span>) </span><span style="color:#f29668;">&lt;&lt; </span><span style="color:#f29718;">8</span><span style="color:#bfbab0cc;">;
+</span><span>     BitField16(high </span><span style="color:#f29668;">+</span><span> rhs</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0 </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">u16</span><span>)
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>This isn't very useful, but it shows what is possible with the Generics system in Rust and it's various TypeParameters and AssociatedTypes. This is all very powerful in giving us strong type checking in lots of different cases.</p>
+<h1 id="now-something-completely-different">Now something completely different</h1>
+<p>Now for why I wrote this post, grokking all of these concepts to fully understand the line that confounded me before. I titled this post, <em>They're not Generics; they're TypeParameters</em> because for me just <em>saying</em> TypeParameter to myself allowed me to better grasp what is going on in this complex signature: </p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/*1*/ </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">new</span><span>&lt;CC&gt;(</span><span style="color:#f29718;">client_connection</span><span style="color:#bfbab0cc;">:</span><span> CC) </span><span style="color:#bfbab0cc;">-&gt; </span><span>SecureSyncClientBuilder&lt;CC&gt;
+</span><span style="font-style:italic;color:#5c6773;">/*2*/  </span><span style="color:#ff7733;">where</span><span> CC</span><span style="color:#bfbab0cc;">:</span><span> ClientConnection,
+</span><span style="font-style:italic;color:#5c6773;">/*3*/        </span><span>&lt;CC </span><span style="color:#f29668;">as</span><span> ClientConnection&gt;</span><span style="color:#f29668;">::</span><span>MessageStream</span><span style="color:#bfbab0cc;">: </span><span>Stream&lt;Item=</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;, Error=io</span><span style="color:#f29668;">::</span><span>Error&gt; + </span><span style="color:#ff7733;">&#39;static
+</span></code></pre>
+<p>Let's disect it line-by-line. <code>CC</code> is the only direct TypeParameter it's used in both a function parameter and the return type:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/*1*/ </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">new</span><span>&lt;CC&gt;(</span><span style="color:#f29718;">client_connection</span><span style="color:#bfbab0cc;">:</span><span> CC) </span><span style="color:#bfbab0cc;">-&gt; </span><span>SecureSyncClientBuilder&lt;CC&gt;
+</span></code></pre>
+<p>In our where clause we are putting a bound on <code>CC</code>, it's a <code>ClientConnection</code>, it could have multiple additional bounds, like <code>Send</code>. The original code doesn't add <code>Send</code>, but let's do it here to make something clearer:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/*2*/ </span><span style="color:#ff7733;">where </span><span style="color:#f29718;">CC</span><span style="color:#bfbab0cc;">:</span><span> ClientConnection </span><span style="color:#f29668;">+ </span><span style="font-style:italic;color:#39bae6;">Send</span><span style="color:#bfbab0cc;">,
+</span></code></pre>
+<p><code>MessageStream</code> is an associated type on the <code>ClientConnection</code>, like <code>Output</code> in <code>Add</code>. For various reasons this complexity was needed, it's mainly for TCP and TLS connections where unlike UDP we first have to establish a connection to the remote endpoint, so a generic TypeParameter allows this new function to operate on all three of those connection types.</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/*3*/       </span><span style="color:#f29668;">&lt;</span><span style="color:#f29718;">CC </span><span style="color:#f29668;">as</span><span> ClientConnection</span><span style="color:#f29668;">&gt;::</span><span>MessageStream</span><span style="color:#bfbab0cc;">: </span><span>Stream&lt;Item=</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt;, Error=io</span><span style="color:#f29668;">::</span><span>Error&gt; </span><span style="color:#f29668;">+ </span><span style="color:#ff7733;">&#39;static
+</span></code></pre>
+<p>Notice something funky here, we are &quot;casting&quot; <code>CC</code> to <code>ClientConnection</code>, why? Coming from Java with no AssociatedTypes this was very foreign, but it makes sense when you think about what's going on in this statement. <code>CC</code> could be either <code>ClientConnection</code> or <code>Send</code>, so we need to &quot;cast&quot; it to the actual type on which we want to add additional bounds for it's associated type, in this case <code>MessageStream</code>. <code>CC</code> could be any type of it's bounds, and by &quot;casting&quot; it we are making it clear to the compiler which AssociatedType of which Trait we are referring to.</p>
+<p>To finish this off, the MessageStream is then bound to the type <code>Stream&lt;Item=Vec&lt;u8&gt;, Error=io::Error&gt; + 'static</code>. This is just saying that MessageStream is a Stream of future data of the type <code>Vec&lt;u8&gt;</code>; the raw, binary DNS packet. The additional <code>'static</code> bound just specifies that the Stream must either have a <code>'static</code> lifetime or be an owned type.</p>
+<p>Before taking TRust-DNS to 1.0, I want to go back and review these interfaces and see if they can be simplified. If anyone has ideas on that, please file an issue on the <a href="https://github.com/bluejekyll/trust-dns/issues">repo</a>.</p>
+<h1 id="grokked">Grokked</h1>
+<p>The reason I wrote this post is because these concepts were something which confused me when initially working with Rust. By literally starting to think in terms of TypeParameters, it has helped clarify some of what is going on when writing generic code. The type system in Rust is so much more advanced than any other language that <em>I've</em> used; I'm still getting used to thinking about it in terms that make sense to me. I hope you found this post useful, apologies if you found it meandering.</p>
+<p>p.s. Posting to your blog is a great learning potential, some corrections:</p>
+<ul>
+<li>
+<p><a name="1">1</a>) Above the way in which I refer to the difference between polymorphism and monomorphism was incorrect, I attempted to correct most locations in the post. <a href="https://en.wikipedia.org/wiki/Polymorphism_(computer_science)">Polymorphism</a> is the general term for multiple types implementing the same common interface. This does not necessarily imply that the functions must be dynamically called at runtime, in fact generics are generally a subset of polymorphism. The term monomorphism is the specific feature of the compiler to replace function calls to polymorphic functions with a separately compiled code path. Thanks for the <a href="https://www.reddit.com/r/rust/comments/6rzbnd/i_just_wrote_a_thing_about_grokking_generics_in/dl8z4pj/">correction</a>!</p>
+</li>
+<li>
+<p><a name="2">2</a>) In the Add example I wrote above, it actually <em>is</em> possible to define add on two different types. I've expanded the example from above:</p>
+</li>
+</ul>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">BitField8</span><span>(</span><span style="color:#ff7733;">u8</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">BitField16</span><span>(</span><span style="color:#ff7733;">u16</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span style="font-style:italic;color:#5c6773;">// added this additional third type
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">BitField32</span><span>(</span><span style="color:#ff7733;">u32</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">impl </span><span>Add&lt;BitField16&gt; </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">BitField8 </span><span>{
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// when you add 8 bits to 16, you need enough space, i.e. 32 bits
+</span><span>  </span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Output </span><span style="color:#f29668;">=</span><span> BitField32</span><span style="color:#bfbab0cc;">;
+</span><span>  
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">add</span><span>(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">rhs</span><span style="color:#bfbab0cc;">:</span><span> BitField16) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self</span><span style="color:#f29668;">::</span><span>Output {
+</span><span>     </span><span style="color:#ff7733;">let</span><span> high</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u32 </span><span style="color:#f29668;">= </span><span>(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0 </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">u32</span><span>) </span><span style="color:#f29668;">&lt;&lt; </span><span style="color:#f29718;">16</span><span style="color:#bfbab0cc;">;
+</span><span>     BitField32(high </span><span style="color:#f29668;">+</span><span> rhs</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0 </span><span style="color:#f29668;">as </span><span style="color:#ff7733;">u32</span><span>)
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>It turns out that in <code>Add&lt;RHS = Self&gt;</code>, the RHS only defaults to <code>Self</code>. This makes more sense after being <a href="https://www.reddit.com/r/rust/comments/6rzbnd/i_just_wrote_a_thing_about_grokking_generics_in/dl8wa97/">corrected</a>.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=They're not Generics; they're TypeParameters&url=https://bluejekyll.github.io/blog/posts/type-parameters/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/type-parameters/&title=They're not Generics; they're TypeParameters"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/type-parameters/&t=They're not Generics; they're TypeParameters"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

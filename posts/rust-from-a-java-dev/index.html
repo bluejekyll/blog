@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rust from a Java dev</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Rust from a Java dev
+            </p>
+            <p class="subtitle is-4 is-italic">
+                
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;rust-from-a-java-dev&#x2F;">
+                    <span class="is-family-monospace">2015-05-14</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-java"></i>
+            
+            <span class="tooltip-text is-6">java</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <h1 id="a-little-background">A little background</h1>
+<p>Let me say first off, I am not one of those developers that jumps on the next cool language. I have a very specific reason why I am interested in Rust. Rust represents an evolution of systems languages of which our options have been limited now for decades. A systems language in my opinion, and I'm sure there is lots of disagreement about this, but the traits important to me are:</p>
+<ul>
+<li>Constant and predictable runtime</li>
+<li>Direct access to OS primitives and interfaces</li>
+<li>Low overhead for the language runtime</li>
+</ul>
+<p><a href="http://en.wikipedia.org/wiki/System_programming_language">Wikipedia defines</a> it this way:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>System software is computer software designed to operate and control
+</span><span> the computer hardware, and to provide a platform for running application
+</span><span> software. System software includes software categories such as operating
+</span><span> systems, utility software, device drivers, compilers, and linkers.
+</span></code></pre>
+<p>That definition seems weak to me, but the line between systems and application languages had been blurred long ago. When choosing a language for any project, there should be specific criteria by which you determine what you need based on what you need to accomplish. Most languages will allow you to accomplish any task you want, but they offer features that may make what you want to do either easier or harder. Picking the right language is important, how many external libraries are available to support what you're building, how many developers exist to support you if you need to hire/contract work, how many unknown bugs or issues remain undiscovered in the language. For most of my use cases Java has always been the right language, but this post isn't about Java, it's about Rust. Also, I don't want to get into defense of Java/JVM over other languages like Go, Ruby, Scala, Clojure, etc. I've been developing in Java since 1997, and I stopped using C/C++ for anything major after 2002.</p>
+<p>I discovered Rust while exploring Go. This was only a few months ago, which make me a late-comer to this game. Remember the two bullet points above; constant and predictable runtime, direct access to OS primitives. Go has always confused me, is it a systems language? It's got a Garbage Collector (GC means unpredictable runtime) and it's awkward access to C structures means that it can not easily interface with the OS. It was the latter issue that brought me to Rust which allows for direct access to C structures through it's FFI (Foreign Function Interface). For you Java devs who've always hated working with JNI this is a godsend (Yes, JNA made it easier and Panama should help immensely). Go ends up being better at potentially replacing Java and the JVM.</p>
+<h1 id="on-to-rust">On to Rust</h1>
+<p>What makes Rust unique in this landscape is that it's a new language with no GC, but it at the same time it handles the memory management for you. It allows for the same direct access to C as C++ does, with no significant hurdles. Coming from a Java landscape where there are a multitudes of libraries in addition to the massive JDK standard library, what this means is you have access to not just Rust elements, but also the massive C library out there. I think of Rust as having two core features, memory safety and management. But by no means is this the limit to what Rust provides. As a Java developer not having to worry about memory allocation and deallocation is nice. I've gotten quite used to a GC which makes sure that I don't have to worry about seg faults and memory leaks any more (yes, people create memory leaks in Java too, but you have to make some very poor choices for that).</p>
+<h1 id="option-t">Option&lt;T&gt;</h1>
+<p>Rust is trying to position it self as a replacement for C, and I've become convinced that unlike C++ and some other languages out there, it actually can. This is because of the fact that Rust gives you access to all the pointer primitives you have in C, but guarantees that accessing the data behind those pointers is always valid. One cool thing that I really like about Rust is that it does not allow for null, this was a little mind blowing, though after building a small project in Swift I learned how nice it is to know that the data you're accessing is either there or not.</p>
+<p>Option is a primitive in Rust that is used to return or pass around data which is optionally there or not. It's an enum (union) type in Rust. When in Java we gave up segmentation faults, what we replaced them with were NullPointerExceptions, the only advancement that gives us in the end is the stacktrace. Rust simply says, this data may or may not exist behind the Option type. This tells the developer immediately that you need to handle those two cases. It also gives you some handy functions at your disposal to handle the null case elegantly:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">unwrap_or</span><span>(</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">def</span><span style="color:#bfbab0cc;">:</span><span> T) </span><span style="color:#bfbab0cc;">-&gt;</span><span> T</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Which returns the value T if there is nothing, i.e. the Option is None. In Java 1.8 there is now the Optional type which acts the same way. I for one am going to start using this in all my future Java code as this is a very nice feature. Scala has had this from it's foundations as well.</p>
+<h1 id="enums-in-rust-are-cool">Enums in Rust are cool</h1>
+<p>Enumerations in Rust are cool, they are a union type. There's not a great corollary to this in Java. The first thing to understand is that an enum in Rust allows you to define values that are stored with the enum, this is done very efficiently in the compiled code, but I won't get into that.</p>
+<p>Look at the Option enum:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub enum </span><span style="color:#59c2ff;">Option</span><span>&lt;T&gt; {
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">None</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(T)</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span></code></pre>
+<p>The first thing you'll notice as a Java dev, is that enums can be Genericized. I've wanted this so many times in Java and end up doing funky stuff to work around it. Now when using this you need to do something that was unfamiliar to me, <a href="http://doc.rust-lang.org/1.0.0-beta.4/book/patterns.html">destructuring</a>, the <code>unwrap()</code> function looks like this:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">unwrap</span><span>(</span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> T {
+</span><span>    </span><span style="color:#ff7733;">if let </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(v) </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return</span><span> v</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>    </span><span style="color:#f07178;">panic!</span><span>(</span><span style="color:#c2d94c;">&quot;This is None, can&#39;t unwrap()&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p><code>v</code> is a locally scoped variable defined to unwrap the enum where the enum is of type Some. This type destructuring is neat and allows for very flexible usage of enums in Rust. Ok, this introduces panic! which is essentially similar to throwing a RuntimeError in Java (the <code>!</code> says that this is a <a href="http://doc.rust-lang.org/1.0.0-beta.4/book/macros.html">macro</a>). This introduces an issue I have with the language, no exceptions (well, except for panic!). Basically, Rust allows you to throw one type of Exception, and comparing it to Errors in Java is good. Errors should not be caught in Java, they are non-recoverable. Panic is similar, and similarly should almost never be used. But they are there, and at Rust deals the the stack unwinding properly so we don't need to worry about dangling pointer issues. I'm torn as to what I'd prefer to see, and this article is a great writeup on the issue.</p>
+<h1 id="errors-in-rust-are-a-little-juvenile-but-still-really-neat">Errors in Rust are a little juvenile, but still really neat</h1>
+<p>So this is where you can see the roots of the desire for Rust to be a bit like C. In C there are no Exceptions, there are return codes. What makes Rust's errors better than C is that since they are enums, there is no question to if the result is good or bad. Objects are generally passed in by reference and then the data returned through that referred parameter. Rust is similar, but instead uses an enum for the result:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">enum </span><span style="color:#59c2ff;">Result</span><span>&lt;T, E&gt; {
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(T)</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(E)</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span></code></pre>
+<p>Where there might be an error you return Result. I actually like this, I've noticed you're code becomes much more condensed than the try{} finally {} blocks in Java, though the AutoCloseable stuff has made that nicer. There is no finally, it seems that there has been a long debate in the Rust community about this. If you need finalization, then you need to implement the trait Drop for your struct.</p>
+<p>The reason I say errors are juvenile in Rust is that it becomes hard to write functions which join different error types and return those errors. In Java it's easy to wrap any Exception and pass that up the call stack as a cause of the Exception. In Rust this still feels very awkward. In Rust you can't extend objects, all structs are final. What this means is that if you want to create a new Error type in rust, you need to write a bunch of code, or maybe I'm doing it wrong. I imagine this will get better over the coming releases.</p>
+<h1 id="ownership-and-lifetimes">Ownership and Lifetimes</h1>
+<p>This is where Rust get's a little difficult. For Java devs it's important to think about the lifetime of objects because your always concerned with how complex the Garbage Collector will have to work, or not make dumb mistakes that lead to memory leaks. Ownership is something that you have to be concerned with when working with Threads in Java. It's also something to make sure where you don't have any dangling references. In Rust it's not just something you need to be cognizant of, you have to abide by it's strict rules related to these two concepts.</p>
+<p>Rust introduced me to a concept of tracking Lifetimes. Initially reading the docs and specs, I thought this was going to be the hard thing to wrap my head around, but in the end it's the Ownership rules that I find to be the difficult piece. See this <a href="http://stackoverflow.com/questions/29818290/how-to-convert-an-iterator-on-a-tuple-of-string-string-to-an-iterator-of-st">question I posted</a> in Stack Overflow to get a bit of an understanding to the complexities of Ownership rules.</p>
+<h1 id="llvm">LLVM</h1>
+<p>Rust compiles to the LLVM byte code. The LLVM is a really awesome concept and reality. I've been following it since Apple decided to start using it in their OS, and it's clear to mean that this is itself a game changer. The concept behind the LLVM is basically to produce architecture agnostic intermediate code which is then compiled to for the specific architecture on which the code needs to run. This is powerful because it allows for all high level languages only worry about parsing, but the machine code generation is only written once for each architecture. The GCC started doing something similar a while back, but the LLVM has, IMO, done a better job.</p>
+<p>As an example, asm.js is a new JavaScript spec that defines a subset of JS which can be optimized by the interpreter to be run like machine code. As a consequence there is no need to do Garbage Collection and some of the numbers I've seen show asm.js applications running at 50% native speeds. But, it comes at a cost, asm.js is complex, writing it by hand is difficult, but this is where the LLVM shines, the <a href="https://kripken.github.io/emscripten-site/index.html">Emscripten</a> tool is a compiler for translating C and C++ into asm.js. What this means is that for us people who like strongly typed languages, we will be able to use them instead of JS to wrote for the Web, which is really awesome. By extension, this means that Rust too could be used for writing web code.</p>
+<h1 id="when-should-you-start-using-rust">When should you start using Rust?</h1>
+<p>Now, depending on what you need it for. For me, having a predictable runtime (no GC) is important to a project I'm working on. Having that also run at native C like speed is also desirable. If you have a project that also needs this, Rust seems like the perfect fit. If on the other hand you have a high application to build and time critical deadlines to get it into production I'd still stick with Java or Scala to deliver that. Rust doesn't have the same amount of libraries and hasn't been beaten around in production to discover all it's bugs yet. It's also possible that the language will change a bit over time, but this will probably all calm down after the 1.0 release.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Rust from a Java dev&url=https://bluejekyll.github.io/blog/posts/rust-from-a-java-dev/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/rust-from-a-java-dev/&title=Rust from a Java dev"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/rust-from-a-java-dev/&t=Rust from a Java dev"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

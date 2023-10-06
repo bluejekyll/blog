@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Software Engineers are lazy bastards, pt. 1</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Software Engineers are lazy bastards, pt. 1
+            </p>
+            <p class="subtitle is-4 is-italic">
+                I decided to make this a three part piece. This one is about components and modularization, the next about testing, and then I will have a final one on development and operations.
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;software-engineers-are-lazy-bastards-1&#x2F;">
+                    <span class="is-family-monospace">2015-06-08</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>Not too long ago, 2000 let's say, it was common for developers of software to be so lazy that they didn't even know if their software worked. They wouldn't write unit tests, they wouldn't even bother testing their code. They would throw it over the fence to quality assurance engineers and expect them to say, &quot;Oh my god this is the greatest code ever, and it works perfectly&quot;. With the exception of the most simple program, this has never actually been the case, hell even <a href="http://en.wikipedia.org/wiki/Grace_Hopper">Grace Murray Hopper</a> (go Brewers!) couldn't account for literal bugs in the system. This has often caused great angst among real engineers out there and even today people in the Software industry continue to say that Software engineering <a href="http://elegantcode.com/2011/06/22/why-software-development-will-never-be-engineering/">is not &quot;Real Engineering&quot;</a>. This is too easy of a copout and let's people off the hook for designing bad software, or using bad techniques.</p>
+<h1 id="it-s-not-like-we-re-building-bridges">It's not like we're building Bridges!</h1>
+<p>This is a classic argument. Bridges are ridged and have to be designed up front to meet the engineering requirements to span what they are being built for. They are static entities that never change, right? Well, that's not totally accurate, even great engineering feats aren't perfect and need to be fixed, look at the new eastern span of the Bay Bridge. There are a bunch of issues that weren't properly accounted for and <a href="http://www.sfgate.com/bayarea/article/Plague-of-problems-puts-Bay-Bridge-seismic-safety-6253577.php">now need to be fixed</a>. So, bridges aren't perfect, and need to go back and be fixed, sounds a lot like software. To try and match the way that buildings and bridges are engineered, the Waterfall Method was created (I remember this being taught to me in college as the new cool awesomeness for development). It really seemed like the greatest thing ever.</p>
+<p>Years later I started working at a large company, when I got there they hadn't shipped their planned release for over a year. It was stuck in this cycle of Dev -&gt; QA -&gt; Dev -&gt; Product -&gt; Dev -&gt; QA that was never ending. So this was first hand experience of this awesome technique that I was taught in college, and it's abject failure to deal with real world issues. What's the problem? Software has a million moving parts. It's dynamic by nature. This is why the Bridge analogy breaks down so quickly, but it's just the static bridges that don't match this. Not all bridges are made this way, check out the <a href="http://www.grindtv.com/random/exploring-the-living-bridges-of-india/#h7UqtAgwrSothwuX.97">living bridges in India</a>.</p>
+<p><img src="http://static.grindtv.com/images/1/00/40/80/06/408006.jpg" alt="Living bridges" /></p>
+<p>What's my point? The issue with Software Engineering isn't that it's not actual engineering, it's that it's Dynamic Engineering. It's constantly adapting and changing to new uses and needs. When you built that website tool it only expected one user at a time, then it blew up and you had like a whopping ten, so you decided it needed to run in parallel. Did you go back and rewrite the entire thing? No, you went back and made it parallel so that all those ten people weren't waiting on each other when they went to your site. Now of course we deal with thousands of connections at a time in an application and so that simple synchronization you did needs to give way to optimistic locking and atomic reads/writes to drastically increase the performance of your application. No locking; again, did you rewrite the entire thing? No, you fixed the weak spots (well unless you wrote it in Ruby and realized that you needed it to actually run fast).</p>
+<h1 id="along-came-tdd">Along came TDD</h1>
+<p>I remember when Test Driven Development came around. If you know all your inputs and outputs, you can just write the tests for it and then the code will just flow to match your test cases. The problem with this is it shoves Software Engineering back into this idea that it is static and non-changing. The one case I've found it useful is parsing and finite-state-machines, you know all the inputs and expected outputs, so it really does help you validate and write your code faster (let me know if you know of other really good fits). In most cases though, you actually don't know what your inputs are until you design the interface and then try to write the code behind it, only to discover that the interface you designed doesn't allow for nice code to be written after that. In fact, I have found TDD to actually be about as slow as Waterfall in terms of delivery. Ok, so TDD doesn't work, but it did pass on something really important, Test <em>Oriented</em> Development. This term is rising in popularity, but what it means is that the code you write is easily tested through the use of Mocks and Unit tests. So why is this an important development in the field? It shows that there is a discipline to coding, and technique which allows for software to be verified to be correct within whatever bounds you've declared. Ok, now we're getting closer to becoming engineers.</p>
+<h1 id="dude-where-s-my-bridge">Dude, where's my Bridge?</h1>
+<p>In the American Civil War (War of Northern Aggression for you Southerners) the Confederate army burned many railroad bridges to try and slow the advance of the Union armies. The <a href="http://usmrr.blogspot.com/2010/10/haupts-military-bridge-w-trestles.html">Trestle bridge</a> construction was used to build bridges quickly and reliably in order to get the Union trains moving. So this is where we come to software as components in a larger system. Object-Oriented design, code reuse, I'll avoid Microservices for right now, maybe a future post. The point is that Components, like the trestle, allow for systems (bridges), to be built faster. The nice thing about this is that like an individual trestle, any component that fails or needs to be changed can be done so without rewriting the entire system. Components must have strong interfaces by which it is known which is in use in software (one reason why I've been attracted to OSGi in the past). So we can build bridges with individual components because each one can be verified individually before inserting into the whole. Unit tests on your components that cover what the expected input and outputs of the components mean that now you have a easy method of verifying a rewrite of that component, and any future rewrites after that.</p>
+<h1 id="so-am-i-an-engineer">So am I an engineer?</h1>
+<p>I build things, I follow strong rules about how I build these things, and I verify that the things I build are correct and fully functional. The entire point of writing this is that I find it annoying that people keep saying that we software engineers are not engineers, that at best we're designers or worst hacks. This is also used as an excuse by lazy developers to not put in proper design and controls in the software they build. This is not true and it's possible to build software both quickly and with a regard to future changes when required. Agility is key and the organization needs to be amenable to Agile development methodologies, with constant iteration to hone in on the ideal system. I follow these rules when building software:</p>
+<ul>
+<li>Use Components to create strong <a href="http://en.wikipedia.org/wiki/Separation_of_concerns">Separation of Concerns</a> and boundaries</li>
+<li>Unit and Functional tests to verify those Components</li>
+<li>All data is Immutable by default for ease of threading</li>
+<li>Any system operation or high level operation should be idempotent and/or atomic</li>
+</ul>
+<p>What these allow me to do is follow fast iterative design. Create a quick top level design, use that to guide the development of each component down the stack. When guiding large architectures across teams, this is essential. Get initial code out as quickly as possible such that the real world stresses can be discovered and fixed as issues come up, and because you have test harnesses and good boundaries around your component it's easy (ish) to replace. I am a Software Engineer, I follow strong engineering practices around what I do, do you?</p>
+<p>What I've left to the reader, proper test design (checkout <a href="http://testng.org/doc/index.html">TestNG</a> for Java and <a href="http://mockito.org/">Mockito</a>) and methodology, good Agile development methodologies (pick one). Do your own research.</p>
+<p><em>I decided to make this a three part piece. The next one deals with testing if you're interested in reading it. The final is about DevOPs</em></p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Software Engineers are lazy bastards, pt. 1&url=https://bluejekyll.github.io/blog/posts/software-engineers-are-lazy-bastards-1/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/software-engineers-are-lazy-bastards-1/&title=Software Engineers are lazy bastards, pt. 1"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/software-engineers-are-lazy-bastards-1/&t=Software Engineers are lazy bastards, pt. 1"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

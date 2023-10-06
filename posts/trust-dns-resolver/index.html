@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The *new* TRust-DNS Resolver</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                The *new* TRust-DNS Resolver
+            </p>
+            <p class="subtitle is-4 is-italic">
+                Fun with the new TRust-DNS Resolver, and generally an update on the progress of the project
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;trust-dns-resolver&#x2F;">
+                    <span class="is-family-monospace">2017-06-30</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-network-wired"></i>
+            
+            <span class="tooltip-text is-6">dns</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>I released the initial version of the TRust-DNS Resolver recently. Version 0.1.0, the version is offset from that of the TRust-DNS library, which is up to 0.10.4 at the time of this writing. When I started this project my main goal was to make a DNS server which was easy to manage, and a client which could be used to manage it in a secure way. As I've marched forward in implementing all of the features I've wanted, it started becoming clear that people are more interested in the Client than the Server. It really struck me when I got issue <a href="https://github.com/bluejekyll/trust-dns/issues/109">#109</a>, &quot;use the system's dns conf, e.g. /etc/resolv.conf&quot;; of course what everyone really wants to use is a simple query interface to get IP addresses. The rest of this post is about building this initial version.</p>
+<h1 id="what-else-has-been-happening">What else has been happening</h1>
+<p>Since my last post I've been heads down at night on TRust-DNS. Writing posts hadn't really been at the top of my mind, but there have been a lot of new features and patches! TRust-DNS has gained support for TLS in that time, probably the other big feature. There are three variants supported: <a href="https://docs.rs/trust-dns/0.10.4/trust_dns/tls/index.html">OpenSSL</a> by default; <a href="https://docs.rs/trust-dns-native-tls/0.1.1/trust_dns_native_tls/">native_tls</a> which uses the host system's TLS implementation; and <a href="https://docs.rs/trust-dns-rustls/0.1.1/trust_dns_rustls/">rustls</a> which is backed by the amazing <a href="https://docs.rs/ring/0.11.0/ring/"><em>ring</em></a> project. I made a claim in my previous post about the <a href="https://tokio.rs">Tokio</a> framework which was that TRust-DNS would &quot;... integrate easily with any code which also chooses to use tokio-rs.&quot; All of the TLS libraries I mentioned have Tokio wrappers, because of this it was actually simple to integrate them into the TRust-DNS library! It's exciting to know that Tokio really is as composable as it promises to be. I'm not completely done with TLS, when I finish up more support for mTLS in the Server and Client I'll post more information about that. On top of that, the DNSSec public and private key implementations have been cleaned up, and some fixes applied. Please see the Special thanks section below.</p>
+<h1 id="dns-resolvers">DNS Resolvers</h1>
+<p>I had always planned to implement a full resolver in TRust-DNS, but it had never bubbled up to a high priority for me. As the Client has gained more users, the requests and confusion around using a raw Client made it clear that it was time to build one. At it's most basic a Resolver is responsible for going from a set of labels and resolving that to a set of records, following any NS<a href="https://bluejekyll.github.io/blog/posts/trust-dns-resolver/?#1">[1]</a> records as necessary until an SOA<a href="https://bluejekyll.github.io/blog/posts/trust-dns-resolver/?#2">[2]</a> is found for the zone. It also has the responsibility of following CNAME<a href="https://bluejekyll.github.io/blog/posts/trust-dns-resolver/?#3">[3]</a> chains until a final record is found. A Client is only responsible for the connection to a name server, the Resolver uses the Client to connect to as many name servers as necessary to fulfill a query on a set of labels (Name). As of now the TRust-DNS Resolver isn't recursive, it only sends a single request and relies on the upstream resolver for any necessary recursion.</p>
+<p><em>It's at points like this that it's worthwhile to mention that everything I know about DNS has been gleaned from operating and using DNS servers in various contexts and reading lots of RFCs. I have never in the past actually written a DNS server, a client, nor a resolver. So if you're reading this post, or any of my previous posts and notice that I've gotten something wrong, please file an issue in the <a href="https://github.com/bluejekyll/trust-dns">TRust-DNS repo</a>. Seriously, I won't be offended.</em></p>
+<h1 id="nameserverpool">NameServerPool</h1>
+<p>There were some fun aspects of building this library. Probably the most interesting thing is the <a href="https://github.com/bluejekyll/trust-dns/blob/c7f6c59adb40c76bb954eaa543d03cefc0bbd70c/resolver/src/name_server_pool.rs">NameServerPool</a>, this is a simple pool for managing connections to a set of remote DNS servers. Most systems specify two DNS resolvers to use for resolution in the <code>/etc/resolv.conf</code> or similar. I thought it would be fun to track the performance of each connection and rank them as they are used. For this Rust has a nice <a href="https://doc.rust-lang.org/std/collections/struct.BinaryHeap.html"><code>BinaryHeap</code></a> in the stdlib. This a queue which allows for the connections to be ordered in priority order such that the highest priority item will be retrieved on the next call to the queue. Right now I'm not tracking a lot of information, just successes and failures at the moment (in the future I want to add latency as another):</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">derive</span><span>(Clone</span><span style="color:#bfbab0cc;">,</span><span> PartialEq</span><span style="color:#bfbab0cc;">,</span><span> Eq)]
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">NameServerStats </span><span>{
+</span><span>    state</span><span style="color:#bfbab0cc;">:</span><span> NameServerState,
+</span><span>    successes</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">usize</span><span>,
+</span><span>    failures</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">usize</span><span>,
+</span><span>}
+</span></code></pre>
+<p>The <code>BinaryHeap</code> requires us to implement <code>Ord</code> and <code>PartialOrd</code> to return an Ordering of the elements in the queue:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span>Ord </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">NameServerStats </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">/// Custom implementation of Ord for NameServer which incorporates the performance of the connection into it&#39;s ranking
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// if they are literally equal, just return
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self </span><span style="color:#f29668;">==</span><span> other {
+</span><span>            </span><span style="color:#ff7733;">return </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Equal</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// otherwise, run our evaluation to determine the next to be returned from the Heap
+</span><span>        </span><span style="color:#ff7733;">match </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>state</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span>state) {
+</span><span>            Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>            o </span><span style="color:#f29668;">@ _ =&gt; </span><span>{
+</span><span>                </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">;
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// invert failure comparison
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>failures </span><span style="color:#f29668;">&lt;=</span><span> other</span><span style="color:#f29668;">.</span><span>failures {
+</span><span>            </span><span style="color:#ff7733;">return </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// at this point we&#39;ll go with the lesser of successes to make sure there is ballance
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>successes</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span>successes)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>This &quot;algorithm&quot; is quite simple. It says that if they are not equal, then the first thing is to compare the state of the connection, of which there are three: <code>Init</code>, <code>Established</code>, <code>Failed</code>. Connections that have never been established, i.e. they are in the initial state, will be <a href="https://github.com/bluejekyll/trust-dns/blob/c7f6c59adb40c76bb954eaa543d03cefc0bbd70c/resolver/src/name_server_pool.rs#L45">preferred</a>. After that whichever connection has fewer failures will be chosen. To try and introduce a little bit of load balancing after that, we choose the least successes. There are some obvious improvements that should be made to this. I'd like to come up with a better way of calculating weights, i.e. some numeric value that is computed based on all these inputs and spits out the highest priority connection. On top of that, it would be good to bucket failures and successes over different time periods such that a connection that initially failed is tried again and isn't permanently starved. For example, it would be interesting if you could list all the NameServers you want to use globally (say on a laptop), and the library transparently handles picking the best one.</p>
+<p>To calculate these stats ends up being really easy with Futures, for example here's the <code>send()</code> method implemented on <code>NameServer</code>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">send</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">message</span><span style="color:#bfbab0cc;">:</span><span> Message) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="font-style:italic;color:#39bae6;">Box</span><span>&lt;Future&lt;Item = Message, Error = ClientError&gt;&gt; {
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// if state is failed, return future::err(), unless retry delay expired...
+</span><span>        </span><span style="color:#ff7733;">if let </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(error) </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f07178;">try_reconnect</span><span>() {
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="font-style:italic;color:#39bae6;">Box</span><span style="color:#f29668;">::</span><span>new(future</span><span style="color:#f29668;">::</span><span>err(error))</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span></code></pre>
+<p>The first thing we do (above) is check and see if the connection needs to be reconnected (TCP and TLS need this). This is an individual <code>NameServer</code> in the pool, if it's connected this is a noop. After that we grab references to the stats (stored in <code>Mutex</code>s for <code>Sync</code>), these are passed to the <code>and_then</code> and <code>or_else</code> Future result handlers:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>        </span><span style="font-style:italic;color:#5c6773;">// grab a reference to the stats for this NameServer
+</span><span>        </span><span style="color:#ff7733;">let</span><span> mutex1 </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>stats</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> mutex2 </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>stats</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">Box</span><span style="color:#f29668;">::</span><span>new(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>client</span><span style="color:#f29668;">.</span><span style="color:#f07178;">send</span><span>(message)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>response</span><span style="color:#f29668;">| </span><span>{
+</span><span>            </span><span style="color:#ff7733;">let</span><span> remote_edns </span><span style="color:#f29668;">=</span><span> response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">edns</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cloned</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// this transitions the state to success
+</span><span>            </span><span style="color:#ff7733;">let</span><span> response </span><span style="color:#f29668;">= 
+</span><span>                mutex1
+</span><span>                    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">lock</span><span>()
+</span><span>                    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(|</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">stats</span><span>| { stats</span><span style="color:#f29668;">.</span><span style="color:#f07178;">next_success</span><span>(remote_edns)</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(response) })
+</span><span>                    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|</span><span style="color:#f29718;">e</span><span>| </span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;Error acquiring NameServerStats lock: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> e)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            future</span><span style="color:#f29668;">::</span><span>result(response)
+</span><span>        })
+</span></code></pre>
+<p>In the above example the stats increment the success of the request, <code>and_then</code> will only be executed if the client returns on a successful query. Otherwise, we go to <code>or_else</code>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">or_else</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>error</span><span style="color:#f29668;">| </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// this transitions the state to failure
+</span><span>            mutex2
+</span><span>                </span><span style="color:#f29668;">.</span><span style="color:#f07178;">lock</span><span>()
+</span><span>                </span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(|</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">stats</span><span>| {
+</span><span>                    stats</span><span style="color:#f29668;">.</span><span style="color:#f07178;">next_failure</span><span>(error</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>Instant</span><span style="color:#f29668;">::</span><span>now())</span><span style="color:#bfbab0cc;">;
+</span><span>                    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(())
+</span><span>                })
+</span><span>                </span><span style="color:#f29668;">.</span><span style="color:#f07178;">or_else</span><span>(|</span><span style="color:#f29718;">e</span><span>| {
+</span><span>                    </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;Error acquiring NameServerStats lock (already in error state, ignoring): {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e)</span><span style="color:#bfbab0cc;">;
+</span><span>                    </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(()) 
+</span><span>                })
+</span><span>                </span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_ok</span><span>()</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#5c6773;">// ignoring error, as this connection is already marked in error...
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// These are connection failures, not lookup failures, that is handled in the resolver layer
+</span><span>            future</span><span style="color:#f29668;">::</span><span>err(error)
+</span><span>        }))
+</span><span>    }
+</span></code></pre>
+<p>Which of course tracks the failure. The <code>NameServerStats</code> object is a StateMachine, where <code>next_failure</code> actually transitions the connection into a <code>Failed</code> state. This all works with <code>BinaryHeap</code> because it exposes a method for performing a <code>peek_mut</code> where the wrapped value in a <code>PeekMut&lt;T&gt;</code> will be reprioritized in the queue after the reference is dropped. This is handled in the <code>NameServerPool::send</code> method:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">send</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">message</span><span style="color:#bfbab0cc;">:</span><span> Message) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="font-style:italic;color:#39bae6;">Box</span><span>&lt;Future&lt;Item = Message, Error = ClientError&gt;&gt; {
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// select the highest priority connection
+</span><span>        </span><span style="color:#ff7733;">let</span><span> conn </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>conns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">peek_mut</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">if</span><span> conn</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_none</span><span>() {
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="font-style:italic;color:#39bae6;">Box</span><span style="color:#f29668;">::</span><span>new(future</span><span style="color:#f29668;">::</span><span>err(ClientErrorKind</span><span style="color:#f29668;">::</span><span>Message(</span><span style="color:#c2d94c;">&quot;No connections available&quot;</span><span>)
+</span><span>                                            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()))</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">let mut</span><span> conn </span><span style="color:#f29668;">=</span><span> conn</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        conn</span><span style="color:#f29668;">.</span><span style="color:#f07178;">send</span><span>(message)
+</span><span>    }
+</span></code></pre>
+<p>I did double check implementation of <code>PeekMut</code> to actually verify this functionality (and there is also a test case for it in <code>trust-dns-resolver</code>), I want to submit some improvements to the docs here in the stdlib. What's great about this implementation is that two async requests can be submitted back to back, and the highest priority connection will always be chosen, never actually removed from the pool! This is different from a database connection pool, for example, as everything is async; there is no need to remove and return connections to the pool, as you would with a synchronous connection to a database.</p>
+<p><em>A side note on <code>pub(crate)</code></em>:</p>
+<p>This is a really nice new feature in Rust for library maintenance. We've just reviewed some code above from two internal objects in the Resolver library. In the TRust-DNS client library, there are a lot of interfaces public that really don't need to be. The issue with this is that it increases the surface area that has been published from the TRust-DNS client library to include things that I really only want to be usable within the project. In the Resolver I get to use the new <code>pub(crate)</code> feature (introduces in <a href="https://blog.rust-lang.org/2017/06/08/Rust-1.18.html">Rust 1.18</a>) which restricts the public interfaces to be only available within the crate. In affect this means that most internals (like <code>NameServer</code> and <code>NameServerPool</code>) of the Resolver library will not be public. This also helps because it will direct users to the interfaces I want them to use, namely: <code>Resolver</code>, and <code>LookupIp</code>. e.g.: </p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">Resolver </span><span>{...}
+</span></code></pre>
+<p>vs. the internal only:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub</span><span>(</span><span style="color:#ff7733;">crate</span><span>) </span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">NameServer </span><span>{...}
+</span></code></pre>
+<p>which is very nice. I do wish this had existed in the beginning, but it's great that it does now.</p>
+<h1 id="what-about-dnssec">What about DNSSec</h1>
+<p>I want TRust-DNS to always be validating DNSSec records, and reject unsigned records. This is actually one pillar of the project that I'm proud of; I'm still amazed it works to be honest... One thing I haven't been able to figure out is what to do with records that fail DNSSec validation. If this were a user application like <code>Firefox</code>, <code>Chrome</code>, or <code>Safari</code> then you would expect a dialogue warning the user, but that's not something I can handle for any downstream project. On top of that, the current implementation of the <a href="https://github.com/bluejekyll/trust-dns/blob/c7f6c59adb40c76bb954eaa543d03cefc0bbd70c/client/src/client/secure_client_handle.rs#L40">SecureClientHandle</a> will strip invalid records from the return record set. This will not work for anyone that wants the option of using a record even if it failed validation. So my plan is to update the result from the SecureClientHandle to return validation failures in an Error variant. I'm of course open to other ideas, so please send them my way, I have <a href="https://github.com/bluejekyll/trust-dns/issues/154">an issue</a> open for discussion.</p>
+<h1 id="work-left-to-do-on-the-resolver">Work left to do on the Resolver</h1>
+<p>There are still a few things that need to be implemented in the Resolver:</p>
+<ul>
+<li><code>AAAA</code> (IPv6) in addition to the <code>A</code> (IPv4) lookup performed today: <em>FIXED</em> <a href="https://github.com/bluejekyll/trust-dns/issues/159">#159</a></li>
+<li>Using the system <code>resolv.conf</code> for configuration: <em>FIXED</em> <a href="https://github.com/bluejekyll/trust-dns/issues/109">#109</a></li>
+<li>Connection latency measurements: <a href="https://github.com/bluejekyll/trust-dns/issues/158">#158</a></li>
+<li>Better fairness in the NameServerPool: <a href="https://github.com/bluejekyll/trust-dns/issues/157">#157</a></li>
+<li>Integrate TLS support: <a href="https://github.com/bluejekyll/trust-dns/issues/156">#156</a></li>
+<li>DNSSec validation: <a href="https://github.com/bluejekyll/trust-dns/issues/155">#155</a></li>
+<li>Fix SecureClientHandle to offer an error result of invalid RecordSets: <a href="https://github.com/bluejekyll/trust-dns/issues/154">#154</a></li>
+</ul>
+<h1 id="special-thanks">Special Thanks</h1>
+<p>TRust-DNS has grown in complexity, supports multiple crypto libraries and multiple DNSSec algorithms, and three different TLS libraries. I tried to get this stuff correct when I wrote it originally, but for some of the variants I didn't have good public sites that I could reliably validate the code with, and getting the RFCs correct isn't easy. This is a special thank you to: <a href="https://github.com/SAPikachu">SAPikachu</a> for fixing multiple complex issues in the library, SAPikachu has an impressive ability for tracking down and fixing opaque problems; <a href="https://github.com/briansmith">briansmith</a> for fixing some issues in the storage of ED25519; <a href="https://github.com/liranringel">liranringel</a> for the AppVeyor build support; <a href="https://github.com/jannic">jannic</a> for fixing SIG(0) interoperability with BIND; and of all the other <a href="https://github.com/bluejekyll/trust-dns/graphs/contributors">contributors</a>. Your support is greatly appreciated, and has raised the quality of this project significantly. Also, I really couldn't have built this project with out the great work on Rust and the many <a href="https://crates.io/crates/trust-dns">dependencies</a> upon which the project relies. If any of you will be at the <a href="http://rustconf.com">RustConf</a> this year, please hit me up, I owe you each at least a drink of your choice. If anyone else will be at RustConf and wants to talk DNS, Tokio, Rust, or children and life; please find me there!</p>
+<p>And of course a huge thanks to my wife, Lyndsey, and both kids who give me some time most days to work on this project and support me in everything else.</p>
+<p>Thank you!</p>
+<p>p.s. <a href="https://twitter.com/gcouprie/status/879975724937080832">@gcouprie</a>, I hope this one is up to your standards.</p>
+<ul>
+<li>
+<p><a name="1">1</a>) NS - Name Server records are pointers to other DNS servers which are known to be authorities for a zone in question. For example, <code>example.com.</code> has an NS record which points to <code>b.iana-servers.net.</code></p>
+</li>
+<li>
+<p><a name="2">2</a>) SOA - Start Of Authority record which defines some default values for the zone, every zone requires one to be valid.</p>
+</li>
+<li>
+<p><a name="3">3</a>) CNAME - Canonical Name record acts as an alias for another record. A CNAME only aliases names, which means it can only act as an alias for one other record type, at the name of the CNAME record, there can only be one (except in DNSSec with regards to RRSIG records). This restriction is important now that we have A, IPv4, and AAAA, IPv6, records in a zone. It means that even if you are dual stack, you can't have a CNAME record which has an A and AAAA aliases at the same time. CNAMEs can also point to other CNAMEs, effectively creating a chain of names.</p>
+</li>
+</ul>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=The *new* TRust-DNS Resolver&url=https://bluejekyll.github.io/blog/posts/trust-dns-resolver/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/trust-dns-resolver/&title=The *new* TRust-DNS Resolver"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/trust-dns-resolver/&t=The *new* TRust-DNS Resolver"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

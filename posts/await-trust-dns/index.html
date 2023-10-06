@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Await Trust-DNS no longer</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Await Trust-DNS no longer
+            </p>
+            <p class="subtitle is-4 is-italic">
+                A review of preparing Trust-DNS for async&#x2F;await in Rust
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;await-trust-dns&#x2F;">
+                    <span class="is-family-monospace">2019-12-21</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-network-wired"></i>
+            
+            <span class="tooltip-text is-6">dns</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>What started as a brief sojourn to learn the new <code>std::future::Future</code> in Rust 1.36, slowly became a journey to fully adopt the new async/await syntax in Rust. The plan had been to merely update to the new Future API, trying to keep the minimum Rust version as low as possible. This was ideally to keep the libraries compatible with more Rust users, but it became apparent that this wasn't really feasible. For a number of reasons, primarily, all of the underlying libraries Trust-DNS relies upon were moving in this direction, which made the task a fools errand. Additionally, adopting async/await simplified much of the code. This post is the announcement of the 0.18 release, representing a few months of work.</p>
+<h1 id="adopting-async-await">Adopting async/await</h1>
+<p>Async/await has been a long awaited feature in Rust. It's such a massive game changer for the language. Low level async programming has traditionally always meant building state machines and abstracting the workflow of the system around them. The original version of Futures in Rust were no different, though the Futures library did help substantially by giving us predefined state machines for common scenarios.</p>
+<p>It can be most easily shown how much more ergonomic this is from some code, here's an example from the previous release of Trust-DNS, the HTTPS request handler:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">h2_handler</span><span>&lt;T, I&gt;(
+</span><span>    </span><span style="color:#f29718;">handler</span><span style="color:#bfbab0cc;">: </span><span>Arc&lt;Mutex&lt;T&gt;&gt;,
+</span><span>    </span><span style="color:#f29718;">io</span><span style="color:#bfbab0cc;">:</span><span> I,
+</span><span>    </span><span style="color:#f29718;">src_addr</span><span style="color:#bfbab0cc;">:</span><span> SocketAddr,
+</span><span>    </span><span style="color:#f29718;">dns_hostname</span><span style="color:#bfbab0cc;">: </span><span>Arc&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;,
+</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> impl Future&lt;Item = (), Error = ()&gt;
+</span><span style="color:#ff7733;">where
+</span><span>    T</span><span style="color:#bfbab0cc;">:</span><span> RequestHandler,
+</span><span>    I</span><span style="color:#bfbab0cc;">:</span><span> AsyncRead + AsyncWrite,
+</span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Start the HTTP/2.0 connection handshake
+</span><span>    server</span><span style="color:#f29668;">::</span><span>handshake(io)
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|</span><span style="color:#f29718;">e</span><span>| </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;h2 handshake error: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e))
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>h2</span><span style="color:#f29668;">| </span><span>{
+</span><span>            </span><span style="color:#ff7733;">let</span><span> dns_hostname </span><span style="color:#f29668;">=</span><span> dns_hostname</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// Accept all inbound HTTP/2.0 streams sent over the
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// connection.
+</span><span>            h2</span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|</span><span style="color:#f29718;">e</span><span>| </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;h2 failed to receive message: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e))
+</span><span>                </span><span style="color:#f29668;">.</span><span style="color:#f07178;">for_each</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>(request</span><span style="color:#bfbab0cc;">,</span><span> respond)</span><span style="color:#f29668;">| </span><span>{
+</span><span>                    </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;Received request: {:#?}&quot;</span><span style="color:#bfbab0cc;">,</span><span> request)</span><span style="color:#bfbab0cc;">;
+</span><span>                    </span><span style="color:#ff7733;">let</span><span> dns_hostname </span><span style="color:#f29668;">=</span><span> dns_hostname</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>                    </span><span style="color:#ff7733;">let</span><span> handler </span><span style="color:#f29668;">=</span><span> handler</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>                    </span><span style="color:#ff7733;">let</span><span> responder </span><span style="color:#f29668;">=</span><span> HttpsResponseHandle(Arc</span><span style="color:#f29668;">::</span><span>new(Mutex</span><span style="color:#f29668;">::</span><span>new(respond)))</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                    https_server</span><span style="color:#f29668;">::</span><span>message_from(dns_hostname</span><span style="color:#bfbab0cc;">,</span><span> request)
+</span><span>                        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|</span><span style="color:#f29718;">e</span><span>| </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;h2 failed to receive message: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e))
+</span><span>                        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(|</span><span style="color:#f29718;">bytes</span><span>| {
+</span><span>                            BinDecodable</span><span style="color:#f29668;">::</span><span>from_bytes(</span><span style="color:#f29668;">&amp;</span><span>bytes)
+</span><span>                                </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|</span><span style="color:#f29718;">e</span><span>| </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;could not decode message: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> e))
+</span><span>                        })
+</span><span>                        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">and_then</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|</span><span>message</span><span style="color:#f29668;">| </span><span>{
+</span><span>                            </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;received message: {:?}&quot;</span><span style="color:#bfbab0cc;">,</span><span> message)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                            server_future</span><span style="color:#f29668;">::</span><span>handle_request(
+</span><span>                                message</span><span style="color:#bfbab0cc;">,
+</span><span>                                src_addr</span><span style="color:#bfbab0cc;">,
+</span><span>                                handler</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>                                responder</span><span style="color:#bfbab0cc;">,
+</span><span>                            )
+</span><span>                        })
+</span><span>                })
+</span><span>        })
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">map_err</span><span>(|_| </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;error in h2 handler&quot;</span><span>))
+</span><span>}
+</span></code></pre>
+<p>This example shows how the older Future combinators could be used together, but it made for somewhat complex code to write. The <code>async fn</code> version is much more straightforward:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub</span><span> async </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">h2_handler</span><span>&lt;T, I&gt;(
+</span><span>    </span><span style="color:#f29718;">handler</span><span style="color:#bfbab0cc;">: </span><span>Arc&lt;Mutex&lt;T&gt;&gt;,
+</span><span>    </span><span style="color:#f29718;">io</span><span style="color:#bfbab0cc;">:</span><span> I,
+</span><span>    </span><span style="color:#f29718;">src_addr</span><span style="color:#bfbab0cc;">:</span><span> SocketAddr,
+</span><span>    </span><span style="color:#f29718;">dns_hostname</span><span style="color:#bfbab0cc;">: </span><span>Arc&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;,
+</span><span>) </span><span style="color:#ff7733;">where
+</span><span>    T</span><span style="color:#bfbab0cc;">:</span><span> RequestHandler,
+</span><span>    I</span><span style="color:#bfbab0cc;">:</span><span> AsyncRead + AsyncWrite + Unpin,
+</span><span>{
+</span><span>    </span><span style="color:#ff7733;">let</span><span> dns_hostname </span><span style="color:#f29668;">=</span><span> dns_hostname</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Start the HTTP/2.0 connection handshake
+</span><span>    </span><span style="color:#ff7733;">let mut</span><span> h2 </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">match </span><span>server</span><span style="color:#f29668;">::</span><span>handshake(io)</span><span style="color:#f29668;">.</span><span>await {
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(h2) </span><span style="color:#f29668;">=&gt;</span><span> h2</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(err) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;handshake error from {}: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> src_addr</span><span style="color:#bfbab0cc;">,</span><span> err)</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#ff7733;">return</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Accept all inbound HTTP/2.0 streams sent over the
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// connection.
+</span><span>    </span><span style="color:#ff7733;">while let </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(next_request) </span><span style="color:#f29668;">=</span><span> h2</span><span style="color:#f29668;">.</span><span style="color:#f07178;">accept</span><span>()</span><span style="color:#f29668;">.</span><span>await {
+</span><span>        </span><span style="color:#ff7733;">let </span><span>(request</span><span style="color:#bfbab0cc;">,</span><span> respond) </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">match</span><span> next_request {
+</span><span>            </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(next_request) </span><span style="color:#f29668;">=&gt;</span><span> next_request</span><span style="color:#bfbab0cc;">,
+</span><span>            </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(err) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>                </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;error accepting request {}: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> src_addr</span><span style="color:#bfbab0cc;">,</span><span> err)</span><span style="color:#bfbab0cc;">;
+</span><span>                </span><span style="color:#ff7733;">return</span><span style="color:#bfbab0cc;">;
+</span><span>            }
+</span><span>        }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#f07178;">debug!</span><span>(</span><span style="color:#c2d94c;">&quot;Received request: {:#?}&quot;</span><span style="color:#bfbab0cc;">,</span><span> request)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> dns_hostname </span><span style="color:#f29668;">=</span><span> dns_hostname</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> handler </span><span style="color:#f29668;">=</span><span> handler</span><span style="color:#f29668;">.</span><span style="color:#f07178;">clone</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> responder </span><span style="color:#f29668;">=</span><span> HttpsResponseHandle(Arc</span><span style="color:#f29668;">::</span><span>new(Mutex</span><span style="color:#f29668;">::</span><span>new(respond)))</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">match </span><span>https_server</span><span style="color:#f29668;">::</span><span>message_from(dns_hostname</span><span style="color:#bfbab0cc;">,</span><span> request)</span><span style="color:#f29668;">.</span><span>await {
+</span><span>            </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(bytes) </span><span style="color:#f29668;">=&gt; </span><span style="color:#f07178;">handle_request</span><span>(bytes</span><span style="color:#bfbab0cc;">,</span><span> src_addr</span><span style="color:#bfbab0cc;">,</span><span> handler</span><span style="color:#bfbab0cc;">,</span><span> responder)</span><span style="color:#f29668;">.</span><span>await</span><span style="color:#bfbab0cc;">,
+</span><span>            </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(err) </span><span style="color:#f29668;">=&gt; </span><span style="color:#f07178;">warn!</span><span>(</span><span style="color:#c2d94c;">&quot;error while handling request from {}: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> src_addr</span><span style="color:#bfbab0cc;">,</span><span> err)</span><span style="color:#bfbab0cc;">,
+</span><span>        }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// we&#39;ll continue handling requests from here.
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>You'll notice that this code is much more straight forward and easier to read, flatter if you will. This is the big advantage of async/await, you can write code in a much simpler manner.</p>
+<h2 id="trust-dns-still-has-hand-made-state-machines">Trust-DNS still has hand made State Machines</h2>
+<p>Trust-DNS has grown to 65 kloc with 41 kloc when excluding documentation (and there are still features to develop). Much of this has been in use for the past 4 years–rewriting it all to be async/await will take time, and isn't necessary to provide a new async/await API for the Resolver or other libraries. If you browse the code, this will be noticeable throughout. There are also some other reasons for keeping the hand made Futures, this is the fact that the Futures returned by an <code>async fn</code> is really just and impl trait. This signature:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">foo</span><span>() </span><span style="color:#bfbab0cc;">-&gt;</span><span> Bar {</span><span style="color:#f29668;">...</span><span>}
+</span></code></pre>
+<p>is for all intents and purposes equivalent to</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">foo</span><span>() </span><span style="color:#bfbab0cc;">-&gt;</span><span> impl Future&lt;Output = Bar&gt; {</span><span style="color:#f29668;">...</span><span>}
+</span></code></pre>
+<p>meaning that all the same limitations on usage of <code>impl Future</code> apply to the result of the <code>async fn</code>. One of those is that impl traits can not be named, e.g. it can't be stored as a field in a struct. This is easily worked around, as the type can just be boxed, and used as a dyn object, e.g. <code>Box&lt;dyn Future&lt;Output = Bar&gt;&gt;</code>. Alternatively, you can implement the Future yourself, and avoid the boxing. So there are still some potential advantages by not adopting <code>async fn</code>s everywhere, but those are rare.</p>
+<h2 id="the-ecosystem-continues-to-advance">The ecosystem continues to advance</h2>
+<p>Trust-DNS has in many ways grown with the ecosystem around it. Initially it was built around the stdlib blocking IO apis. Once that POC was done, it was converted to use non-blocking IO with mio. After that as Tokio and Futures were developed in tandem, Trust-DNS adopted them early on and benefited greatly from those advancements. Now, Tokio and Futures have both been upgraded to also have async/await APIs, and they've become far easier to use because of it. It really is a great time to explore async IO in Rust. We know that people are excited, because the minute that the Trust-DNS Resolver supported Tokio 0.2 in 0.18.0.alpha.2, we saw a huge spike in <a href="https://crates.io/crates/trust-dns-resolver">downloads</a>.</p>
+<p>Oddly enough, a feature of the Trust-DNS Resolver to make testing easier will also potentially make it easy to port other executors (like async-std). To facilitate decent tests in the resolver a trait was defined, <code>ConnectionProvider</code>. This trait allowed for the creation of mocked connections to test all the Resolver's logic, allowing us to test many different scenarios without actually introducing any network IO. This has the interesting side-effect of being useful for abstracting the underlying executor and network drivers–something for us to explore in the future.</p>
+<p>Tokio itself has improved in a lot of other ways as well. The library has been polished significantly. There were some nuances to learn in adapting all of Trust-DNS to it, but all very much worth it. Please, explore the new API and I'd love any feedback you'd like to provide: <a href="https://docs.rs/trust-dns-resolver">Trust-DNS Resolver</a>, discussion can be had on the release note on the <a href="https://users.rust-lang.org/t/trust-dns-0-18-async-await-tokio-0-2-support/36053">users.rust-lang.org discussion board</a>.</p>
+<h2 id="a-massive-thank-you">A Massive thank you!</h2>
+<p>I want to thank Lucio <a href="https://twitter.com/lucio_d_franco">@lucio_d_franco</a> and Eliza <a href="https://twitter.com/mycoliza">@mycoliza</a> for helping review so much of this. Additionally, I'd like to express my thanks to everyone who's contributed to Rust's async/await features, which are a spectacular achievement. To everyone who's contributed to Futures and Tokio, that was a herculean effort and it's really paid off, thank you! To all of the folks that continue to experiment with and contribute to Trust-DNS, this would not be possible without <a href="https://github.com/bluejekyll/trust-dns/graphs/contributors">you</a>. Lastly, thank you, Carl <a href="https://twitter.com/carllerche">@carllerche</a> for convincing me to &quot;ship and fix later&quot;.</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Await Trust-DNS no longer&url=https://bluejekyll.github.io/blog/posts/await-trust-dns/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/await-trust-dns/&title=Await Trust-DNS no longer"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/await-trust-dns/&t=Await Trust-DNS no longer"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multicasting in Rust</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Multicasting in Rust
+            </p>
+            <p class="subtitle is-4 is-italic">
+                A brief post to help others multicast in Rust
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;multicasting-in-rust&#x2F;">
+                    <span class="is-family-monospace">2018-03-18</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>In 2000 at a small startup I joined after college, I had discovered multicast and realized it was an amazing network tool. A service I had built made it possible to discover CORBA services on the network and link them together. This was just before zero-conf started becoming popular through, Apple's Bonjour, mDNS, LLMNR, and many other technologies that were being standardized. It was a lot of fun, and ever since working with it I have always wanted to use it for more things.</p>
+<p>Fast forward <em>a few</em> years to the TRust-DNS project; very early on in the project I decided I wanted to implement mDNS, multicast DNS, <a href="https://github.com/bluejekyll/trust-dns/issues/24">issue #24</a>. Finally I've had some time to do this and I have gotten to learn a bunch more about multicasting, especially the differences of implementations between macOS, Linux, and Windows (the three platforms supported by TRust-DNS). Also, this is the first time I've done any multicasting in IPv6, which is surprising in its nuanced differences.</p>
+<h2 id="what-is-multicasting">What is multicasting?</h2>
+<p>When sending IP packets on networks there are generally two different protocols used, UDP and TCP. TCP always operates point-to-point, meaning there is only ever one <code>src</code> (source) and one <code>dst</code> (destination). The <code>src</code> and <code>dst</code> are specified as a pair of IP address (IPv4 or IPv6) and a <code>port</code>. The reason TCP is point-to-point is that it is session oriented, meaning both ends of the connection maintain information about what packets have been sent or received and then will attempt to resend any that were lost. UDP on the other hand is fire-and-forget, meaning that when a UDP packet is lost, there is no attempt by the underlying protocol to resend the packet. There are four basic modes for sending packets on a network over IP:</p>
+<ul>
+<li><code>unicast</code>: single <code>src</code> to single <code>dst</code> (TCP and UDP)</li>
+</ul>
+<p>This is what most people are using when they are sending data between network sources. This is where packets are being sent from a <code>src</code> to a <code>dst</code>, and only those two things care about it. Mind you, there is nothing that prevents any router on any network in-between from looking at and doing whatever it wants with these packets (this is true of all IP protocols). You need to add TLS over TCP or DTLS over UDP to create any privacy of your packets (or similar), though you can't really hide the <code>src</code> and <code>dst</code> on packets. Even with network encapsulation over something like a VPN (virtual private network), the VPN knows the ultimate <code>src</code> and <code>dst</code>.</p>
+<ul>
+<li><code>broadcast</code>: many <code>src</code> to many <code>dst</code> on a single network (UDP)</li>
+</ul>
+<p>Broadcasting is basically a thing of the past, only available in IPv4 (IPv6 must use multicast). This is the last address in a network, for example <code>198.51.100/24</code> the last address is <code>198.51.100.255</code>. The most useful thing that uses it is DHCP for dynamically configuring your network information on your computer. Broadcasting can create a lot of congestion on networks that span routers or switches, which is one reason why networks tend to be kept limited in size and also scope.</p>
+<ul>
+<li><code>anycast</code>: single <code>src</code> to one of many <code>dst</code> (TCP* and UDP)</li>
+</ul>
+<p>Anycasting is used to generally allow for the geographical distribution of service end-points, for example DNS. With UDP when the order and sequence of the packets doesn't matter, this is generally easily configured. Basically, in <code>anycast</code> the &quot;closest&quot; <code>dst</code> will win, derived from weights configured across all of the routes. There is no guarantee that a packet will end up in the same place.</p>
+<p>* TCP relies on a stable <code>src</code> and <code>dst</code>, <code>anycast</code> addresses can be configured to be reliable for TCP, but it takes a lot of care.</p>
+<ul>
+<li><code>multicast</code>: many <code>src</code> to many <code>dst</code> (UDP and RTP*)</li>
+</ul>
+<p>Finally, the point of this post, multicasting gives the ability for many <code>src</code>s to deliver packets to many <code>dst</code>s. Similar to broadcasting, but it allows for these distributed packets to be delivered to more nodes than just the ones attached to the hosts network. Multicast attempts to reduce congestion by requiring services that wish to receive multicast packets to &quot;join&quot; a multicast address for interest. These joins are then announced to upstream routers, where different network address spaces define the scope or range up the network stack that these memberships should be announced (see <a href="https://tools.ietf.org/html/rfc5771">rfc5771</a> and <a href="https://tools.ietf.org/html/rfc7346">rfc7346</a> for IPv4 and IPv6 registrations). This is to help prevent floods of multicast traffic hitting the internet at large. For our uses, you'll see that mDNS is defined to operate on <code>224.0.0.251</code> and <code>FF02::FB</code>, both of these are defined to be <code>link-local</code> multicast addresses, meaning they should not leave the local network (similar to the restriction on <code>broadcast</code>). This post isn't meant to be restricted to multicasting in mDNS, but that is what inspired this post.</p>
+<p>* RTP, <a href="https://en.wikipedia.org/wiki/Real-time_Transport_Protocol">real-time protocol</a>, is a new protocol implemented over UDP mainly for audio and/or video delivery. <a href="https://webrtc.org/architecture/">WebRTC</a> being a major use-case. RTP can be used over multicast, but I personally haven't done anything with it, so can't comment much more about it's potential or the implementation details as they relate to multicast.</p>
+<h2 id="when-should-you-use-multicasting">When should you use multicasting?</h2>
+<p>Whenever you need to deliver the same data to many destinations. In mDNS what is being delivered to all nodes on the network is a query, and also announcements of new services on the network, you can read more details in <a href="https://tools.ietf.org/html/rfc6762">rfc6762</a>, specifically section 5. When dealing with <code>link-local</code> multicast, this is generally going to be ok. Be aware that many networks configurations make it difficult to multicast beyond the <code>link-local</code> network, so good luck.</p>
+<p>You should be careful when deploying multicast software that spans networks. As networks of systems grow, the amount of traffic associated with multicast starts growing exponentially very quickly. Thought should be put into how this traffic can be reduced, for example, sections 7 and 8 of rfc6762 have suggestions for this in mDNS.</p>
+<h2 id="multicasting-in-rust">Multicasting in Rust</h2>
+<p>Multicasting is not very different from standard UDP. There is a sender and a receiver, the <code>src</code> and the <code>dst</code> as normal. The difference being that the desitination IP address being sent to is a multicast address <code>224.0.0.0/4</code> IPv4 or <code>ff00::/8</code> IPv6. Those are large network spaces, and the <a href="https://en.wikipedia.org/wiki/Multicast_address">Wikipedia</a> article does a decent job of explaining what they are for. There are some caveats though; while IPv4 will generally just work, IPv6 requires you to specify the interface on which you send the multicast packets (I'll get to this further on).</p>
+<p>In general if you want to both send and receive multicast packets, you will need to create two sockets, one for outbound multicast packets, and one for inbound. We'll go through this process by first creating the multicast receiver. And then move on to the sender. The stdlib of Rust does not yet have all of the multicast options needed, so we need to turn to another library. We'll be using the <code>socket2</code> library which exposes the necessary options from <code>libc</code>. One thing that surprised me while working on this support in TRust-DNS was that I ended up being the person who had the pleasure of adding the IPv6 multicast socket option bindings to <code>libc</code> and <code>socket2</code>, which is surprisingly easy! If you notice things missing while you're working on similarly low-level features, you should definitely not be put off by process or working with the maintainers to get those changes in.</p>
+<p>For the rest of this post, this repo has the complete project and a step-by-step commit history: <a href="https://github.com/bluejekyll/multicast-example">bluejekyll/multicast-example</a></p>
+<h3 id="getting-the-basics-out-of-the-way">Getting the basics out of the way</h3>
+<p>Add the dependency on <code>socket2</code> in your Cargo.toml:</p>
+<pre data-lang="text" style="background-color:#0f1419;color:#bfbab0;" class="language-text "><code class="language-text" data-lang="text"><span>socket2 = { version = &quot;0.3.4&quot;, features = [&quot;reuseport&quot;] }
+</span></code></pre>
+<p>We need a minimum of <code>0.3.4</code>, which contains all of the IPv6 options and also a bug fixed. The <code>reuseport</code> feature is going to enable <code>SO_REUSE_PORT</code> on Unix systems. This feature should work on recent versions of Linux and BSD systems. It <em>may</em> work in the Windows Linux environment. This is going to allow us to &quot;share&quot; the multicast address and port on which we'll be listening. I don't get into the details of this in this post, but this is useful if you want many multicast listeners on the same host.</p>
+<p>Next in your <code>bin.rs</code>, <code>lib.rs</code>, or <code>main.rs</code> we'll externalize the crate for usage in our program:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">extern crate</span><span> socket2</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Ok, so now we have our nuts and bolts.</p>
+<h3 id="setting-up-some-boiler-plate">Setting up some boiler plate</h3>
+<p>TRust-DNS uses Tokio, but I'm going to leave tokio out of these examples and use blocking IO to keep everything simple. The initial socket creation is identical, but the operations would be wrapped in futures, just know that everything is basically the same. </p>
+<p>Let's pick a couple of addresses for our tests. We're going to use <code>link-local</code> scoped addresses. <code>224.0.0.123</code> and <code>FF02::123</code> should be available, and let's choose a randomish port, <code>7645</code>. I'm going to bring in <code>lazy_static</code> crate as well so that we can create static references to these addresses.</p>
+<p>Cargo.toml:</p>
+<pre data-lang="toml" style="background-color:#0f1419;color:#bfbab0;" class="language-toml "><code class="language-toml" data-lang="toml"><span style="color:#59c2ff;">lazy_static </span><span>= </span><span style="color:#c2d94c;">&quot;1.0&quot;
+</span></code></pre>
+<p>and <code>lib.rs</code>:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>#[macro_use]
+</span><span>extern crate lazy_static;
+</span></code></pre>
+<p><code>lazy_static</code> relies on a macro for it's static construction which is why we need this.</p>
+<p>Now let's define the static fields in our <code>lib.rs</code>, at this point we'll have:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">macro_use</span><span>]
+</span><span style="color:#ff7733;">extern crate</span><span> lazy_static</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">extern crate</span><span> socket2</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>net</span><span style="color:#f29668;">::</span><span>{IpAddr</span><span style="color:#bfbab0cc;">,</span><span> Ipv4Addr</span><span style="color:#bfbab0cc;">,</span><span> Ipv6Addr</span><span style="color:#bfbab0cc;">,</span><span> SocketAddr}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">pub const </span><span style="color:#f29718;">PORT</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u16 </span><span style="color:#f29668;">= </span><span style="color:#f29718;">7645</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#f07178;">lazy_static! </span><span>{
+</span><span>    </span><span style="color:#ff7733;">pub static ref </span><span style="color:#f29718;">IPV4</span><span style="color:#bfbab0cc;">:</span><span> IpAddr </span><span style="color:#f29668;">= </span><span>Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">224</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">123</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">pub static ref </span><span style="color:#f29718;">IPV6</span><span style="color:#bfbab0cc;">:</span><span> IpAddr </span><span style="color:#f29668;">= </span><span>Ipv6Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0xFF02</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0x0123</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>Rust's stdlib can test that the addresses are in the right scope for our use. Let's start building up our test cases:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">test</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_ipv4_multicast</span><span>() {
+</span><span>    </span><span style="color:#f07178;">assert!</span><span>(</span><span style="color:#f29718;">IPV4</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_multicast</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">test</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_ipv6_multicast</span><span>() {
+</span><span>    </span><span style="color:#f07178;">assert!</span><span>(</span><span style="color:#f29718;">IPV6</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_multicast</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>Now if you run <code>cargo test</code> we'll see that at least our addresses are in scope. Now let's add the listener. First we're going to start with our boiler plate for the thread:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>sync</span><span style="color:#f29668;">::</span><span>{Arc</span><span style="color:#bfbab0cc;">,</span><span> Barrier}</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>sync</span><span style="color:#f29668;">::</span><span>atomic</span><span style="color:#f29668;">::</span><span>{AtomicBool</span><span style="color:#bfbab0cc;">,</span><span> Ordering}</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>thread</span><span style="color:#f29668;">::</span><span>{</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#bfbab0cc;">,</span><span> JoinHandle}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">multicast_listener</span><span>(
+</span><span>    </span><span style="color:#f29718;">response</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;static str</span><span>,
+</span><span>    </span><span style="color:#f29718;">client_done</span><span style="color:#bfbab0cc;">: </span><span>Arc&lt;AtomicBool&gt;,
+</span><span>    </span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">:</span><span> SocketAddr,
+</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>JoinHandle&lt;()&gt; {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// A barrier to not start the client test code until after the server is running
+</span><span>    </span><span style="color:#ff7733;">let</span><span> server_barrier </span><span style="color:#f29668;">= </span><span>Arc</span><span style="color:#f29668;">::</span><span>new(Barrier</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">2</span><span>))</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> client_barrier </span><span style="color:#f29668;">= </span><span>Arc</span><span style="color:#f29668;">::</span><span>clone(</span><span style="color:#f29668;">&amp;</span><span>server_barrier)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">let</span><span> join_handle </span><span style="color:#f29668;">= </span><span>std</span><span style="color:#f29668;">::</span><span>thread</span><span style="color:#f29668;">::</span><span>Builder</span><span style="color:#f29668;">::</span><span>new()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>(</span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server&quot;</span><span style="color:#bfbab0cc;">,</span><span> response))
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">spawn</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|| </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// socket creation will go here...
+</span><span>
+</span><span>            server_barrier</span><span style="color:#f29668;">.</span><span style="color:#f07178;">wait</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>            </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server: is ready&quot;</span><span style="color:#bfbab0cc;">,</span><span> response)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// We&#39;ll be looping until the client indicates it is done.
+</span><span>            </span><span style="color:#ff7733;">while </span><span style="color:#f29668;">!</span><span>client_done</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(std</span><span style="color:#f29668;">::</span><span>sync</span><span style="color:#f29668;">::</span><span>atomic</span><span style="color:#f29668;">::</span><span>Ordering</span><span style="color:#f29668;">::</span><span>Relaxed) {
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// test receive and response code will go here...
+</span><span>            }
+</span><span>
+</span><span>            </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server: client is done&quot;</span><span style="color:#bfbab0cc;">,</span><span> response)</span><span style="color:#bfbab0cc;">;
+</span><span>        })
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    client_barrier</span><span style="color:#f29668;">.</span><span style="color:#f07178;">wait</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    join_handle
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// This will guarantee we always tell the server to stop
+</span><span style="color:#ff7733;">struct </span><span style="color:#59c2ff;">NotifyServer</span><span>(Arc&lt;AtomicBool&gt;)</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">impl </span><span>Drop </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">NotifyServer </span><span>{
+</span><span>    </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">drop</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut </span><span style="color:#f29718;">self</span><span>) {
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f29718;">0.</span><span style="color:#f07178;">store</span><span>(</span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Relaxed)</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// Our generic test over different IPs
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_multicast</span><span>(</span><span style="color:#f29718;">test</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;static str</span><span>, </span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">:</span><span> IpAddr) {
+</span><span>    </span><span style="color:#f07178;">assert!</span><span>(addr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_multicast</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">let</span><span> addr </span><span style="color:#f29668;">= </span><span>SocketAddr</span><span style="color:#f29668;">::</span><span>new(addr</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">PORT</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">let</span><span> client_done </span><span style="color:#f29668;">= </span><span>Arc</span><span style="color:#f29668;">::</span><span>new(AtomicBool</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">false</span><span>))</span><span style="color:#bfbab0cc;">;
+</span><span>    NotifyServer(Arc</span><span style="color:#f29668;">::</span><span>clone(</span><span style="color:#f29668;">&amp;</span><span>client_done))</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#f07178;">multicast_listener</span><span>(test</span><span style="color:#bfbab0cc;">,</span><span> client_done</span><span style="color:#bfbab0cc;">,</span><span> addr)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// client test code send and receive code after here
+</span><span>    </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:client: running&quot;</span><span style="color:#bfbab0cc;">,</span><span> test)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">test</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_ipv4_multicast</span><span>() {
+</span><span>    </span><span style="color:#f07178;">test_multicast</span><span>(</span><span style="color:#c2d94c;">&quot;ipv4&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">*</span><span style="color:#f29718;">IPV4</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">test</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_ipv6_multicast</span><span>() {
+</span><span>    </span><span style="color:#f07178;">test_multicast</span><span>(</span><span style="color:#c2d94c;">&quot;ipv6&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">*</span><span style="color:#f29718;">IPV6</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>Ok that's a bit more code. What we're doing in that block in there is starting a thread that's going to run our server logic. We're making using of a <code>Barrier</code> to synchronize the server and the client such that the client does not attempt to run the tests before the server is running. We also have an <code>AtomicBool</code> for indicating when the server can safely stop running. I've also moved the client test section to a generic test case regardless of IPv4 or IPv6. Doing this makes testing client/server code easy.</p>
+<p>When you run the tests you should see some decent output:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$&gt; cargo test -- --nocapture
+</span><span>    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs
+</span><span>     Running target/debug/deps/multicast_example-82a50da931778747
+</span><span>
+</span><span>running 2 tests
+</span><span>ipv4:server: is ready
+</span><span>ipv4:client: running
+</span><span>ipv6:server: is ready
+</span><span>ipv6:client: running
+</span><span>ipv4:server: client is done
+</span><span>ipv6:server: client is done
+</span><span>test test_ipv4_multicast ... ok
+</span><span>test test_ipv6_multicast ... ok
+</span><span>
+</span><span>test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+</span><span>
+</span><span>   Doc-tests multicast-example
+</span><span>
+</span><span>running 0 tests
+</span><span>
+</span><span>test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+</span></code></pre>
+<p>Ok great, basics are out of the way. Now we can get on to the meat of the problem. Code in <a href="https://github.com/bluejekyll/multicast-example/commit/a9c58409a72362605f2288397f41e0c93eefda6d">test harnesses ready commit</a></p>
+<h3 id="creating-the-multicast-listener">Creating the multicast listener</h3>
+<p>No we're going to build up our multicast socket. We'll be using the <code>socket2</code> library and not <code>std::net</code> for much of this. You can wrap <code>std::net</code> sockets in <code>socket2::Socket</code>, but we won't be doing that here.</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>io</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">use </span><span>std</span><span style="color:#f29668;">::</span><span>time</span><span style="color:#f29668;">::</span><span>Duration</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">use </span><span>socket2</span><span style="color:#f29668;">::</span><span>{Domain</span><span style="color:#bfbab0cc;">,</span><span> Protocol</span><span style="color:#bfbab0cc;">,</span><span> SockAddr</span><span style="color:#bfbab0cc;">,</span><span> Socket</span><span style="color:#bfbab0cc;">,</span><span> Type}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// this will be common for all our sockets
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">new_socket</span><span>(</span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>SocketAddr) </span><span style="color:#bfbab0cc;">-&gt; </span><span>io</span><span style="color:#f29668;">::</span><span style="font-style:italic;color:#39bae6;">Result</span><span>&lt;Socket&gt; {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> domain </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">if</span><span> addr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_ipv4</span><span>() {
+</span><span>        Domain</span><span style="color:#f29668;">::</span><span>ipv4()
+</span><span>    } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>        Domain</span><span style="color:#f29668;">::</span><span>ipv6()
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">let</span><span> socket </span><span style="color:#f29668;">= </span><span>Socket</span><span style="color:#f29668;">::</span><span>new(domain</span><span style="color:#bfbab0cc;">, </span><span>Type</span><span style="color:#f29668;">::</span><span>dgram()</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(Protocol</span><span style="color:#f29668;">::</span><span>udp()))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// we&#39;re going to use read timeouts so that we don&#39;t hang waiting for packets
+</span><span>    socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_read_timeout</span><span>(</span><span style="font-style:italic;color:#39bae6;">Some</span><span>(Duration</span><span style="color:#f29668;">::</span><span>from_millis(</span><span style="color:#f29718;">100</span><span>)))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(socket)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">join_multicast</span><span>(</span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">:</span><span> SocketAddr) </span><span style="color:#bfbab0cc;">-&gt; </span><span>io</span><span style="color:#f29668;">::</span><span style="font-style:italic;color:#39bae6;">Result</span><span>&lt;Socket&gt; {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> ip_addr </span><span style="color:#f29668;">=</span><span> addr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">ip</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">let</span><span> socket </span><span style="color:#f29668;">= </span><span style="color:#f07178;">new_socket</span><span>(</span><span style="color:#f29668;">&amp;</span><span>addr)</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// depending on the IP protocol we have slightly different work
+</span><span>    </span><span style="color:#ff7733;">match</span><span> ip_addr {
+</span><span>        IpAddr</span><span style="color:#f29668;">::</span><span style="color:#f29718;">V4</span><span>(</span><span style="color:#ff7733;">ref</span><span> mdns_v4) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// join to the multicast address, with all interfaces
+</span><span>            socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">join_multicast_v4</span><span>(mdns_v4</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>        IpAddr</span><span style="color:#f29668;">::</span><span style="color:#f29718;">V6</span><span>(</span><span style="color:#ff7733;">ref</span><span> mdns_v6) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// join to the multicast address, with all interfaces (ipv6 uses indexes not addresses)
+</span><span>            socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">join_multicast_v6</span><span>(mdns_v6</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>            socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_only_v6</span><span>(</span><span style="color:#f29718;">true</span><span>)</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// bind us to the socket address.
+</span><span>    socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">bind</span><span>(</span><span style="color:#f29668;">&amp;</span><span>SockAddr</span><span style="color:#f29668;">::</span><span>from(addr))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(socket)
+</span><span>}
+</span></code></pre>
+<p>And we'll be adding the join into the <code>multicast_listener</code> function:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// socket creation will go here...
+</span><span style="color:#ff7733;">let</span><span> listener </span><span style="color:#f29668;">= </span><span style="color:#f07178;">join_multicast</span><span>(addr)</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server: joined: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> response</span><span style="color:#bfbab0cc;">,</span><span> addr)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>How about some more detail on each of those calls?</p>
+<ol>
+<li><code>socket.join_multicast_*(address, interface)</code></li>
+</ol>
+<p>This is the most important call, it tells the specified <code>interface</code> that you would like it to &quot;join&quot; the specified multicast group designated by <code>address</code>. If <code>interface</code> is IPv4 <code>0.0.0.0</code> or the IPv6 index <code>0</code>, then <em>all</em> interfaces will be joined to the multicast group.</p>
+<ol start="2">
+<li><code>socket.bind(address)</code></li>
+</ol>
+<p>This is special, it expresses to the kernel that we are only interested in messages for <code>address</code>, i.e. it should filter out any other packets, at least this is how it works on Unix like systems. When we look at Windows we'll be coming back to this. The other option for this would be to bind to <code>0.0.0.0</code> IPv4 or <code>::</code> IPv6, but then we'd receive traffic on any interface sent to our port. By binding to the multicast group address we are saying to the kernel, we only want the multicast traffic.</p>
+<p>And that's it, we now have a listener. Running the tests we should see:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>ipv4:server: joined: 224.0.0.123:7645
+</span><span>ipv6:server: joined: [ff02::123]:7645
+</span><span>ipv4:server: is ready
+</span><span>ipv6:server: is ready
+</span><span>ipv4:client: running
+</span><span>ipv6:client: running
+</span><span>ipv4:server: client is done
+</span><span>ipv6:server: client is done
+</span></code></pre>
+<p>Excellent, we are now joined to the multicast group. Code in <a href="https://github.com/bluejekyll/multicast-example/commit/70e2426938806490b211a187be4cbe67872a74db">join_multicast commit</a></p>
+<h3 id="wiring-it-all-together">Wiring it all together</h3>
+<p>The next step is going to be to send some data to the server. So we'll create a new socket on the client to do this:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">new_sender</span><span>(</span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>SocketAddr) </span><span style="color:#bfbab0cc;">-&gt; </span><span>io</span><span style="color:#f29668;">::</span><span style="font-style:italic;color:#39bae6;">Result</span><span>&lt;UdpSocket&gt; {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> socket </span><span style="color:#f29668;">= </span><span style="color:#f07178;">new_socket</span><span>(addr)</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">if</span><span> addr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_ipv4</span><span>() {
+</span><span>        socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">bind</span><span>(</span><span style="color:#f29668;">&amp;</span><span>SockAddr</span><span style="color:#f29668;">::</span><span>from(SocketAddr</span><span style="color:#f29668;">::</span><span>new(
+</span><span>            Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>            </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">,
+</span><span>        )))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>    } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>        socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">bind</span><span>(</span><span style="color:#f29668;">&amp;</span><span>SockAddr</span><span style="color:#f29668;">::</span><span>from(SocketAddr</span><span style="color:#f29668;">::</span><span>new(
+</span><span>            Ipv6Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>            </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">,
+</span><span>        )))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(socket)
+</span><span>}
+</span></code></pre>
+<p>We're binding to any interface with the above, and a random port. Now we can send to the multicast listener (this replaces the section in <code>test_multicast</code>), <a href="https://github.com/bluejekyll/multicast-example/commit/06e58e1ce47f29eb63d0f05cdb2a3aa8ceabf83e">add sender commit</a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// client test code send and receive code after here
+</span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:client: running&quot;</span><span style="color:#bfbab0cc;">,</span><span> test)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">let</span><span> message </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">b</span><span style="color:#c2d94c;">&quot;Hello from client!&quot;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// create the sending socket
+</span><span style="color:#ff7733;">let</span><span> socket </span><span style="color:#f29668;">= </span><span style="color:#f07178;">new_sender</span><span>(</span><span style="color:#f29668;">&amp;</span><span>addr)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;could not create sender!&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>socket
+</span><span>    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">send_to</span><span>(message</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>SockAddr</span><span style="color:#f29668;">::</span><span>from(addr))
+</span><span>    </span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;could not send_to!&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>And let's run tests:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$ cargo test
+</span><span>...
+</span><span>test test_ipv4_multicast ... ok
+</span><span>test test_ipv6_multicast ... FAILED
+</span></code></pre>
+<p>On macOS the failure is due to <code>No route to host</code>. But why did it work for IPv4 and not IPv6? Well, it seems that at least on macOS the interface <em>must</em> be specified for IPv6. I need to look more into this, as this doesn't appear to be a requirement in many of the texts that I've read on the matter (and may have changed in recent OS releases). Digging around, the claim is that all you need is a route for the network, well:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$ netstat -nr
+</span><span>...
+</span><span>ff02::%lo0/32                           ::1                             UmCI            lo0
+</span><span>ff02::%en0/32                           link#5                          UmCI            en0
+</span><span>ff02::%awdl0/32                         link#7                          UmCI          awdl0
+</span></code></pre>
+<p>That output claims that for our test address <code>FF02::123</code> we have three routes defined, so we <em>should</em> have a route. Please send me feedback if you see an obvious problem with my methods here, and have a solution. In any case, a workaround is to use <code>ifconfig -v</code> to get the index of the interface you want to use for IPv6. Then you can add this flag specific for multicast delivery:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/// to be consistent we&#39;ll add ipv4 default as well
+</span><span>socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_multicast_if_v4</span><span>(</span><span style="color:#f29668;">&amp;</span><span>Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#f29668;">...
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// and IPv6, this is specific to my machine
+</span><span>socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_multicast_if_v6</span><span>(</span><span style="color:#f29718;">5</span><span>)</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>What this essentially does is specify precisely which interface the multicast packets should be delivered on. For IPv4 that's just specifying the default. Now when we run the test both IPv4 and IPv6 tests should pass. <a href="https://github.com/bluejekyll/multicast-example/commit/a2f8b90bf440a7f20993c82e04dbf24327eada33">fix ipv6 outbound multicast commit</a></p>
+<h3 id="acknowledge-receipt">Acknowledge receipt</h3>
+<p>Now we'll add the final piece to the puzzle, which is to respond to the message from the server. To do this, the multicast listener needs to read the inbound data, and then respond to it. This will require an additional socket. If you remember, we bound the listener's socket to the multicast address, which means we can't use it for delivering the response. But that's easy, we have our socket creation function, and since this is just for testing, we'll be wasteful and create a new socket for every response, note I changed <code>join_multicast</code> and <code>new_sender</code> to convert to and return <code>std::net::UdpSocket</code> to make some code simpler: <a href="https://github.com/bluejekyll/multicast-example/commit/0b851c1f1466d2b0984f455f95c95c29deda3af6">add response and validate commit</a></p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">// test receive and response code will go here...
+</span><span style="color:#ff7733;">let mut</span><span> buf </span><span style="color:#f29668;">= </span><span>[</span><span style="color:#f29718;">0</span><span style="color:#ff7733;">u8</span><span style="color:#bfbab0cc;">; </span><span style="color:#f29718;">64</span><span>]</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#5c6773;">// receive buffer
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// we&#39;re assuming failures were timeouts, the client_done loop will stop us
+</span><span style="color:#ff7733;">match</span><span> listener</span><span style="color:#f29668;">.</span><span style="color:#f07178;">recv_from</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> buf) {
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>((len</span><span style="color:#bfbab0cc;">,</span><span> remote_addr)) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">let</span><span> data </span><span style="color:#f29668;">= &amp;</span><span>buf[</span><span style="color:#f29668;">..</span><span>len]</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#f07178;">println!</span><span>(
+</span><span>            </span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server: got data: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;"> from: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>            response</span><span style="color:#bfbab0cc;">,
+</span><span>            </span><span style="font-style:italic;color:#39bae6;">String</span><span style="color:#f29668;">::</span><span>from_utf8_lossy(data)</span><span style="color:#bfbab0cc;">,
+</span><span>            remote_addr
+</span><span>        )</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// create a socket to send the response
+</span><span>        </span><span style="color:#ff7733;">let</span><span> responder </span><span style="color:#f29668;">= </span><span style="color:#f07178;">new_socket</span><span>(</span><span style="color:#f29668;">&amp;</span><span>remote_addr)
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;failed to create responder&quot;</span><span>)
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">into_udp_socket</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// we send the response that was set at the method beginning
+</span><span>        responder
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">send_to</span><span>(response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">as_bytes</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>remote_addr)
+</span><span>            </span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;failed to respond&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server: sent response to: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> response</span><span style="color:#bfbab0cc;">,</span><span> remote_addr)</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(err) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:server: got an error: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> response</span><span style="color:#bfbab0cc;">,</span><span> err)</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>So now the server is getting the client's message <em>and</em> the server is responding to the message. We are responding to the client on the address received on this message. A side note here on trusting the UDP <code>remote_addr</code>: because UDP is not session oriented, just because the message through <code>remote_addr</code> claims to be from a particular host, this is by no means necessarily the case. If you want to read more about this, research reflection attacks and UDP source address spoofing. Back to this example, here are the important details:</p>
+<ol>
+<li><code>listener.recv_from(&amp;mut buf)</code></li>
+</ol>
+<p>Receive the packet from the client into the allocated buffer we created first.</p>
+<ol start="2">
+<li><code>Ok((len, remote_addr)) =&gt; ...</code></li>
+</ol>
+<p>On a successful receipt we're unwrapping the length of data received and the source address.</p>
+<ol start="3">
+<li><code>let responder = new_socket(&amp;remote_addr)</code></li>
+</ol>
+<p>Create a new socket for the response, in the proper IP scope.</p>
+<ol start="4">
+<li><code>responder.send_to(response.as_bytes(), &amp;remote_addr)</code></li>
+</ol>
+<p>Send our response to the source address. The response was a string passed in at the creation of the server, so the client already knows what is coming.</p>
+<p>From here we can move on to the client to verify the server's response. A note, I realized that the <code>NotifyServer</code> was dropping early after getting to this point, so I changed that to capture the notify, and we're back in the <code>test_multicast</code> function:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">let</span><span> notify </span><span style="color:#f29668;">=</span><span> NotifyServer(Arc</span><span style="color:#f29668;">::</span><span>clone(</span><span style="color:#f29668;">&amp;</span><span>client_done))</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>
+</span><span>socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">send_to</span><span>(message</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>addr)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;could not send_to!&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">let mut</span><span> buf </span><span style="color:#f29668;">= </span><span>[</span><span style="color:#f29718;">0</span><span style="color:#ff7733;">u8</span><span style="color:#bfbab0cc;">; </span><span style="color:#f29718;">64</span><span>]</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#5c6773;">// receive buffer
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// get our expected response
+</span><span style="color:#ff7733;">match</span><span> socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">recv_from</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> buf) {
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>((len</span><span style="color:#bfbab0cc;">,</span><span> remote_addr)) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">let</span><span> data </span><span style="color:#f29668;">= &amp;</span><span>buf[</span><span style="color:#f29668;">..</span><span>len]</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> response </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">String</span><span style="color:#f29668;">::</span><span>from_utf8_lossy(data)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:client: got data: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> test</span><span style="color:#bfbab0cc;">,</span><span> response)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// verify it&#39;s what we expected
+</span><span>        </span><span style="color:#f07178;">assert_eq!</span><span>(test</span><span style="color:#bfbab0cc;">,</span><span> response)</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">Err</span><span>(err) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">:client: had a problem: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> test</span><span style="color:#bfbab0cc;">,</span><span> err)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#f07178;">assert!</span><span>(</span><span style="color:#f29718;">false</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// make sure we don&#39;t notify the server until the end of the client test
+</span><span style="color:#f07178;">drop</span><span>(notify)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Now if you run the tests we should see successes, I'll limit it to just IPv4 so to shorten the output:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>$ cargo test ipv4 -- --nocapture
+</span><span>...
+</span><span>ipv4:server: joined: 224.0.0.123:7645
+</span><span>ipv4:server: is ready
+</span><span>ipv4:client: running
+</span><span>ipv4:server: got data: Hello from client! from: 10.0.0.195:56069
+</span><span>ipv4:server: sent response to: 10.0.0.195:56069
+</span><span>ipv4:client: got data: ipv4
+</span><span>ipv4:server: client is done
+</span><span>test test_ipv4_multicast ... ok
+</span><span>...
+</span></code></pre>
+<p>Excellent! We're done right?</p>
+<h2 id="supporting-windows">Supporting Windows</h2>
+<p>If you're happy with Unix only support you're done, but we're working in Rust, supporting multiple platforms is easy, right? Let's switch to Windows and see what happens! For this I grabbed a VM <a href="https://developer.microsoft.com/en-us/windows/downloads/virtual-machines">from Microsoft</a> and installed the standard Windows Rust tools through <a href="https://rustup.rs/">rustup</a> (make sure to go through a browser in the VM so that you get the correct link on the rustup site). I'm going to leave ipv6 up to the reader, so I'll just be running the IPv4 test:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>C:&gt; cargo test ipv4 -- --nocapture
+</span><span>...
+</span><span>test test_ipv4_multicast ... thread &#39;ipv4:server&#39; panicked at &#39;failed to create listener: Error { repr: Os { code: 10049, message: &quot;The requested address is not valid in its context.&quot; } }&#39;, src\libcore\result.rs:916:5
+</span><span>...
+</span></code></pre>
+<p>Not valid in it's context, what? Well, I have the luck of having already worked through this with the TRust-DNS mdns support. It turns out Windows doesn't want you to bind to the multicast address like Unix. So we're going to make a platform specific construct here, we'll create a <code>bind_multicast</code> function that has two different implementations, one for Unix and one for Windows. By the way this command comes in handy when you're developing on something other than Windows and just want to check it if builds: <code>cargo check --tests --target x86_64-pc-windows-msvc</code>. In <code>join_multicast</code> we're going to replace the call to <code>socket.bind(&amp;SockAddr::from(addr))?</code> with <code>bind_multicast(&amp;socket, &amp;addr)?</code> and then add the new function:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#5c6773;">/// On Windows, unlike all Unix variants, it is improper to bind to the multicast address
+</span><span style="font-style:italic;color:#5c6773;">///
+</span><span style="font-style:italic;color:#5c6773;">/// see https://msdn.microsoft.com/en-us/library/windows/desktop/ms737550(v=vs.85).aspx
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">cfg</span><span>(windows)]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">bind_multicast</span><span>(</span><span style="color:#f29718;">socket</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>Socket, </span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>SocketAddr) </span><span style="color:#bfbab0cc;">-&gt; </span><span>io</span><span style="color:#f29668;">::</span><span style="font-style:italic;color:#39bae6;">Result</span><span>&lt;()&gt; {
+</span><span>    </span><span style="color:#ff7733;">let</span><span> addr </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">match </span><span style="color:#f29668;">*</span><span>addr {
+</span><span>        SocketAddr</span><span style="color:#f29668;">::</span><span style="color:#f29718;">V4</span><span>(addr) </span><span style="color:#f29668;">=&gt; </span><span>SocketAddr</span><span style="color:#f29668;">::</span><span>new(Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">,</span><span> addr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">port</span><span>())</span><span style="color:#bfbab0cc;">,
+</span><span>        SocketAddr</span><span style="color:#f29668;">::</span><span style="color:#f29718;">V6</span><span>(addr) </span><span style="color:#f29668;">=&gt; </span><span>{
+</span><span>            SocketAddr</span><span style="color:#f29668;">::</span><span>new(Ipv6Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">,</span><span> addr</span><span style="color:#f29668;">.</span><span style="color:#f07178;">port</span><span>())
+</span><span>        }
+</span><span>    }</span><span style="color:#bfbab0cc;">;
+</span><span>    socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">bind</span><span>(</span><span style="color:#f29668;">&amp;</span><span>socket2</span><span style="color:#f29668;">::</span><span>SockAddr</span><span style="color:#f29668;">::</span><span>from(addr))
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">/// On unixes we bind to the multicast address, which causes multicast packets to be filtered
+</span><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">cfg</span><span>(unix)]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">bind_multicast</span><span>(</span><span style="color:#f29718;">socket</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>Socket, </span><span style="color:#f29718;">addr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>SocketAddr) </span><span style="color:#bfbab0cc;">-&gt; </span><span>io</span><span style="color:#f29668;">::</span><span style="font-style:italic;color:#39bae6;">Result</span><span>&lt;()&gt; {
+</span><span>    socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">bind</span><span>(</span><span style="color:#f29668;">&amp;</span><span>socket2</span><span style="color:#f29668;">::</span><span>SockAddr</span><span style="color:#f29668;">::</span><span>from(</span><span style="color:#f29668;">*</span><span>addr))
+</span><span>}
+</span></code></pre>
+<p>All we've done is tell Windows to listen on all interfaces, but restrict it to the multicast port. We're still joining in the same way as before. You could limit this to a specific interface if you like, but that's up to the reader. But this is it, our code is now cross platform. What about IPv6? Well, I have to apologize. I can't seem to get IPv6 working on Windows, regardless of changing the target. I'll leave that to some intrepid Rustacean on Windows to figure out.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Multicasting in IPv4 in Rust is straightforward. In IPv6 there are still some issues to work through, like finding an easy way to deal with the interface problem, and determining what is wrong on Windows. IPv6 leaves me dissatisfied, so I'll be continuing to look for solutions here. I'd love feedback from others who might know what, if anything, I'm doing wrong there. I ended up not getting into this in this post, but when multiple multicast listeners are on the same host for the same traffic, you will need to use <code>set_reuse_address</code> and <code>set_reuse_port</code> (where applicable) to allow for the listeners to use the same addresses.</p>
+<p>I hope you enjoyed this post. Figuring all of this out for mDNS was a lot of testing, trial-and-error; the long list of commits is <a href="https://github.com/bluejekyll/trust-dns/pull/337">here for the mdns_stream</a>. The mDNS support is not yet complete in TRust-DNS but that mdns_stream (similar to what we did in this post) is the first step in getting there.</p>
+<p>Thank you!</p>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Multicasting in Rust&url=https://bluejekyll.github.io/blog/posts/multicasting-in-rust/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/multicasting-in-rust/&title=Multicasting in Rust"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/multicasting-in-rust/&t=Multicasting in Rust"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

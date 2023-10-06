@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A year of Rust and DNS</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                A year of Rust and DNS
+            </p>
+            <p class="subtitle is-4 is-italic">
+                This post is not meant to teach you Rust or DNS. It&#x27;s more of a journal about some things I&#x27;ve found interesting while developing a DNS client and server in Rust
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;a-year-of-rust-and-dns&#x2F;">
+                    <span class="is-family-monospace">2016-08-21</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-network-wired"></i>
+            
+            <span class="tooltip-text is-6">dns</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>Approximately a year and a half ago I discovered possibly the greatest
+programming language ever created. It happened while I was learning Go. Go was
+a fun language to learn, and coming from Java I appreciated one
+particularly awesome thing about it, I could compile a single binary, deploy
+and run it quickly and easily. Honestly, I hadn't realized how much I missed
+static binaries from C until I wrote a program in Go. There was no classpath, no monkeying with the
+default memory settings, no changing the default garbage collector. It was a
+nice language, but I had some problems. I missed generics, I missed typed and
+checked exceptions, and I couldn't help but feel like I was writing C but with
+a Garbage Collector (ok, easier than C and it has memory safety, big bonuses).</p>
+<p>Then I started seeing Hacker News talking about this new language called
+<a href="https://www.rust-lang.org">Rust</a>. It was marching toward a 1.0 release, I think
+it was at 0.8 when I first tried it out. With the help of
+<a href="http://rustbyexample.com">Rust by Example</a> I sat down and started learning
+the language, every time I wrote something there was an old hardened layer of
+programming tarnish that was wiped from my eyes. I had been shown the
+light, and there is no going back once you have been to the promised land. All
+of my colleagues have gotten tired of me talking about Rust... I definitely
+feel like a bible thumper sometimes. But at that point, I still didn't have anything
+substantial that I had written in Rust.</p>
+<h1 id="then-the-computer-gods-said-rewrite-dns">Then the computer gods said, &quot;rewrite DNS&quot;</h1>
+<p><a href="https://www.isc.org/blogs/about-cve-2015-5477-an-error-in-handling-tkey-queries-can-cause-named-to-exit-with-a-require-assertion-failure/">CVE-2015-5477</a> struck BIND9, and it sounded pretty bad. After doing a little research
+it became somewhat clear, to me anyway, that BIND's biggest issue is that it is written in C;
+buffer overflows, out-of-bound array access, race conditions, etc. Take a look
+at the <a href="https://kb.isc.org/category/74/0/10/Software-Products/BIND9/Security-Advisories/">full list</a>
+sometime, I think roughly 50% of those could have been avoided by using
+(safe) Rust. Is BIND9 the only DNS server out there? No. But it is the most
+widely deployed.</p>
+<p>Before you call me a C hater, C is still probably my most favorite language.
+It's pure, raw power. It's also a huge pain in the neck to debug, and there's
+always that question, like what happens when you call <code>strstr()</code> on a non-null
+terminated buffer? (yes, that was a fun one to track down, Kevin G.).</p>
+<p>So I got started. Here is the first disappointing thing, there is no spec! What
+exists are rfc's dating back to 1987, specifically
+<a href="https://tools.ietf.org/html/rfc1034">rfc1034</a> and <a href="https://tools.ietf.org/html/rfc1035">rfc1035</a>.
+Luckily the IETF marks the status of rfc's (the color coding at the top of the
+rfc page), and then it also forward and backward references to rfc's that
+update the current rfc or the ones which it obsolete's. My first job was to
+organize all of the rfc's that I planned on implementing (this list keeps
+changing by-the-way), obviously starting with rfc1035.</p>
+<p>So then I got started, on-the-side; and by the way I have two small children
+and a full-time job, so
+on-the-side for me is not always the easiest time to come up with. Anywhere close
+to six hours a week is impressive.</p>
+<h1 id="a-dns-client-and-server-is-born">A DNS client and server is born</h1>
+<p>From the <a href="https://github.com/bluejekyll/trust-dns/commit/a3496cebf37c5e88bfbd4d7c5f036afe1d61cf6d#diff-04c6e90faac2675aa89e2176d2eec7d8">README.md</a>:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span># trust-dns
+</span><span>A Rust based DNS server
+</span></code></pre>
+<p>The commit:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>commit a3496cebf37c5e88bfbd4d7c5f036afe1d61cf6d
+</span><span>Author: Benjamin Fry &lt;benjaminfry@me.com&gt;
+</span><span>Date:   Fri Aug 7 19:47:12 2015 -0700
+</span><span>
+</span><span>    Initial commit
+</span></code></pre>
+<p>It took me a few weeks to <em>mostly</em> complete rfc1035, the basics. The first
+thing that I really started appreciating about Rust were the well defined
+fixed size integers <code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>. It was actually fun to parse
+binary streams again! I've been working in Java mainly for the last decade,
+I never found bit shifting intuitive in Java because there are only signed
+integers. So this was like going back to C. Example DNS header parsing
+(current as of this writing):</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">read</span><span>(</span><span style="color:#f29718;">decoder</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> BinDecoder) </span><span style="color:#bfbab0cc;">-&gt; </span><span>DecodeResult&lt;</span><span style="color:#ff7733;">Self</span><span>&gt; {
+</span><span>  </span><span style="color:#ff7733;">let</span><span> id </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">read_u16</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> q_opcd_a_t_r </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">pop</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// if the first bit is set
+</span><span>  </span><span style="color:#ff7733;">let</span><span> message_type </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#f29718;">0x80 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0x80 </span><span>{ MessageType</span><span style="color:#f29668;">::</span><span>Response } </span><span style="color:#ff7733;">else </span><span>{ MessageType</span><span style="color:#f29668;">::</span><span>Query }</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// the 4bit opcode, masked and then shifted right 3bits for the u8...
+</span><span>  </span><span style="color:#ff7733;">let</span><span> op_code</span><span style="color:#bfbab0cc;">:</span><span> OpCode </span><span style="color:#f29668;">= </span><span>((</span><span style="color:#f29718;">0x78 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">&gt;&gt; </span><span style="color:#f29718;">3</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> authoritative </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0x4 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0x4</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> truncation </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0x2 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0x2</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> recursion_desired </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0x1 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0x1</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> r_z_ad_cd_rcod </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">pop</span><span>())</span><span style="color:#bfbab0cc;">; </span><span style="font-style:italic;color:#5c6773;">// fail fast...
+</span><span>  </span><span style="color:#ff7733;">let</span><span> recursion_available </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0b1000_0000 </span><span style="color:#f29668;">&amp;</span><span> r_z_ad_cd_rcod) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0b1000_0000</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> authentic_data </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0b0010_0000 </span><span style="color:#f29668;">&amp;</span><span> r_z_ad_cd_rcod) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0b0010_0000</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> checking_disabled </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0b0001_0000 </span><span style="color:#f29668;">&amp;</span><span> r_z_ad_cd_rcod) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0b0001_0000</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> response_code</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8 </span><span style="color:#f29668;">= </span><span style="color:#f29718;">0x0F </span><span style="color:#f29668;">&amp;</span><span> r_z_ad_cd_rcod</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> query_count </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">read_u16</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> answer_count </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">read_u16</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> name_server_count </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">read_u16</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> additional_count </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">read_u16</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(Header { id</span><span style="color:#bfbab0cc;">:</span><span> id</span><span style="color:#bfbab0cc;">,</span><span> message_type</span><span style="color:#bfbab0cc;">:</span><span> message_type</span><span style="color:#bfbab0cc;">,</span><span> op_code</span><span style="color:#bfbab0cc;">:</span><span> op_code</span><span style="color:#bfbab0cc;">,</span><span> authoritative</span><span style="color:#bfbab0cc;">:</span><span> authoritative</span><span style="color:#bfbab0cc;">,
+</span><span>    truncation</span><span style="color:#bfbab0cc;">:</span><span> truncation</span><span style="color:#bfbab0cc;">,</span><span> recursion_desired</span><span style="color:#bfbab0cc;">:</span><span> recursion_desired</span><span style="color:#bfbab0cc;">,
+</span><span>    recursion_available</span><span style="color:#bfbab0cc;">:</span><span> recursion_available</span><span style="color:#bfbab0cc;">,
+</span><span>    authentic_data</span><span style="color:#bfbab0cc;">:</span><span> authentic_data</span><span style="color:#bfbab0cc;">,</span><span> checking_disabled</span><span style="color:#bfbab0cc;">:</span><span> checking_disabled</span><span style="color:#bfbab0cc;">,
+</span><span>    response_code</span><span style="color:#bfbab0cc;">:</span><span> response_code</span><span style="color:#bfbab0cc;">,
+</span><span>    query_count</span><span style="color:#bfbab0cc;">:</span><span> query_count</span><span style="color:#bfbab0cc;">,</span><span> answer_count</span><span style="color:#bfbab0cc;">:</span><span> answer_count</span><span style="color:#bfbab0cc;">,
+</span><span>    name_server_count</span><span style="color:#bfbab0cc;">:</span><span> name_server_count</span><span style="color:#bfbab0cc;">,</span><span> additional_count</span><span style="color:#bfbab0cc;">:</span><span> additional_count })
+</span><span>  }
+</span></code></pre>
+<p>In each of those operations, I know exactly what is stored at each bit in each
+of those variables. I haven't gone back and changed it in some cases yet, but
+I've decided to start using this binary int format for checking bits, as I
+think it's more clear (as opposed to hex, which you can still see in the above
+code block. I need to clean that up, but if it ain't broke don't fix it):</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>  </span><span style="color:#ff7733;">let</span><span> recursion_available </span><span style="color:#f29668;">= </span><span>(</span><span style="color:#f29718;">0b1000_0000 </span><span style="color:#f29668;">&amp;</span><span> r_z_ad_cd_rcod) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0b1000_0000</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>If you're unfamiliar with rust, the result of the <code>==</code> operation is a boolean,
+so the type of <code>recursion_available</code> is inferred. Also, I know my names look
+funny, but each of those characters represents a bit, or more to help me visually
+understand the bitfield I'm reading from.</p>
+<p>In this bitshift example:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>  </span><span style="color:#ff7733;">let</span><span> op_code</span><span style="color:#bfbab0cc;">:</span><span> OpCode </span><span style="color:#f29668;">= </span><span>((</span><span style="color:#f29718;">0x78 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">&gt;&gt; </span><span style="color:#f29718;">3</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>If that operation happened on a 32bit boundary in Java, I'd be scratching my head
+(actually a junit test would be easier) trying to remember if I needed <code>&gt;&gt;&gt;</code> or
+<code>&gt;&gt;</code>. I know the the answer, do you? In Rust there is no question. I will
+be changing that above line to this, because I think it's much clearer:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>  </span><span style="color:#ff7733;">let</span><span> op_code</span><span style="color:#bfbab0cc;">:</span><span> OpCode </span><span style="color:#f29668;">= </span><span>((</span><span style="color:#f29718;">0b0_1111_0_0_0 </span><span style="color:#f29668;">&amp;</span><span> q_opcd_a_t_r) </span><span style="color:#f29668;">&gt;&gt; </span><span style="color:#f29718;">3</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into</span><span>()</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>I have to say, some of the ergonomics of Rust are awesome, like support for the
+binary literal, Java just got this in 1.7. And the allowance of the <code>_</code> for
+visually separating portions of the literal is awesome, obviously most people
+will usually use it as a replacement for <code>,</code> like <code>let million = 1_000_000</code>.
+Disecting the above code a little more, that <code>into()</code> is a function from the
+<code>From</code> trait <a href="https://github.com/bluejekyll/trust-dns/blob/7b271c468d9c3919d2015a5c75b21fa8503e8b29/src/op/op_code.rs">implementation</a>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">impl </span><span style="font-style:italic;color:#39bae6;">From</span><span>&lt;</span><span style="color:#ff7733;">u8</span><span>&gt; </span><span style="color:#ff7733;">for </span><span style="color:#59c2ff;">OpCode </span><span>{
+</span><span>  </span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">from</span><span>(</span><span style="color:#f29718;">value</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">u8</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self </span><span>{
+</span><span>    </span><span style="color:#ff7733;">match</span><span> value {
+</span><span>      </span><span style="color:#f29718;">0 </span><span style="color:#f29668;">=&gt; </span><span>OpCode</span><span style="color:#f29668;">::</span><span>Query</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#f29718;">2 </span><span style="color:#f29668;">=&gt; </span><span>OpCode</span><span style="color:#f29668;">::</span><span>Status</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#f29718;">4 </span><span style="color:#f29668;">=&gt; </span><span>OpCode</span><span style="color:#f29668;">::</span><span>Notify</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#f29718;">5 </span><span style="color:#f29668;">=&gt; </span><span>OpCode</span><span style="color:#f29668;">::</span><span>Update</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#f29668;">_ =&gt; </span><span style="color:#f07178;">panic!</span><span>(</span><span style="color:#c2d94c;">&quot;unimplemented code: {}&quot;</span><span style="color:#bfbab0cc;">,</span><span> value)</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>The above code shows a basic usage of match on integer and conversion to the
+DNS <code>OpCode</code> enum. Notice that <code>panic!</code>, yeah, that's a logic bug.
+I just filed the <a href="https://github.com/bluejekyll/trust-dns/issues/36">issue</a>
+for it, basically that <code>panic!</code> will crash the server if someone sends a bad
+OpCode. This brings up an important point:</p>
+<h1 id="rust-does-not-prevent-logic-bugs">Rust does not prevent <em>logic</em> bugs</h1>
+<p>Rust prevents memory leaks<a href="https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/?#1">[1]</a>, a subset of concurrency bugs, and others. It's not
+some magic bullet, but to not have to deal with memory access issues? Null
+pointer dereferences? Memory leaks<a href="https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/?#1">[1]</a>? Yeah, there was a reason I went to Java all
+those years ago. But now, I can go back to systems level programming with even
+better safety guarantees than Java!</p>
+<p>That <code>panic!</code> is residual from when I was still getting comfortable with errors
+in Rust. There are some error handling changes coming in Rust
+that will make them easier, and <a href="https://crates.io/crates/error-chain">error_chain</a>
+is greatly simplifies error type definitions, <a href="https://github.com/bluejekyll/trust-dns/blob/ba8eee06d37e9ad633489ce0595835c5e59fac07/src/error/client_error.rs">example</a>.
+I thought I had removed all <code>panic!</code> use cases from areas where they would be
+encountered in live code paths, I never claimed to be perfect! (And writing
+this post helped uncover a bug, so even if no one reads this, it was worth it).</p>
+<h1 id="you-must-deal-with-errors">You must deal with errors</h1>
+<p>Rust has made errors something you can not ignore. This is akin to checked
+exceptions in Java (by the way, I'm in the camp of all Exceptions should be
+checked). Rust uses a similar practice to Java in that, if you don't know how
+to deal with an error, just rethrow it (best practice in Java). I'll be converting
+that above <code>From</code> to something else soon, but let's look at the simplest form of
+error handling:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>  </span><span style="color:#ff7733;">let</span><span> query_count </span><span style="color:#f29668;">= </span><span style="color:#f07178;">try!</span><span>(decoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">read_u16</span><span>())</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>This reads from the decoder byte stream the next u16. Of course this could fail,
+because maybe there isn't enough bytes left to read a u16, or maybe it's a backed
+by a <code>TcpStream</code> and the connection fails. But in this context, what can I do
+with an error like that? Nothing really, there is no way to recover, so we rethrow.
+That's what <code>try!</code> does, but in Rust it's not quite as simple as in Java, Rust
+is statically typed. I won't get into error handling in this article, except to
+point out a pain point with it, you can learn more about <a href="https://doc.rust-lang.org/book/error-handling.html">error handling here</a>.</p>
+<p>Rust has made the wise decision to force you to either propagate errors through
+the <code>Result</code> type, or handle them. Because Rust is strongly typed, every function
+call which returns an Error will need to compensate for all the inner functions called.</p>
+<p>In the above example, we only need to deal with the <code>DecodeError</code> returned from
+<code>read_u16()</code>, but in the <code>Client::query()</code> we return <a href="https://github.com/bluejekyll/trust-dns/blob/ba8eee06d37e9ad633489ce0595835c5e59fac07/src/error/client_error.rs">ClientError</a>, which is
+is just a union of a bunch of different types:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>links {
+</span><span>  </span><span style="color:#ff7733;">super</span><span style="color:#f29668;">::</span><span>decode_error</span><span style="color:#f29668;">::</span><span>Error</span><span style="color:#bfbab0cc;">, </span><span style="color:#ff7733;">super</span><span style="color:#f29668;">::</span><span>decode_error</span><span style="color:#f29668;">::</span><span>ErrorKind</span><span style="color:#bfbab0cc;">,</span><span> Decode</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">super</span><span style="color:#f29668;">::</span><span>encode_error</span><span style="color:#f29668;">::</span><span>Error</span><span style="color:#bfbab0cc;">, </span><span style="color:#ff7733;">super</span><span style="color:#f29668;">::</span><span>encode_error</span><span style="color:#f29668;">::</span><span>ErrorKind</span><span style="color:#bfbab0cc;">,</span><span> Encode</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>While the type itself isn't growing because enums in Rust are more equivalent to
+unions in C, the definition is expanding with each additional Error. The <code>Client</code>
+ends up with the potential for <code>DecodeError</code> or <code>EncodeError</code> because it's obviously
+performing both operations to send and then receive a message. The overhead of
+dealing with this was daunting initially, but since better understanding the
+problem, it's no longer a significant overhead, and again <code>error_chain</code> has
+made it even easier.</p>
+<h1 id="implementing-rfc1035-was-deceivingly-easy">Implementing rfc1035 was deceivingly easy</h1>
+<p>After a few iterations on the server code and authority, in September of 2015
+I had a fully functional DNS server and client. But that's not what I set out
+to do. I set out to implement DNSSec, threw in DNSCrypt for fun, and wanted a
+dynamic library of which I could be proud.</p>
+<p>This brings me to a lull point; DNSSec, how hard could it be? Remember I
+mentioned all those rfc's? Well DNSSec has gone through a few revisions, there
+is a trail of dead rfc carcasses that can be followed: rfc2065 (1997), obsoleted
+by rfc2535 (1999), obsoleted by rfc4033, rfc4034, and rfc4035 (2005), which have some
+very important clarifications in rfc6840 (2013). I missed one in there and fixed it
+recently, see <a href="https://github.com/bluejekyll/trust-dns/issues/27">issue #27</a>.
+Which stems from this brilliant quote:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span> The guidance in the above paragraph differs from what has been
+</span><span>   published before but is consistent with current common practice.
+</span><span>   Item 3 of Section 6.2 of [RFC4034] says that names in both of these
+</span><span>   RR types should be converted to lowercase.  The earlier [RFC3755]
+</span><span>   says that they should not.  Current practice follows neither document
+</span><span>   fully.
+</span></code></pre>
+<p>Did you catch that? No one implemented the spec properly, so now the spec is
+the implementation. I think that's a tail wagging the dog, right?</p>
+<p>Anyway, back to the deceivingly easy bit; perhaps a picture will help:</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/trust-dns-work.png" alt="Trust-DNS work history" /></p>
+<p>At <em>blindmans peak</em>, I was riding high. Loving Rust, nothing could stop me. I
+had fun adding in support for things like the async io library <code>mio</code>
+(I have plans to move to <a href="https://aturon.github.io/blog/2016/08/11/futures/">futures</a>
+when I have time). Then I decided it was
+time to add DNSSec support. I had to read, and reread, all of the mentioned
+rfcs, and some others. I started implementing, and then fell into the <em>pit of
+dispair</em> as I tried and tried to get RRSIGs to first parse and then validate
+properly. Only to discover that I needed <a href="https://github.com/sfackler/rust-openssl/commit/ef95223d2679d68b36df77393bd334d4da02077f">additional methods</a>
+in the Rust OpenSSL port. After learning too much about OpenSSL (oh-my-dear-god I can
+not unsee what I saw in there, the C, not Rust).</p>
+<p>While in the <em>pit of dispair</em>, I considered many times giving up, with questions like; &quot;What's
+the point?&quot;, &quot;There are a ton of DNS servers out there, DJB's is rock solid.
+Am I really adding anything new?&quot;, &quot;Is anyone even
+going to use this?&quot; I have good answers to all of these, that will eventually
+make this implementation unique and offer features that answer long standing
+issues that I've had with DNS. So, I slogged through, and made some progress.
+Then I discovered that none of my signing logic was working properly. This
+brought me to the <em>valley of doom</em>, those questions I was asking myself, they
+only got louder and louder. &quot;Stop wasting your time.&quot; But how could I stop? I
+made it this far, I must see it through. I needed to go back and reread all the
+DNSSec rfc's, and understand what I had screwed up.</p>
+<p>Then I climbed <em>saviors peak</em>, which was hard. For any cyclists in the Bay Area,
+it's like the Three Bears ride in the East Bay, where the Baby Bear and Mamma Bear hills were
+tough, then Papa Bear hill has a false summit, and you still need to go up
+the huge last climb to get to the top. The downhill is totally worth it though,
+45mph is thrilling on a bike.</p>
+<h1 id="tests-as-a-way-of-life">Tests as a way of life</h1>
+<p>A feature that I found both surprising, and yet seems so obvious it should be
+inherent to all languages, was the embedded tests
+with a simple <code>#[test]</code> annotation which causes a test binary to be produced
+with the <code>cargo test</code> command. In most languages you usually start by writing
+a simple <code>main()</code> with a <code>println!(&quot;hello world&quot;)</code>, in Rust it's even easier to
+start with a test. I have &gt; 84% coverage, I can do better, but if you look at the
+<a href="https://coveralls.io/github/bluejekyll/trust-dns?branch=master">reports</a>,
+the most glaringly uncovered things are actually covered, but in integration
+tests, <code>cargo test -- --ignored</code>, which I'm not currently running on Travis.
+TCP servers on a free CI service seem like issues will follow. I've never been
+a huge fan of aiming too much higher than 85-90% coverage, because I see
+diminishing returns beyond that, as Dijkstra said:</p>
+<pre data-lang="quote" style="background-color:#0f1419;color:#bfbab0;" class="language-quote "><code class="language-quote" data-lang="quote"><span> testing can be a very effective way to show the presence of bugs,
+</span><span>                but it is hopelessly inadequate for showing their absence
+</span></code></pre>
+<p>My favorite though is the ability to write threaded tests for server code, in Rust it's
+made even easier than similar practices I've used in Java:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#bfbab0cc;">#</span><span>[</span><span style="color:#ffb454;">test</span><span>]
+</span><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">test_server_www_udp</span><span>() {
+</span><span>  </span><span style="color:#ff7733;">let</span><span> addr </span><span style="color:#f29668;">= </span><span>SocketAddr</span><span style="color:#f29668;">::</span><span style="color:#f29718;">V4</span><span>(SocketAddrV4</span><span style="color:#f29668;">::</span><span>new(Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">127</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29718;">1</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>))</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> udp_socket </span><span style="color:#f29668;">= </span><span>UdpSocket</span><span style="color:#f29668;">::</span><span>bound(</span><span style="color:#f29668;">&amp;</span><span>addr)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> ipaddr </span><span style="color:#f29668;">=</span><span> udp_socket</span><span style="color:#f29668;">.</span><span style="color:#f07178;">local_addr</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;udp_socket on port: </span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> ipaddr)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  thread</span><span style="color:#f29668;">::</span><span>Builder</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>(</span><span style="color:#c2d94c;">&quot;test_server:udp:server&quot;</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_string</span><span>())</span><span style="color:#f29668;">.</span><span style="color:#f07178;">spawn</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|| </span><span style="color:#f07178;">server_thread_udp</span><span>(udp_socket))</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> client_conn </span><span style="color:#f29668;">= </span><span>UdpClientConnection</span><span style="color:#f29668;">::</span><span>new(ipaddr)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> client_thread </span><span style="color:#f29668;">= </span><span>thread</span><span style="color:#f29668;">::</span><span>Builder</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>(</span><span style="color:#c2d94c;">&quot;test_server:udp:client&quot;</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_string</span><span>())</span><span style="color:#f29668;">.</span><span style="color:#f07178;">spawn</span><span>(</span><span style="color:#ff7733;">move </span><span style="color:#f29668;">|| </span><span style="color:#f07178;">client_thread_www</span><span>(client_conn))</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> client_result </span><span style="color:#f29668;">=</span><span> client_thread</span><span style="color:#f29668;">.</span><span style="color:#f07178;">join</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#f07178;">assert!</span><span>(client_result</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_ok</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;client failed: {:?}&quot;</span><span style="color:#bfbab0cc;">,</span><span> client_result)</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>Teasing this apart, it creates two threads, one for the client, and one for the server.
+Both use random local ports, so that we don't have any issues with binding to an
+already used socket address. Then we start the server. Next we grab the server's
+randomly assigned port, pass that into a new Client and start the client thread.
+In tests, I see <code>unwrap()</code> and <code>panic!</code> as perfectly legit. The server thread is dead simple:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">server_thread_udp</span><span>(</span><span style="color:#f29718;">udp_socket</span><span style="color:#bfbab0cc;">:</span><span> UdpSocket) {
+</span><span>  </span><span style="color:#ff7733;">let</span><span> catalog </span><span style="color:#f29668;">= </span><span style="color:#f07178;">new_catalog</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let mut</span><span> server </span><span style="color:#f29668;">= </span><span>Server</span><span style="color:#f29668;">::</span><span>new(catalog)</span><span style="color:#bfbab0cc;">;
+</span><span>  server</span><span style="color:#f29668;">.</span><span style="color:#f07178;">register_socket</span><span>(udp_socket)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  server</span><span style="color:#f29668;">.</span><span style="color:#f07178;">listen</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>I started writing tests like this in Java years ago for distributed systems, but
+this is much easier than the primitives I had at my disposal in Java. The client
+thread is where the meat of the test is:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">client_thread_www</span><span>&lt;C</span><span style="color:#bfbab0cc;">:</span><span> ClientConnection&gt;(</span><span style="color:#f29718;">conn</span><span style="color:#bfbab0cc;">:</span><span> C) {
+</span><span>  </span><span style="color:#ff7733;">let</span><span> name </span><span style="color:#f29668;">= </span><span>Name</span><span style="color:#f29668;">::</span><span>with_labels(</span><span style="color:#f07178;">vec!</span><span>[</span><span style="color:#c2d94c;">&quot;www&quot;</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_string</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;example&quot;</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_string</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;com&quot;</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_string</span><span>()])</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">println!</span><span>(</span><span style="color:#c2d94c;">&quot;about to query server: </span><span style="color:#f29718;">{:?}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> conn)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">let</span><span> client </span><span style="color:#f29668;">= </span><span>Client</span><span style="color:#f29668;">::</span><span>new(conn)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> response </span><span style="color:#f29668;">=</span><span> client</span><span style="color:#f29668;">.</span><span style="color:#f07178;">query</span><span>(</span><span style="color:#f29668;">&amp;</span><span>name</span><span style="color:#bfbab0cc;">, </span><span>DNSClass</span><span style="color:#f29668;">::</span><span style="color:#f29718;">IN</span><span style="color:#bfbab0cc;">, </span><span>RecordType</span><span style="color:#f29668;">::</span><span>A)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;error querying&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#f07178;">assert!</span><span>(response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_response_code</span><span>() </span><span style="color:#f29668;">== </span><span>ResponseCode</span><span style="color:#f29668;">::</span><span>NoError</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;got an error: {:?}&quot;</span><span style="color:#bfbab0cc;">,</span><span> response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_response_code</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let</span><span> record </span><span style="color:#f29668;">= &amp;</span><span>response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_answers</span><span>()[</span><span style="color:#f29718;">0</span><span>]</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(record</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>name)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(record</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>RecordType</span><span style="color:#f29668;">::</span><span>A)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(record</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_dns_class</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>DNSClass</span><span style="color:#f29668;">::</span><span style="color:#f29718;">IN</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">if let </span><span style="color:#f29668;">&amp;</span><span>RData</span><span style="color:#f29668;">::</span><span>A(</span><span style="color:#ff7733;">ref</span><span> address) </span><span style="color:#f29668;">=</span><span> record</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rdata</span><span>() {
+</span><span>    </span><span style="color:#f07178;">assert_eq!</span><span>(address</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>Ipv4Addr</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29718;">93</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29718;">184</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29718;">216</span><span style="color:#bfbab0cc;">,</span><span style="color:#f29718;">34</span><span>))
+</span><span>  } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>    </span><span style="color:#f07178;">assert!</span><span>(</span><span style="color:#f29718;">false</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#ff7733;">let mut</span><span> ns</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#f29668;">_</span><span>&gt; </span><span style="color:#f29668;">=</span><span> response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_name_servers</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_vec</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>  ns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">sort</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(ns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(ns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">first</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">NS</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(ns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">first</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rdata</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>RData</span><span style="color:#f29668;">::</span><span style="color:#f29718;">NS</span><span>(Name</span><span style="color:#f29668;">::</span><span>parse(</span><span style="color:#c2d94c;">&quot;a.iana-servers.net.&quot;</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">None</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()) )</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(ns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">last</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rr_type</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>RecordType</span><span style="color:#f29668;">::</span><span style="color:#f29718;">NS</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#f07178;">assert_eq!</span><span>(ns</span><span style="color:#f29668;">.</span><span style="color:#f07178;">last</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_rdata</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>RData</span><span style="color:#f29668;">::</span><span style="color:#f29718;">NS</span><span>(Name</span><span style="color:#f29668;">::</span><span>parse(</span><span style="color:#c2d94c;">&quot;b.iana-servers.net.&quot;</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">None</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">unwrap</span><span>()) )</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span></code></pre>
+<p>If you notice, the function is declared as generic over the <code>ClientConnection</code> type,
+this allows for a monomorphic function call that works with both TCP and UDP clients,
+meaning one test for both TCP and UDP servers and clients. I put the code here for an
+example, you can see the rest of the tests in the <a href="https://github.com/bluejekyll/trust-dns/blob/26b44483b0151682a7d835ddbd6ff9261c0651b6/CHANGELOG.md">server.rs</a>
+source.</p>
+<p>I know that looking at the <code>Name::with_labels()</code> call looks a little clumsy, I want
+to clean that up, but haven't quite settled on some ideas around String interning
+that I want to play with. In point of fact, my labels implementation in <code>Name</code> is
+one of the very few places where I want a garbage collector in Rust, that desire might
+go away once I have a better way of performing an intern.</p>
+<h1 id="so-where-is-trust-dns-now">So where is Trust-DNS now?</h1>
+<p>It's currently not used in production (as far as I know). I've put a lot of work
+into validating correctness of what is going on, and have had
+<a href="https://github.com/bluejekyll/trust-dns/graphs/contributors">help</a>, more
+is always welcome. I want to get a DNS fuzzer running against it to really pound
+on it, and then get some benchmark and comparison tests against other servers.</p>
+<p>Things I'm proud of: DNSSec support, with client side validation, and zone
+signing with local keys. Server and Client both have support for dynamic DNS
+with SIG0 validation and auth. Journaling support on the Server with sqlite. EDNS is
+supported for greater than 512 byte UDP packets (defaults to 1500).</p>
+<p>I'm currently in the middle of working on DNSCrypt<a href="https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/?#2">[2]</a>, and then I'll be moving on
+to some more fun ideas. I never imagined it would be this long of a journey,
+but it's only just beginning, and along with learning such a spectacular language
+it's totally worth it. Thank you to everyone who
+spends so much time perfecting Rust and it's ecosystem, you have reinvigorated
+my joy of programming.</p>
+<p>(I'll try to post more regularly on progress)</p>
+<ul>
+<li><a name="1">1</a>) I got a lot of feedback on Rust not preventing memory leaks.
+For me, in my experience it's at least as good as Java, meaning you have to go
+out of your way to cause a situation where a variable will not be dropped. This
+can happen in safe code. Examples would be ever growing Vectors, or poor usage
+of <code>std::mem::forget</code> which tells Rust not to call drop and cleanup the memory.
+When would you want to do this? I've used this when passing objects back to C
+through FFI methods, there are other cases. If you want to read a ton, checkout
+this post: <a href="https://github.com/rust-lang/rfcs/pull/1066">https://github.com/rust-lang/rfcs/pull/1066</a>.
+I left what I wrote mostly so that people could come to it, and then read this,
+think about it, and then realize no language actually prevents memory leaks, but
+Rust is memory safe...</li>
+<li><a name="2">2</a>) After some offline discussion and this issue:
+Feature request: &quot;RFC 7858, DNS over TLS <a href="https://github.com/bluejekyll/trust-dns/issues/38">#38</a>&quot;,
+I'm very much thinking of shelving my work on DNSCrypt and focusing instead on
+DNS over TLS</li>
+</ul>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=A year of Rust and DNS&url=https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/&title=A year of Rust and DNS"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/a-year-of-rust-and-dns/&t=A year of Rust and DNS"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>

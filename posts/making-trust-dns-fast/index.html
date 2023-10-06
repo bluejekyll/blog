@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Making TRust-DNS faster than BIND9</title>
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/css/font-recursive.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/darkmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/lightmode.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/fontawesome-free-5.15.2-web/css/brands.min.css" />
+    <script src="https://bluejekyll.github.io/blog/js/navbar.js"></script>
+    <!-- <script src="https://bluejekyll.github.io/blog/js/navbar.js"
+        integrity="sha384-\{\{ get_file_hash(path='js/navbar.js', sha_type=384) \}\}"></script> -->
+</head>
+
+<body class="">
+    <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+        <div class="container is-max-desktop">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-weight-bold is-family-monospace" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog">
+                    let blueJEKYLL=benjaminFRY;
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbar-data">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbar-data" class="navbar-menu">
+                <div class="navbar-end">
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/posts">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-th-list"></i>
+            
+        </span>
+        
+        <span>Posts</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog/topics">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-pagelines"></i>
+            
+        </span>
+        
+        <span>Topics</span>
+    </span>
+    
+
+
+
+                    </a>
+                    <a class="navbar-item" href="https://github.com/bluejekyll">
+                        
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<section class="hero mb-5">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <p class="title is-2">
+                Making TRust-DNS faster than BIND9
+            </p>
+            <p class="subtitle is-4 is-italic">
+                Written to explain what I&#x27;ve done to get from 400µs to less that 100µs
+            </p>
+            <div class="is-7">
+                <a href="https:&#x2F;&#x2F;bluejekyll.github.io&#x2F;blog&#x2F;posts&#x2F;making-trust-dns-fast&#x2F;">
+                    <span class="is-family-monospace">2017-12-29</span>
+                </a>
+                
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-laptop-code"></i>
+            
+            <span class="tooltip-text is-6">programming</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fab fa-rust"></i>
+            
+            <span class="tooltip-text is-6">rust</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                <span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="tooltip">
+    
+        <span class="icon">
+            <i class="fas fa-network-wired"></i>
+            
+            <span class="tooltip-text is-6">dns</span>
+            
+        </span>
+        
+    
+</span>
+
+
+
+
+</span>
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container is-max-desktop box">
+    <article class="content">
+        <p>When I wrote <a href="https://bluejekyll.github.io/blog/rust/2016/12/03/trust-dns-into-future.html">Taking TRust-DNS IntoFuture</a> regarding the initial implementation of TRust-DNS over the <a href="https://tokio.rs/">Tokio</a> async library, one of the first questions I was asked (by one of the maintainers): &quot;is it the fastest implementation out there?&quot; Sadly the answer was no, not by a long shot. TRust-DNS was 400µs and BIND9 100µs (as measured on my getting older laptop, YMMV). 300µs is a miniscule amount of time to people, but to computers that's a lot of time. Given that inside datacenters a full round trip is <a href="https://gist.github.com/jboner/2841832">500µs</a>, spending an extra 300µs on the node serving up the IP address of the service you're trying to connect to is not insubstantial. Shouldn't we be able to beat BIND? Of course we should. The rest of this post is going to document the path to get there, and some that I tried but didn't follow. As my knowledge of Rust has grown, it seemed like a good time to try some new things. It's an arbitrary goal, but it's a fun one.</p>
+<h2 id="measure-first-cut-second">Measure First, Cut Second</h2>
+<p>Where are we right now? Well, after starting to use better practices around references and clones in the project, this number is down to 250µs. Why did this improve so much from the 400µs? I really have no idea. It could be improvements in the compiler and such, but that would surprise me if it made that big of a difference. My guess is that after writing that previous post and being disappointed in the performance, I started practicing better code style around not cloning data and better utilizing reference passing, etc. Our target is being set by BIND9's performance<a href="https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/?#1">[1]</a>:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>test bind_udp_bench           ... bench:      69,960 ns/iter (+/- 7,207)
+</span></code></pre>
+<p>69µs, that's the number we need to beat (best time produced after multiple runs of the benchmark test, due to network stack, etc. this has not always produced a consistent number).</p>
+<p>I have some theories on where I should spend my time in trying to speed things up. My guess is that for the records stored in the authority, they are not stored in serialized form. This means that the records are always serialized for each response. If we pre-serialize I think this should get us the biggest win. The next is that buffers are allocated on each request. My guess is that if this is replaced with a fixed-sized pool of buffers, like an <a href="https://docs.rs/typed-arena/1.3.0/typed_arena/">arena</a>. The next thing I'm going to guess is that for each set of records we return, there is a new <code>Vec&lt;&amp;Record&gt;</code> returned. Getting rid of this might speed things up. I want to play with some ideas around <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.chain">chained</a> iterators instead of creating the temporary Vecs. Some other ideas are to go through and replace a lot of the <code>Box&lt;Future&lt;...&gt;&gt;</code> results from a lot of methods throughout the library. But which should we target first? There are a million good quotes on this, but I like this one: &quot;Human beings, even experienced programmers, are very poor at predicting (guessing) where a computation will bog down.&quot; from <a href="http://wiki.c2.com/?ProfileBeforeOptimizing">C2</a>. So I've made my guesses, but given that I'm human, we should find a way to get the machine to tell us if we're correct.</p>
+<p>I liked this <a href="https://gist.github.com/jFransham/369a86eff00e5f280ed25121454acec1">post</a> about optimizing Rust from <a href="https://github.com/jFransham">jFransham</a>. Lots of good advice in there, and it links to this great post: <a href="http://blog.adamperry.me/rust/2016/07/24/profiling-rust-perf-flamegraph/">Rust Performance: A story featuring perf and flamegraph on Linux</a>, but that's Linux, my dev machine in macOS. So we'll be using Carol Nicol's, <a href="http://carol-nichols.com/2015/12/09/rust-profiling-on-osx-cpu-time/">Rust Profiling with Instruments and FlameGraph on OSX: CPU/Time</a>. I was concerned that switching to the system allocator, as she recommends in that article, would have an effect on the benchmark. If it does, it's not one that showed up in my testing.</p>
+<p>Following Carol's instructions, I launched <code>Instruments</code> and registered the <code>named</code> binary from TRust-DNS. Configured with the same options I was using in the bench tests, it was ready to go. I just needed to pick a stable UDP port to use. Back to the bench test itself with a hard-coded port and stopped launching <code>named</code> in the test. After I ran the test, I was going to be excited to see all of this profile information to tell me where to fix things. I ran the test and:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>test trust_dns_udp_bench ... bench:     100,892 ns/iter (+/- 148,959)
+</span></code></pre>
+<p>wait... hold on a second here, 100µs? This was definitely not expected. TRust-DNS <em>is</em> almost as fast as BIND9. So I reviewed the startup, initially thinking it was the <code>Stdio::piped</code> arg for stdout on the <code>Command</code>. It was not that, but the answer does lie in the initialization:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">let mut</span><span> named </span><span style="color:#f29668;">= </span><span>Command</span><span style="color:#f29668;">::</span><span>new(</span><span style="color:#f29668;">&amp;</span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">/../target/debug/named&quot;</span><span style="color:#bfbab0cc;">,</span><span> server_path))
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">stdout</span><span>(Stdio</span><span style="color:#f29668;">::</span><span>null())
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">arg</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f07178;">format!</span><span>(
+</span><span>            </span><span style="color:#c2d94c;">&quot;--config=</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">/tests/named_test_configs/example.toml&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>            server_path
+</span><span>        ))
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">arg</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f07178;">format!</span><span>(
+</span><span>            </span><span style="color:#c2d94c;">&quot;--zonedir=</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">/tests/named_test_configs&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>            server_path
+</span><span>        ))
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">arg</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f07178;">format!</span><span>(</span><span style="color:#c2d94c;">&quot;--port=</span><span style="color:#f29718;">{}</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">,</span><span> test_port))
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">spawn</span><span>()
+</span><span>        </span><span style="color:#f29668;">.</span><span style="color:#f07178;">expect</span><span>(</span><span style="color:#c2d94c;">&quot;failed to start named&quot;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Take a look at the path to the TRust-DNS command, <code>&quot;{}/../target/debug/named&quot;</code>, notice <code>debug</code>? Yup... making that <code>release</code> means that we're using the optimized target. Let's see what the time is with the fixed version:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>test trust_dns_udp_bench      ... bench:      79,274 ns/iter (+/- 9,626)
+</span></code></pre>
+<p>That's significantly better, and brings us within 10µs of BIND9. That was a sad oversight; I've been underselling TRust-DNS' performance for over a year.</p>
+<h2 id="collecting-some-data">Collecting Some Data</h2>
+<p>Now that we're viewing the correct binary, we can actually start looking at how to make it faster. Here's a screenshot of the <code>Instruments</code> capture, which has a lot of options. I've narrowed the view to only the time where the test was running.</p>
+<p><img src="https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/profile-trust-dns.png" alt="Instruments" /></p>
+<p>I've underlined some things to draw your attention to them. You'll notice a few things. First on the left is the time spent in different calls. There are some that I avoided in this view. For example, the time spent in I/O. Most of the time is actually spent in <code>UdpSocket::recv_from</code> and <code>UdpSocket::send_to</code>, which we expect, this is mainly a network bound process after all. The other time I'm ignoring is the time spent in <code>env_logger</code>, as I see logging as important for monitoring the process.</p>
+<p>So what does that leave for us? Looking at that image, on the right is the tool helpfully drawing your attention to the most expensive call stack in the capture. Following through from the left, most of the expense in the call is in the lookup of the record from the <code>Authority</code>. You'll notice in the underlined calls that we recorded, <code>Catalog::lookup</code> eventually ends up relying on <code>Name::cmp_with_case</code>. I've only shown a snippet, but the call into this function happens a lot. It's not surprising, during a lookup the <code>Query::name</code> is one of the three components we're using for the search, and it's the most complex. Names are the human interface into DNS (arguably it's most important feature), and for better or worse, they are generally case-insensitive. On the good side this means that someone typing <code>WWW.GOOGLE.COM</code> into their browser, will get the same result as if they type <code>www.google.com</code>; on the bad side it means that we have to do a more complex string comparison where we convert to lowercase while comparing during our search for records in the <code>Authority</code> (I'll be referring to other findings from the instruments tool throughout this post). I wonder if this is a regret on the side of the original RFC authors? <a href="https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/?#2">[2]</a></p>
+<p>Let's look at this function:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">cmp_with_case</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">other</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">Self</span><span>, </span><span style="color:#f29718;">ignore_case</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">bool</span><span>) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Ordering {
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() </span><span style="color:#f29668;">&amp;&amp;</span><span> other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() {
+</span><span>            </span><span style="color:#ff7733;">return </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Equal</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// we reverse the iters so that we are comparing from the root/domain to the local...
+</span><span>        </span><span style="color:#ff7733;">let</span><span> self_labels </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">rev</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">let</span><span> other_labels </span><span style="color:#f29668;">=</span><span> other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">rev</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// here were taking all the labels from the name
+</span><span>        </span><span style="color:#ff7733;">for </span><span>(l</span><span style="color:#bfbab0cc;">,</span><span> r) </span><span style="color:#f29668;">in</span><span> self_labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(other_labels) {
+</span><span>            </span><span style="color:#ff7733;">if</span><span> ignore_case {
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// for each we to_lowercase, hey, this allocates a new String each time!
+</span><span>                </span><span style="color:#ff7733;">match </span><span>(</span><span style="color:#f29668;">*</span><span>l)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>(</span><span style="color:#f29668;">*</span><span>r)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()) {
+</span><span>                    o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Less </span><span style="color:#f29668;">|</span><span> o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">,
+</span><span>                    Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                }
+</span><span>            } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>                </span><span style="color:#ff7733;">match</span><span> l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(r) {
+</span><span>                    o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Less </span><span style="color:#f29668;">|</span><span> o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">,
+</span><span>                    Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                }
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(</span><span style="color:#f29668;">&amp;</span><span>other</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())
+</span><span>    }
+</span></code></pre>
+<p>The <code>to_lowercase</code> is occurring on each label portion of the name, and if you look at the docs for <a href="https://doc.rust-lang.org/std/string/struct.String.html#method.to_lowercase"><code>String::to_lowercase</code></a>, this allocates a new String. This post recently made the rounds, <a href="https://lemire.me/blog/2017/11/16/fast-software-is-a-discipline-not-a-purpose/">Fast software is a discipline, not a purpose</a>, what's the very first bullet point? &quot;Avoid unnecessary memory allocations&quot; and then the next one, &quot;Avoid multiple passes over the data when one would do&quot;. By performing the <code>to_lowercase</code> while evaluating all names, we are basically breaking both of these rules. Well, let's see if we can fix that.</p>
+<p>I created 3 variations for comparing names:</p>
+<ol>
+<li>
+<p>short</p>
+<p><code>&quot;com&quot; == &quot;COM&quot; // case insensitive</code>
+<code>&quot;com&quot; != &quot;COM&quot; // case sensitive</code>
+<code>&quot;com&quot; == &quot;com&quot; // case sensitive</code></p>
+</li>
+<li>
+<p>medium, about average length</p>
+<p><code>&quot;www.example.com&quot; == &quot;www.EXAMPLE.com&quot; // case insensitive</code>
+<code>&quot;www.example.com&quot; != &quot;www.EXAMPLE.com&quot; // case sensitive</code>
+<code>&quot;www.example.com&quot; == &quot;www.example.com&quot; // case sensitive</code></p>
+</li>
+<li>
+<p>long</p>
+<p><code>&quot;a.crazy.really.long.example.com&quot; == &quot;a.crazy.really.long.EXAMPLE.com&quot; // case insensitive</code>
+<code>&quot;a.crazy.really.long.example.com&quot; != &quot;a.crazy.really.long.EXAMPLE.com&quot; // case sensitive</code>
+<code>&quot;a.crazy.really.long.example.com&quot; == &quot;a.crazy.really.long.example.com&quot; // case sensitive</code></p>
+</li>
+</ol>
+<p>Here are the runtimes:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>running 9 tests
+</span><span>test name_cmp_long          ... bench:       2,178 ns/iter (+/- 387)
+</span><span>test name_cmp_long_case     ... bench:          33 ns/iter (+/- 9)
+</span><span>test name_cmp_long_not_eq   ... bench:          11 ns/iter (+/- 2)
+</span><span>test name_cmp_medium        ... bench:       1,052 ns/iter (+/- 196)
+</span><span>test name_cmp_medium_case   ... bench:          18 ns/iter (+/- 4)
+</span><span>test name_cmp_medium_not_eq ... bench:          10 ns/iter (+/- 3)
+</span><span>test name_cmp_short         ... bench:         255 ns/iter (+/- 86)
+</span><span>test name_cmp_short_case    ... bench:           8 ns/iter (+/- 5)
+</span><span>test name_cmp_short_not_eq  ... bench:           6 ns/iter (+/- 1) 
+</span></code></pre>
+<p>Those case insensitive checks are really expensive! What are our options here? I see two options: make the comparison itself not allocate new <code>String</code>s - this would be easier; Make a new type of <code>Name</code> like <code>LowerName</code> or such - this would be harder. The latter would require a lot more effort in terms of refactor call sites in the library, and I'd prefer to try and keep these changes performant, but maintain some simplicity in the code. So we'll try option 1 first, the code isn't all that different. The change is in the for loop from above, we just add an inner loop on chars:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>        </span><span style="color:#ff7733;">for </span><span>(l</span><span style="color:#bfbab0cc;">,</span><span> r) </span><span style="color:#f29668;">in</span><span> self_labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(other_labels) {
+</span><span>            </span><span style="color:#ff7733;">if</span><span> ignore_case {
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// just grab the chars, and then do the lower case setting:
+</span><span>                </span><span style="color:#ff7733;">for </span><span>(l</span><span style="color:#bfbab0cc;">,</span><span> r) </span><span style="color:#f29668;">in</span><span> l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">chars</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">zip</span><span>(r</span><span style="color:#f29668;">.</span><span style="color:#f07178;">chars</span><span>()) {
+</span><span>                    </span><span style="color:#ff7733;">match</span><span> l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(r</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()) {
+</span><span>                        o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Less </span><span style="color:#f29668;">|</span><span> o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">,
+</span><span>                        Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                    }
+</span><span>                }
+</span><span>            } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>                </span><span style="color:#ff7733;">match</span><span> l</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cmp</span><span>(r) {
+</span><span>                    o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Less </span><span style="color:#f29668;">|</span><span> o </span><span style="color:#f29668;">@ </span><span>Ordering</span><span style="color:#f29668;">::</span><span>Greater </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">return</span><span> o</span><span style="color:#bfbab0cc;">,
+</span><span>                    Ordering</span><span style="color:#f29668;">::</span><span>Equal </span><span style="color:#f29668;">=&gt; </span><span style="color:#ff7733;">continue</span><span style="color:#bfbab0cc;">,
+</span><span>                }
+</span><span>            }
+</span><span>        }
+</span></code></pre>
+<p>And the new timings:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>running 9 tests
+</span><span>test name_cmp_long          ... bench:       1,332 ns/iter (+/- 273)
+</span><span>test name_cmp_long_case     ... bench:          31 ns/iter (+/- 7)
+</span><span>test name_cmp_long_not_eq   ... bench:          10 ns/iter (+/- 2)
+</span><span>test name_cmp_medium        ... bench:         686 ns/iter (+/- 355)
+</span><span>test name_cmp_medium_case   ... bench:          18 ns/iter (+/- 8)
+</span><span>test name_cmp_medium_not_eq ... bench:          10 ns/iter (+/- 0)
+</span><span>test name_cmp_short         ... bench:         157 ns/iter (+/- 5)
+</span><span>test name_cmp_short_case    ... bench:           8 ns/iter (+/- 3)
+</span><span>test name_cmp_short_not_eq  ... bench:           6 ns/iter (+/- 3)
+</span></code></pre>
+<p>That's better, we've almost doubled the speed. After running this attempt through our benchmark it made no difference to the overall time. Ok, slightly more extreme variation, let's store a lowercased version of the labels internally in <code>Name</code> on demand. I've added an extra field to <code>Name</code> with all the labels lowercased, and to simplify the object changed the labels from <code>Vec&lt;Arc&lt;String&gt;&gt;</code> to just <code>Vec&lt;String&gt;</code>. This is a little ugly, something I can go back and cleanup:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">Name </span><span>{
+</span><span>    is_fqdn</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">bool</span><span>,
+</span><span>    labels</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Now it&#39;s stored separately
+</span><span>    lower_case_labels</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;,
+</span><span>}
+</span></code></pre>
+<p>The reason I think that's ugly is that we now have an entire class of potential bugs related to it. When adding a label, we need to add it to both, same with removing. Luckily there were a lot of unit tests covering <code>Name</code>, so the likely hood of missing simple issues here is low, but still. Here are the new times:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>running 9 tests
+</span><span>test name_cmp_long          ... bench:          30 ns/iter (+/- 4)
+</span><span>test name_cmp_long_case     ... bench:          29 ns/iter (+/- 2)
+</span><span>test name_cmp_long_not_eq   ... bench:          10 ns/iter (+/- 2)
+</span><span>test name_cmp_medium        ... bench:          16 ns/iter (+/- 2)
+</span><span>test name_cmp_medium_case   ... bench:          16 ns/iter (+/- 6)
+</span><span>test name_cmp_medium_not_eq ... bench:           9 ns/iter (+/- 1)
+</span><span>test name_cmp_short         ... bench:           7 ns/iter (+/- 0)
+</span><span>test name_cmp_short_case    ... bench:           7 ns/iter (+/- 1)
+</span><span>test name_cmp_short_not_eq  ... bench:           6 ns/iter (+/- 1)
+</span></code></pre>
+<p>Now that is <em>much</em> better! Again, after running the overall benchmark, we didn't see a difference. Maybe by removing <code>Arc</code> from the labels, we have too many clones of <code>Name</code> now? Time to throw it into the profiler again... (time passes) ...after perusing the profiler output, there were still a lot of <code>to_lowercase</code> calls showing up. But even with that change, it's made no difference to the overall benchmark.</p>
+<h3 id="revisiting-string-duplication-1-month-later">Revisiting String Duplication (1 Month Later)</h3>
+<p>After reaching the end of this expedition (continue reading), I came back and decided to revisit the hack that I put in place above, specifically the duplicate <code>String</code>s. So I reverted the changes to name, so that we can take a different approach. I thought it would be fun to see if <code>to_lowercase</code> on <code>Name</code> could be faster if we performed the  lowercase operation when needed, otherwise just a simple clone of the <code>Arc</code> to each label would suffice. I wrote some benchmarks to start (the <code>no</code> means that there is no difference between the lowercased form and the non-lowercased form):</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>test name_no_lower_long     ... bench:         699 ns/iter (+/- 29)
+</span><span>test name_no_lower_short    ... bench:         242 ns/iter (+/- 34)
+</span><span>test name_to_lower_long     ... bench:         705 ns/iter (+/- 33)
+</span><span>test name_to_lower_short    ... bench:         229 ns/iter (+/- 52)
+</span></code></pre>
+<p>And then after only <code>to_lowercasing</code> the label if it's required (code follows):</p>
+<pre data-lang="-" style="background-color:#0f1419;color:#bfbab0;" class="language-- "><code class="language--" data-lang="-"><span>test name_no_lower_long     ... bench:          69 ns/iter (+/- 32)
+</span><span>test name_no_lower_short    ... bench:          36 ns/iter (+/- 17)
+</span><span>test name_to_lower_long     ... bench:         340 ns/iter (+/- 98)
+</span><span>test name_to_lower_short    ... bench:         188 ns/iter (+/- 69)
+</span></code></pre>
+<p>That's a nice improvement, so I'll keep the code:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">to_lowercase</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="color:#ff7733;">Self </span><span>{
+</span><span>        </span><span style="color:#ff7733;">let mut</span><span> new_labels</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;Rc&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;&gt; </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">Vec</span><span style="color:#f29668;">::</span><span>with_capacity(</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">for</span><span> label </span><span style="color:#f29668;">in &amp;</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels {
+</span><span>            </span><span style="color:#ff7733;">if</span><span> label</span><span style="color:#f29668;">.</span><span style="color:#f07178;">chars</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">any</span><span>(|</span><span style="color:#f29718;">c</span><span>| </span><span style="color:#f29668;">!</span><span>c</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_lowercase</span><span>()) {
+</span><span>                new_labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push</span><span>(Rc</span><span style="color:#f29668;">::</span><span>new(label</span><span style="color:#f29668;">.</span><span style="color:#f07178;">to_lowercase</span><span>()))</span><span style="color:#bfbab0cc;">;
+</span><span>            } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>                new_labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push</span><span>(Rc</span><span style="color:#f29668;">::</span><span>clone(label))
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        Name{ is_fqdn</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>is_fqdn</span><span style="color:#bfbab0cc;">,</span><span> labels</span><span style="color:#bfbab0cc;">:</span><span> new_labels }
+</span><span>    }
+</span></code></pre>
+<p>But, when searching for matches, and storing the Keys in the Authority we don't care about case at all... So I created a <code>LowerName</code>, that guarantees that the <code>Name</code> is already lowercased where we need it to be:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span># comparison
+</span><span>test name_cmp_long        ... bench:          35 ns/iter (+/- 11)
+</span><span>test name_cmp_long_case   ... bench:          35 ns/iter (+/- 5)
+</span><span>test name_cmp_medium      ... bench:          19 ns/iter (+/- 0)
+</span><span>test name_cmp_medium_case ... bench:          19 ns/iter (+/- 1)
+</span><span>test name_cmp_short       ... bench:           8 ns/iter (+/- 1)
+</span><span>test name_cmp_short_case  ... bench:           8 ns/iter (+/- 0)
+</span><span>
+</span><span># to_lowercase
+</span><span>test name_no_lower_long   ... bench:           2 ns/iter (+/- 0)
+</span><span>test name_no_lower_medium ... bench:           2 ns/iter (+/- 0)
+</span><span>test name_no_lower_short  ... bench:           2 ns/iter (+/- 1)
+</span><span>test name_to_lower_long   ... bench:           2 ns/iter (+/- 0)
+</span><span>test name_to_lower_medium ... bench:           2 ns/iter (+/- 0)
+</span><span>test name_to_lower_short  ... bench:           2 ns/iter (+/- 0)
+</span></code></pre>
+<p>The to_lowercase section is a joke. The name is already lowercased (and type safe at that). It's just doing a stupid check to make sure the benchmark isn't removed entirely. I won't be adding this useless benchmark. Obviously, I'm not really expecting a better result than the former case of compares that were case sensitive, but this makes sure that all cases of <code>to_lowercase</code> are verifiably not needed because of the new <code>LowerName</code> type. In addition to that, I've created a <code>LowerQuery</code> which is just a wrapper around <code>LowerName</code>, <code>DNSClass</code>, and <code>RecordType</code> then used that as the type of the parameter for the API into the Catalog and Authority. We still have a flexible programming environment when working with these structures.</p>
+<h3 id="don-t-have-a-cow">Don't Have a <code>Cow</code></h3>
+<p>Ok, truth be known, I really wanted to use <code>Cow</code> for all of this. <code>Cow</code> is our friend, and this <code>String</code> method in particular:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">from_utf8_lossy</span><span>(</span><span style="color:#f29718;">v</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;a</span><span> [</span><span style="color:#ff7733;">u8</span><span>]) </span><span style="color:#bfbab0cc;">-&gt; </span><span>Cow&lt;</span><span style="color:#ff7733;">&#39;a</span><span>, </span><span style="color:#ff7733;">str</span><span>&gt; {</span><span style="color:#f29668;">...</span><span>}
+</span></code></pre>
+<p>There is a concern here, which is that this lossy method will result in non-valid utf8 characters being converted to �. This seems like an acceptable loss for now. It's not <em>incorrect</em> per sé. Obviously the other option here would be to just directly use <code>[u8]</code>, but that would mean we'd lose access to Rust's nice <code>to_lowercase</code>, and why would we want to do that?</p>
+<p>So I had created a new <code>Name</code> type, <code>DecodedName&lt;'r&gt;</code> which shared a lifetime with the request buffer backing the <code>BinDecoder&lt;'r&gt;</code>. This meant that if the buffer was proper utf8 and in addition lowercase, we wouldn't have needed to allocate anything for query names. But I ran into an issue: all of the <code>RecordSet</code>s are stored in a <code>BTreeMap</code> keyed off of <code>RrKey</code> which is just a wrapper type of <code>Name</code> and <code>RecordType</code>. <code>BTree::get</code> has this interface:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">get</span><span>&lt;Q&gt;(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">key</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>Q) </span><span style="color:#bfbab0cc;">-&gt; </span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;</span><span style="color:#f29668;">&amp;</span><span>V&gt; </span><span style="color:#ff7733;">where
+</span><span>    K</span><span style="color:#bfbab0cc;">: </span><span>Borrow&lt;Q&gt;,
+</span><span>    Q</span><span style="color:#bfbab0cc;">:</span><span> Ord + ?Sized, 
+</span></code></pre>
+<p>I could not for the life of me figure out how get a <code>Name</code> implement a <code>Borrow&lt;Q&gt;</code> where <code>Q</code> would have been <code>DecodeName&lt;'r&gt;</code> (or <code>RrKey</code> to <code>DecodedRrKey&lt;'r&gt;</code> which is what would have been needed). After working through a lot of ideas, I gave up on this approach. Maybe there's a way to do it with <code>unsafe</code> and <code>std::mem::transmute</code>, but I'm trying to keep all <code>unsafe</code> usage out of the <code>TRust-DNS</code> libraries (and have been successful up to this point). So I leave that as a challenge to someone who knows Rust better than I.</p>
+<h2 id="surprises-lurking-in-old-code">Surprises Lurking in Old Code</h2>
+<p>The next thing on this list is the serialization. It turns out half our time in the <code>RequestHandler</code> is spent serializing and for the big ticket item, serialization of the <code>Records</code>:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>374.2ms   19.8%	624   19.5%	2.5	 	    _$LT$trust_dns_server..server..server_future..ServerFuture::handle_request
+</span><span>148.7ms    7.8%	237    7.4%	5.7	 	       trust_dns_server::server::request_stream::ResponseHandle::send
+</span><span>...
+</span><span>57.9ms    3.0%	95    2.9%	6.0	 	         _$LT$trust_dns_proto..rr..resource..Record::emit
+</span><span>29.5ms    1.5%	48    1.5%	0.6	 	          trust_dns_proto::rr::record_data::RData::emit
+</span><span>...
+</span><span>14.9ms    0.7%	23    0.7%	2.4	 	         _$LT$trust_dns_proto..rr..resource..Record::clone
+</span></code></pre>
+<p>The last one surprised me, though, I spent a lot of time making sure that references were passed to individual records stored in the <code>Authority</code>. Turns out, in some of the original code, I had been lazy and had delayed making a borrowed version of <code>Message</code>. This means all the records inserted into the response <code>Message</code> ended up being cloned. It's not the most substantial cost of the <code>send</code>, but it's ugly in <code>Catalog::lookup</code>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">lookup</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">request</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>Message) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Message {
+</span><span>        </span><span style="color:#ff7733;">let mut</span><span> response</span><span style="color:#bfbab0cc;">:</span><span> Message </span><span style="color:#f29668;">= </span><span>Message</span><span style="color:#f29668;">::</span><span>new()</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// CLONE!!
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>        response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">add_queries</span><span>(request</span><span style="color:#f29668;">.</span><span style="color:#f07178;">queries</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">into_iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cloned</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>        </span><span style="color:#ff7733;">for</span><span> query </span><span style="color:#f29668;">in</span><span> request</span><span style="color:#f29668;">.</span><span style="color:#f07178;">queries</span><span>() {
+</span><span>            </span><span style="color:#ff7733;">if let </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(ref_authority) </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span style="color:#f07178;">find_auth_recurse</span><span>(query</span><span style="color:#f29668;">.</span><span style="color:#f07178;">name</span><span>()) {
+</span><span>
+</span><span>                </span><span style="color:#ff7733;">let</span><span> records </span><span style="color:#f29668;">=</span><span> authority</span><span style="color:#f29668;">.</span><span style="color:#f07178;">search</span><span>(query</span><span style="color:#bfbab0cc;">,</span><span> is_dnssec</span><span style="color:#bfbab0cc;">,</span><span> supported_algorithms)</span><span style="color:#bfbab0cc;">;
+</span><span>                </span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span>records</span><span style="color:#f29668;">.</span><span style="color:#f07178;">is_empty</span><span>() {
+</span><span>                    response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_response_code</span><span>(ResponseCode</span><span style="color:#f29668;">::</span><span>NoError)</span><span style="color:#bfbab0cc;">;
+</span><span>                    response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_authoritative</span><span>(</span><span style="color:#f29718;">true</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// CLONE!!
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>                    response</span><span style="color:#f29668;">.</span><span style="color:#f07178;">add_answers</span><span>(records</span><span style="color:#f29668;">.</span><span style="color:#f07178;">iter</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#f07178;">cloned</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>                }
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>            }
+</span><span>          </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>    }
+</span></code></pre>
+<p><code>Message</code> was one of the first things written in the library, I had not yet become as comfortable with the type system in the language enough to understand<a href="https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/?#3">[3]</a> the patterns for writing generics over owned and unowned data in Rust. But now, I get to clean this 💩 up. By introducing a new <code>Message</code> type, <code>MessageResponse</code>, there is now a zero (less) copy <code>Message</code> type:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub struct </span><span style="color:#59c2ff;">MessageResponse</span><span>&lt;</span><span style="color:#ff7733;">&#39;q</span><span>, </span><span style="color:#ff7733;">&#39;a</span><span>&gt; {
+</span><span>    header</span><span style="color:#bfbab0cc;">:</span><span> Header,
+</span><span>    queries</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;q </span><span>Queries&lt;</span><span style="color:#ff7733;">&#39;q</span><span>&gt;&gt;,
+</span><span>    answers</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;a</span><span> Record&gt;,
+</span><span>    name_servers</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;a</span><span> Record&gt;,
+</span><span>    additionals</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;a</span><span> Record&gt;,
+</span><span>    sig0</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;Record&gt;,
+</span><span>    edns</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;Edns&gt;,
+</span><span>}
+</span></code></pre>
+<p>This <code>MessageResponse</code> type only has strong ownership of the data it requires, things like <code>sig0</code> and <code>EDNS</code>, which are dynamically constructed per request. Notice this has two lifetimes (<code>Message</code> did not have any), <code>'q</code> and <code>'a</code>. <code>'q</code> represents the request lifetime of <code>Queries&lt;'q&gt;</code> which itself is a new type for this change. <code>Queries&lt;'q&gt;</code> carry a reference to the request buffer's query section, which is now used to stream those directly back in the encoding of the response. This means that we only need to decode queries, but not encode them so much as just write the exact same bytes to the response packet (this is jumping ahead a little bit, see below for the discovery of the expense of <code>Query</code> serialization). The <code>'a</code> is the lifetime associated with the answers. These lifetimes are associated with <code>Authority</code> in the <code>Catalog</code> of the Server. There used to be a clone of each of those answer <code>Record</code>s, but now we share a reference back to the <code>Authority</code> so there is no clone.</p>
+<p>To get the numbers associated to this change, I hacked the code into a really ugly state. It's a testament to Rust that it still works. Many other languages I'm sure I would have introduced some bugs, but this still passes all the tests. We are getting closer to our goal. I am a little disappointed with a particular part of this change, though. In the <code>Catalog</code> there is a <code>ReadWriteLock</code> which wraps the <code>Authority</code> serving records. Originally, this would construct a fully owned <code>Message</code> for response. Now, if you notice, most of the <code>Record</code>s in <code>MessageResponse</code> are references with associated lifetimes. Those lifetimes are from the inner <code>Authority</code> record sets in which they are stored, but because they are returned in a critical section of the <code>ReadWriteLock</code> during lookup, we can no longer pass the <code>MessageResponse</code> out from <code>RequestHandler</code>. The reason this is disappointing is more obvious in the change to the <code>request_handle</code> signature:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">handle_request</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">request</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>Request) </span><span style="color:#bfbab0cc;">-&gt;</span><span> Message</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>becomes:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">fn </span><span style="color:#ffb454;">fn </span><span>handle_request&lt;</span><span style="color:#ff7733;">&#39;q</span><span>, </span><span style="color:#ff7733;">&#39;a</span><span>&gt;(</span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;a </span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#bfbab0cc;">,</span><span> request</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">&#39;q</span><span> Request</span><span style="color:#bfbab0cc;">,</span><span> response_handle</span><span style="color:#bfbab0cc;">:</span><span> ResponseHandle) </span><span style="color:#bfbab0cc;">-&gt; </span><span>io</span><span style="color:#f29668;">::</span><span>Result</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Before there was a compile time guarantee that a handler would return a <code>Message</code> to send back to a client. Now, there is no compilation validation that a <code>Message</code> will always be sent. I'd really like to continue to enforce this guarantee, but haven't yet come up with a clear solution. At least <em>something</em> is required to be returned, but the former was a stronger guarantee. I may add a type that can only be created by <code>ResponseHandle</code> when a response is sent that must be returned, which may be an acceptable compromise.</p>
+<h2 id="serialization-is-expensive">Serialization is Expensive</h2>
+<p>Now we get into some serialization issues. Looking through the instruments run data again we have this:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>32.0ms    2.3%	32    2.3%	0.0	trust_dns_server..authority..message_response..MessageResponse::emit_queries
+</span><span>22.0ms    1.6%	22    1.6%	1.0	trust_dns_server..authority..message_response..MessageResponse::emit_name_servers
+</span><span>12.0ms    0.8%	12    0.8%	1.0	trust_dns_proto..rr..resource..Record::emit
+</span><span>12.0ms    0.8%	12    0.8%	2.0 trust_dns_server..authority..message_response..MessageResponse::emit_answers
+</span></code></pre>
+<p>Once these records are stored in the <code>Authority</code> they really don't change, so why not just pre-serialize them? Digging into those calls, it turns out that our friend <code>Name</code> is the most expensive thing to serialize. But the first thing we can quickly do, is preserve the bytes on the <code>Query</code>s (as already briefly mentioned), we have that passed in from the Request. The serialization of these sections of the <code>Message</code> don't even appear in the capture any more as hotspots. I should take a look at how <code>EDNS</code> is being serialized, but first I have a lot of cleanup of these changes to do. I considered pre-serializing all the Records as stored in the Authority, but this would make label compression harder and also make dynamic updates more difficult for things like compare-and-swap operations. It would be a bummer to increase the speed of the server only to discover that we've increased packet size dramatically and also made maintenance of the project much worse (see <code>Revisiting all that String duplication</code> above).</p>
+<h3 id="stop-creating-intermediary-objects">Stop Creating Intermediary Objects</h3>
+<p>For EDNS it turns out that we're first creating a <code>Record</code> and then serializing that record. The EDNS object is generally constructed per connection, the cost is surprising:</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>14.0ms    1.2%	14    1.2%	1.0	 	           trust_dns_proto::rr::rdata::opt::emit
+</span><span>12.0ms    1.0%	12    1.0%	8.0	 	            trust_dns_proto::rr::rdata::opt::EdnsOption::from
+</span></code></pre>
+<p>For this one, I'm going to get rid of the intermediate construction of the <code>Record</code> object and just stream the data directly. While fixing this code, I discovered that I was doing a pretty expensive operation to temporarily capture the rdata portion of the Record as a <code>Vec&lt;u8&gt;</code> just so that I could get its final size (in DNS the RData of a Record is preceded by a u16 and then the binary data); this is a huge waste (and it happens during all <code>Record</code> serialization, not just <code>EDNS</code>). To get around this, I've added a new interface to the <code>BinEncoder</code> that allows you to capture a place in the buffer, and then write back to it when done. This should allow for a lot of serialization routines to be improved. It mimics the new unstable feature in the stdlib, <a href="https://doc.rust-lang.org/std/ops/trait.Place.html"><code>Place</code></a>.</p>
+<p>After fixing <code>EDNS</code>, I went back and applied this fix to all <code>Record</code> serialization.</p>
+<h3 id="fixup-label-compression">Fixup Label Compression</h3>
+<p>Label compression in DNS is pretty straight forward: basically don't duplicate names already written to the packet. This was being tracked in the <code>BinEncoder</code> with a <code>HashMap</code> storing labels which would be inspected for each label being added. This was defined as owning <code>String</code>s (I didn't show the things which directed me here from Instruments' output, but it was clear that this was expensive from that tool):</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>name_pointers</span><span style="color:#bfbab0cc;">: </span><span>HashMap&lt;</span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;, </span><span style="color:#ff7733;">u16</span><span>&gt;
+</span></code></pre>
+<p>It made encoding labels into the message an expensive process because each <code>String</code> would be cloned into the map (and a <code>Vec</code>) allocated for each set of labels. We can simplify this to just store offsets into the buffer being written, and be much more memory/allocation efficient:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span>name_pointers</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;(</span><span style="color:#ff7733;">u32</span><span>, </span><span style="color:#ff7733;">u32</span><span>)&gt;
+</span></code></pre>
+<p>Now when processing labels, we always write the set of labels to the buffer, then take slices into the buffer and compare those to see if they can be replaced with an excerpt from another already serialized <code>Name</code>:</p>
+<pre data-lang="rust" style="background-color:#0f1419;color:#bfbab0;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#ff7733;">pub fn </span><span style="color:#ffb454;">emit_as_canonical</span><span>(</span><span style="color:#f29668;">&amp;</span><span style="color:#f29718;">self</span><span>, </span><span style="color:#f29718;">encoder</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span style="color:#ff7733;">mut</span><span> BinEncoder, </span><span style="color:#f29718;">canonical</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">bool</span><span>) </span><span style="color:#bfbab0cc;">-&gt; </span><span>ProtoResult&lt;()&gt; {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">/// ... canonical case not shown ....
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// our set of labels from this Name
+</span><span>            </span><span style="color:#ff7733;">let</span><span> labels</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>[Rc&lt;</span><span style="font-style:italic;color:#39bae6;">String</span><span>&gt;] </span><span style="color:#f29668;">= &amp;</span><span style="font-style:italic;color:#39bae6;">self</span><span style="color:#f29668;">.</span><span>labels</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// start index of each label
+</span><span>            </span><span style="color:#ff7733;">let mut</span><span> labels_written</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Vec</span><span>&lt;</span><span style="color:#ff7733;">u32</span><span>&gt; </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">Vec</span><span style="color:#f29668;">::</span><span>with_capacity(labels</span><span style="color:#f29668;">.</span><span style="color:#f07178;">len</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// we first write all our labels to the buffer,
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">//   this get&#39;s us the encoded form we&#39;re going to use for the &amp;[u8] comparison to other already serialized labels
+</span><span>            </span><span style="color:#ff7733;">for</span><span> label </span><span style="color:#f29668;">in</span><span> labels {
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// track the labels position in the buffer
+</span><span>                labels_written</span><span style="color:#f29668;">.</span><span style="color:#f07178;">push</span><span>(encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">offset</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// now write the label
+</span><span>                encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">emit_character_data</span><span>(label)</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>            }
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// we&#39;ve written all the labels to the buf, the current offset is the end
+</span><span>            </span><span style="color:#ff7733;">let</span><span> last_index </span><span style="color:#f29668;">=</span><span> encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">offset</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// now search for other labels already stored matching from the beginning label, strip them to the end
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">//   if it&#39;s not found, then store this as a new label
+</span><span>            </span><span style="color:#ff7733;">for</span><span> label_idx </span><span style="color:#f29668;">in &amp;</span><span>labels_written {
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">// this method on encoder is designed to search all stored (see name_pointers mentioned above)
+</span><span>                </span><span style="font-style:italic;color:#5c6773;">//   and if there is any matching return they&#39;re offset (we only ne the start index for that)
+</span><span>                </span><span style="color:#ff7733;">let</span><span> label_ptr</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">Option</span><span>&lt;</span><span style="color:#ff7733;">u16</span><span>&gt; </span><span style="color:#f29668;">=</span><span> encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get_label_pointer</span><span>(</span><span style="color:#f29668;">*</span><span>label_idx</span><span style="color:#bfbab0cc;">,</span><span> last_index)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                </span><span style="color:#ff7733;">if let </span><span style="font-style:italic;color:#39bae6;">Some</span><span>(loc) </span><span style="color:#f29668;">=</span><span> label_ptr {
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// We found a matching label, reset back to the
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">//   beginning of this label, and then write the pointer...
+</span><span>                    encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">set_offset</span><span>(</span><span style="color:#f29668;">*</span><span>label_idx)</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// chop off the labels that we had already written to the buffer
+</span><span>                    encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">trim</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>                    
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// write out the pointer marker
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">//  or&#39;d with the location which shouldn&#39;t be larger than this 2^14 or 16k
+</span><span>                    encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">emit_u16</span><span>(</span><span style="color:#f29718;">0xC000</span><span style="color:#ff7733;">u16 </span><span style="color:#f29668;">| </span><span>(loc </span><span style="color:#f29668;">&amp; </span><span style="color:#f29718;">0x3FFF</span><span style="color:#ff7733;">u16</span><span>))</span><span style="color:#f29668;">?</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// we found a pointer don&#39;t check the rest of the labels
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">//   (they are all contained at the end of that pointer)
+</span><span>                    </span><span style="color:#ff7733;">return </span><span style="font-style:italic;color:#39bae6;">Ok</span><span>(())</span><span style="color:#bfbab0cc;">;
+</span><span>                } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>                    </span><span style="font-style:italic;color:#5c6773;">// no existing label exists, store this new one.
+</span><span>                    encoder</span><span style="color:#f29668;">.</span><span style="color:#f07178;">store_label_pointer</span><span>(</span><span style="color:#f29668;">*</span><span>label_idx</span><span style="color:#bfbab0cc;">,</span><span> last_index)</span><span style="color:#bfbab0cc;">;
+</span><span>                }
+</span><span>            }
+</span><span style="font-style:italic;color:#5c6773;">// ...
+</span><span>}
+</span></code></pre>
+<h2 id="the-finish-line">The Finish Line</h2>
+<p>So after all of these changes, did we achieve our goal?</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>test trust_dns_udp_bench      ... bench:      68,173 ns/iter (+/- 11,699)
+</span></code></pre>
+<p>and BIND9 (rerunning benches to make sure there was nothing accidentally in the Client that would have favored TRust-DNS)</p>
+<pre data-lang="console" style="background-color:#0f1419;color:#bfbab0;" class="language-console "><code class="language-console" data-lang="console"><span>test bind_udp_bench           ... bench:      69,576 ns/iter (+/- 3,620)
+</span></code></pre>
+<p>Now the +/- is obviously a problem with TRust-DNS, and some point it would be great to make that more consistent. Is it an honest claim that TRust-DNS is faster than BIND9? For this simple test case, TRust-DNS is consistently faster than BIND9. But is it fair? Not really, BIND9 still has many more features than TRust-DNS, also there are many other configurations where we may not be faster, such as TCP based requests, dynamic update, DNSSec record signing, etc. For querying <code>www.example.com</code> of type <code>A</code> from a local server, I do feel confident in claiming we are faster.</p>
+<p>I would like to go back and cleanup some other things (like I mentioned at the beginning). But with the help of measurements they weren't necessary to achieve this goal, so those can be done at a later date.</p>
+<h2 id="thank-you">Thank you!</h2>
+<p>Making all these improvements required a lot of API changes, and became super ugly at different points. While I'm happy to have achieved my goal, it took me a while to clean up the code. I posted this <a href="https://twitter.com/benj_fry/status/940251646470135808">tweet</a>, a while ago. It's taken me quite a while to clean up all the changes so that I could submit them to the library (at which point I came back and edited this post). This was a slog to say the least.</p>
+<p>One thing that happened while I was working on this change, <a href="https://github.com/little-dude">@little-dude</a> submitted a new PR which looks to have shaved off approximately another microsecond in <a href="https://github.com/bluejekyll/trust-dns/pull/311">#311</a>, without which I don't think we'd have beaten BIND9. Thanks for helping me on this quest!</p>
+<p>Thank you for reading this meandering post, I hope you enjoyed it. I definitely enjoyed digging into these issues in the code. It's in the dark corners of software that past decisions continue to haunt.</p>
+<p>Happy New Year!</p>
+<p><em>Thank you to my beautiful wife, Lyndsey, for editing this post</em></p>
+<hr />
+<ul>
+<li><a name="1">1</a>) About the Measurements</li>
+</ul>
+<p>I'm not being scientific here, so don't get up in arms if my methods aren't perfect. You're welcome to reproduce these results or improve the methods. Everything is publicly available. Rust has a nice benchmarking testing facility (requires nightly as of the time of this writing). I wrote a wrapper for launching the <a href="https://github.com/bluejekyll/trust-dns/blob/3c8dd8dbc333ab616ec2aef29b23e2805f64b479/server/benches/comparison_benches.rs#L105">TRust-DNS</a> or <a href="https://github.com/bluejekyll/trust-dns/blob/3c8dd8dbc333ab616ec2aef29b23e2805f64b479/server/benches/comparison_benches.rs#L210">BIND9</a> named binaries. These are loaded with the same <a href="https://github.com/bluejekyll/trust-dns/blob/3c8dd8dbc333ab616ec2aef29b23e2805f64b479/server/tests/named_test_configs/default/localhost.zone">zone</a> configuration file; this is not fancy. What I'm interested in is the round-trip time of a UDP DNS request. In the future more benches can be added for things like dynamic update, zone transfer, zone signing, concurrency, etc. The <a href="https://gist.github.com/bluejekyll/fa890f3144025a5244c462ba7b69b060">config.log</a> output matches the one I used for building the BIND9 binary. If you think I should change any of that, let me know.</p>
+<p>To be clear, the client being used for these measurements is consistent between the two servers. The only thing we should be measuring is the time it takes the client to send and receive a response from the server being tested. The query is simply for the <code>A</code> records with the name <code>www.example.com</code>. I don't believe I've done anything that would give either BIND9 or TRust-DNS a bias. <em>Also a big note here: I wrote this post while working through these changes. I've been working on this in my spare time over the course of a month. During that time a few OS updates came out, and the performance of both BIND9 and TRust-DNS suffered as a result of those OS upgrades. I had planned on tracking the improvement each change had on the overall benchmark performance, but it wasn't possible because those OS upgrades also caused each server to have overall worse performance. Approximately 5µs were lost due to the recent macOS updates.</em> All of the changes in this post are in this PR: <a href="https://github.com/bluejekyll/trust-dns/pull/317">#317</a>. If you notice poor verb tense agreement throughout this post, the reason is that I tried many different options, reverted many and continued in different directions (I hope it doesn't distract too much from the content).</p>
+<ul>
+<li>
+<p><a name="2">2</a>) I received a lot of great feedback on my lack of punycode support here: https://www.reddit.com/r/rust/comments/7my0m0/making_trustdns_faster_than_bind9/. It's clear that I need to drop support for UTF8 from the wire, as much as it pains me to have to support this backward compatible format. <a href="https://github.com/bluejekyll/trust-dns/issues/321">#321</a> is now open on the project for this, and maybe I'll work on that next. </p>
+</li>
+<li>
+<p><a name="3">3</a>) See previous article, <a href="http://bluejekyll.github.io/blog/rust/2017/08/06/type-parameters.html">They're not Generics; they're TypeParameters</a></p>
+</li>
+</ul>
+
+    </article>
+    <section class="section p-1">
+        <div>
+            <a href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll"
+                rel="nofollow" target="_blank" title="Discuss on Mastodon">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=Making TRust-DNS faster than BIND9&url=https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/&via=benj_fry&related=benj_fry"
+                rel="nofollow" target="_blank" title="Share on Twitter">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter-square"></i>
+            
+        </span>
+        
+        <span>Tweet</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="http://www.reddit.com/submit?url=https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/&title=Making TRust-DNS faster than BIND9"
+                rel="nofollow" target="_blank" title="Discuss on Reddit">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-reddit-square"></i>
+            
+        </span>
+        
+        <span>Reddit</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+            <a href="https://news.ycombinator.com/submitlink?u=https://bluejekyll.github.io/blog/posts/making-trust-dns-fast/&t=Making TRust-DNS faster than BIND9"
+                title="Discuss on Hacker News">
+                
+
+<span class="button">
+    
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-hacker-news-square"></i>
+            
+        </span>
+        
+        <span>Hacker News</span>
+    </span>
+    
+
+
+
+</span>
+
+
+            </a>
+        </div>
+    </section>
+</div>
+
+
+    <footer class="footer">
+        <div class="container is-max-desktop">
+            <div class="content has-text-centered">
+                <p class="is-size-7">A Self-proclaimed Rust evangelist, Java distributed systems engineer, recovering C&#x2F;C++ masochist; Pie and bread maker; Cyclist; Raiser of Humans.</p>
+                <section class="section">
+                    <h4 class="3sidebar-title text-center">Contact</h4>
+                    <div>
+                        <a class="" href="mailto:benjaminfry@me.com">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fas fa-paper-plane"></i>
+            
+        </span>
+        
+        <span>benjaminfry@me.com</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://github.com/bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-github"></i>
+            
+        </span>
+        
+        <span>Github</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https:&#x2F;&#x2F;hachyderm.io&#x2F;@bluejekyll">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-mastodon"></i>
+            
+        </span>
+        
+        <span>Mastodon</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://twitter.com/benj_fry">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-twitter"></i>
+            
+        </span>
+        
+        <span>Twitter</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                    <div>
+                        <a class="" href="https://www.linkedin.com/in/benjamin-fry-8b83072">
+                            
+
+
+
+
+
+
+    
+    <span class="icon-text">
+        <span class="icon">
+            <i class="fab fa-linkedin"></i>
+            
+        </span>
+        
+        <span>LinkedIn</span>
+    </span>
+    
+
+
+
+                        </a>
+                    </div>
+                </section>
+                <p class="is-size-7">Copyright ©2012-2023 Benjamin Fry a.k.a. bluejekyll</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+</body>
+
+</html>
